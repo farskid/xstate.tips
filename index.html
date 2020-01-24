@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>
+        XState.tips - Tips and tricks of using XState for UI Development
+    </title>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,700" rel="stylesheet" />
+    <style>
+        *,
+        *:before,
+        *:after {
+            box-sizing: border-box;
+        }
+
+        body,
+
+
+        html {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: Roboto, Arial, Helvetica, sans-serif;
+            font-size: 14px;
+            color: white;
+            background-image: linear-gradient(to bottom right, #232435, #3a3c5a);
+        }
+
+
+
+        @keyframes slide-up {
+            from {
+                opacity: 0;
+                transform: translateY(100%);
+            }
+
+            to {
+                opacity: 1;
+                transform: none;
+            }
+        }
+
+        .logo {
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            font-weight: 300;
+            animation: slide-up 0.6s cubic-bezier(0.2, 0, 0.2, 1) both;
+        }
+
+        .logo img {
+            margin-right: 1rem;
+            width: 10rem;
+        }
+
+        .chars {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: row;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .char:not(:first-child) {
+            margin-left: 1rem;
+        }
+
+        .char {
+            display: inline-block;
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+            /* font-size: 2em; */
+            animation: slide-up 0.1s calc(var(--i) * 0.1s) cubic-bezier(0.2, 0, 0.2, 1);
+            animation-fill-mode: both;
+        }
+
+        main {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <h1 class="logo">
+            <img src="https://xstate.js.org/logo-white.svg" alt="XState" />
+            <span>.tips</span>
+        </h1>
+        <ul class="chars">
+            <li class="char" style="--i: 0">
+                C
+            </li>
+            <li class="char" style="--i: 1">
+                O
+            </li>
+            <li class="char" style="--i: 2">
+                M
+            </li>
+            <li class="char" style="--i: 3">
+                I
+            </li>
+            <li class="char" style="--i: 4">
+                N
+            </li>
+            <li class="char" style="--i: 5">
+                G
+            </li>
+            <li class="char" style="--i: 6;margin-left: 2em;">
+                S
+            </li>
+            <li class="char" style="--i: 7">
+                O
+            </li>
+            <li class="char" style="--i: 8">
+                O
+            </li>
+            <li class="char" style="--i: 9">
+                N
+            </li>
+        </ul>
+    </main>
+</body>
+
+</html>

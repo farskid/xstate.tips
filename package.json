@@ -1,0 +1,19 @@
+{
+  "name": "xstate.tips",
+  "description": "Tips and tricks of using XState for UI Development",
+  "version": "0.0.1",
+  "main": "index.html",
+  "author": {
+    "email": "farskid@gmail.com",
+    "name": "Farzad YZ",
+    "url": "https://farzadyz.com"
+  },
+  "repository": "git@github.com:farskid/xstate.tips.git",
+  "scripts": {
+    "develop": "serve ."
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "serve": "^11.3.0"
+  }
+}
