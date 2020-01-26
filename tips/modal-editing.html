@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en-US" prefix="og:http://ogp.me/ns#">
+  <head>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.png" />
+    <link rel="icon" sizes="192x192" href="%PUBILC_URL%/favicon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Title" />
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/favicon.png" />
+    <link rel="apple-touch-startup-image" href="%PUBLIC_URL%/favicon.png" />
+    <meta itemprop="description" content="An HTML File" />
+    <script src="https://unpkg.com/xstate@4.7.7/dist/xstate.js"></script>
+    <style>
+      #terminal {
+        display: flex;
+        font-family: monospace;
+        font-size: 1rem;
+        background: #2b2b2b;
+        padding: 5px;
+        height: 300px;
+      }
+      #terminal span {
+        padding-left: 3px;
+        white-space: pre;
+        color: #BADA55;
+      }
+      #cursor {
+        width: 5px;
+        height: 1rem;
+        background: #BADA55;
+      }
+      input {
+        width: 0;
+        height: 0;
+        opacity: 0;
+      }
+      #modeline {
+        background: #2b2b2b;
+        color: #dbdbdb;
+        font-family: monospace;
+        height: 15px;
+      }
+      #showmode {
+        margin: 0;
+      }
+    </style>
+  </head>
+  <title>Modal Text Editing</title>
+  <body>
+    <div id="terminal">
+      <span></span>
+      <div id="cursor"></div>
+    </div>
+    <div id="modeline">
+      <h4 id="showmode"></h4>
+    </div>
+    <input type="text" name="command" value="" />
+    <br />
+    <h4>CURRENT MACHINE STATE:</h4>
+    <pre id="debug"></pre>
+    <script src="modal-editing.js"></script>
+  </body>
+</html>
+
