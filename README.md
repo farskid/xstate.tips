@@ -12,6 +12,10 @@ Even though this website tries to provide the code tips in the synrtax of XState
 
 - Tips live under `/data/tips` directory in markdown format. Either clone the repo and add a new markdown file or try adding it on Github.
 
+- Run `node scripts/compile-tips.js` to collect and compile the tips into `data/_tips.json` which will be consumed by the website.
+
+- Send a PR!
+
 ## License
 
 MIT.

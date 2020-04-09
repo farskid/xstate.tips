@@ -1,4 +1,4 @@
-import tips from "./_tips.js";
+import tips from "../../data/_tips.json";
 
 const lookup = new Map();
 tips.forEach((tip) => {

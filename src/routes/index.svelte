@@ -16,8 +16,6 @@
   <title>Real World XState tips</title>
 </svelte:head>
 
-<h1>{latesttip.title}</h1>
-
 <div class="content">
   {@html latesttip.html}
 </div>

@@ -7,7 +7,8 @@
     "build": "sapper build",
     "export": "sapper export",
     "start": "node __sapper__/build",
-    "start:export": "node __sapper__/export"
+    "start:export": "node __sapper__/export",
+    "compile-tips": "node scripts/compile-tips.js"
   },
   "dependencies": {
     "compression": "^1.7.1",
@@ -15,7 +16,9 @@
     "sirv": "^0.4.0"
   },
   "devDependencies": {
+    "chalk": "^4.0.0",
     "npm-run-all": "^4.1.5",
+    "remarkable": "^2.0.0",
     "sapper": "^0.27.0",
     "svelte": "^3.0.0",
     "svelte-loader": "^2.9.0",

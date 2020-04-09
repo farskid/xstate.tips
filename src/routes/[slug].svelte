@@ -57,8 +57,6 @@
   <title>{tip.title}</title>
 </svelte:head>
 
-<h1>{tip.title}</h1>
-
 <div class="content">
   {@html tip.html}
 </div>

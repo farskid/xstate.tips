@@ -1,15 +1,9 @@
 <script>
-  import tips from "../routes/_tips.js";
+  import tips from "../../data/_tips.json";
   export let segment;
   let isPageActive;
   $: {
     isPageActive = (tip, index) => {
-      console.log(
-        segment,
-        tip,
-        index,
-        (segment === undefined && index === 0) || segment === tip.slug
-      );
       return (segment === undefined && index === 0) || segment === tip.slug;
     };
   }

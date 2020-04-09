@@ -1,5 +1,4 @@
-import tips from "./_tips.js";
-
+import tips from "../../data/_tips.json";
 const contents = JSON.stringify(tips[0]);
 
 export function get(req, res) {
