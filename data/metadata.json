@@ -1,0 +1,10 @@
+{
+  "site": {
+    "title": "XState.tips",
+    "description": "Tips and tricks of using xstate for UI Development"
+  },
+  "authors": [
+    { "name": "Farzad YZ", "avatar": "", "twitter": "", "github": "" },
+    { "name": "Taylor Thompson", "avatar": "", "twitter": "", "github": "" }
+  ]
+}
