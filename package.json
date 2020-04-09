@@ -1,19 +1,24 @@
 {
   "name": "xstate.tips",
-  "description": "Tips and tricks of using XState for UI Development",
+  "description": "Tips and tricks of using xstate for UI Development",
   "version": "0.0.1",
-  "main": "index.html",
-  "author": {
-    "email": "farskid@gmail.com",
-    "name": "Farzad YZ",
-    "url": "https://farzadyz.com"
-  },
-  "repository": "git@github.com:farskid/xstate.tips.git",
   "scripts": {
-    "develop": "serve ."
+    "dev": "sapper dev",
+    "build": "sapper build",
+    "export": "sapper export",
+    "start": "node __sapper__/build",
+    "start:export": "node __sapper__/export"
   },
-  "license": "MIT",
+  "dependencies": {
+    "compression": "^1.7.1",
+    "polka": "next",
+    "sirv": "^0.4.0"
+  },
   "devDependencies": {
-    "serve": "^11.3.0"
+    "npm-run-all": "^4.1.5",
+    "sapper": "^0.27.0",
+    "svelte": "^3.0.0",
+    "svelte-loader": "^2.9.0",
+    "webpack": "^4.7.0"
   }
 }
