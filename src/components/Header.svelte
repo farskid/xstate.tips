@@ -1,5 +1,7 @@
 <script>
+  import metadata from "../../data/metadata.json";
   import ExternalIcon from "./ExternalIcon.svelte";
+  let value = "";
 </script>
 
 <style>
@@ -38,6 +40,17 @@
     margin-left: 1em;
   }
 
+  form {
+    position: relative;
+  }
+
+  label {
+    position: absolute;
+    top: 50%;
+    left: 0.75em;
+    transform: translateY(-50%);
+  }
+
   input {
     display: block;
     height: 40px;
@@ -53,15 +66,22 @@
     outline-offset: -2;
     outline-style: solid;
   }
+
+  label.hidden {
+    opacity: 0;
+  }
 </style>
 
 <header>
   <h1>
-    <a href="/">XState.tips</a>
+    <a href="/">{metadata.site.title}</a>
   </h1>
 
   <div class="right">
-    <input placeholder="Search" type="search" />
+    <form>
+      <label class={value.length > 0 && 'hidden'} for="search">Search</label>
+      <input bind:value type="search" id="search" />
+    </form>
     <nav>
       <ul>
         <li>
