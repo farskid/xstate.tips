@@ -2,20 +2,23 @@
   export function preload({ params, query }) {
     return this.fetch(`index.json`)
       .then(r => r.json())
-      .then(latesttip => {
-        return { latesttip };
+      .then(latestTip => {
+        return { latestTip };
       });
   }
 </script>
 
 <script>
-  export let latesttip;
+  import metadata from "../../data/metadata.json";
+  export let latestTip;
 </script>
 
 <svelte:head>
-  <title>Real World XState tips</title>
+  <title>{metadata.site.title}</title>
+  <meta name="description" content={metadata.site.description} />
 </svelte:head>
 
+<h1>{latestTip.title}</h1>
 <div class="content">
-  {@html latesttip.html}
+  {@html latestTip.html}
 </div>

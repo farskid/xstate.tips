@@ -55,8 +55,10 @@
 
 <svelte:head>
   <title>{tip.title}</title>
+  <meta name="description" content={tip.description} />
 </svelte:head>
 
+<h1>{tip.title}</h1>
 <div class="content">
   {@html tip.html}
 </div>
