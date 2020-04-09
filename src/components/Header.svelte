@@ -65,7 +65,10 @@
     <nav>
       <ul>
         <li>
-          <a href="https://github.com/farskid/xstate.tips" target="_blank">
+          <a
+            rel="noopener noreferrer"
+            href="https://github.com/farskid/xstate.tips"
+            target="_blank">
             Github
             <ExternalIcon />
           </a>
