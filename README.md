@@ -1,6 +1,4 @@
-# XState.tips
-
-![XState.tips](https://i.imgur.com/ui2yfFp.jpg)
+![XState.tips](/static/xstate.tips.png)
 
 XState.tips aims to fill the gap between the world of Finite State machines and Statecharts and the real world of development.
 
