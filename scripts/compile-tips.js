@@ -17,6 +17,7 @@ const remarkableConfig = {
   linkify: true
 };
 
+const metadata = JSON.parse(fs.readFileSync(`${DATA_DIR}/metadata.json`));
 const collectMarkdowns = () => {
   return fs.readdirSync(MARKDOWN_DIR);
 };
@@ -76,7 +77,6 @@ function generateFeed(tips) {
   let feedXML = `<?xml version="1.0" encoding="UTF-8"?>
       <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
       <channel>
-      import metadata from '../data/metadata.json'l;
       <title>${metadata.site.title}</title>
       <description>${metadata.site.description}</description>
       <link>${HOME_URL}</link>
@@ -95,7 +95,7 @@ function generateFeed(tips) {
 
   feedXML += "\n</channel>\n</rss>";
   fs.writeFileSync(RSS_FILE, feedXML);
-  console.log(chalk.green(`📰\x1b[35mSuccessfully compiled RSS feed!\x1b[0m`));
+  console.log(chalk.green(`📰Successfully compiled RSS feed!`));
 }
 
 function escapeHtml(raw) {
