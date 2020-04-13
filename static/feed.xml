@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+      <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+      <channel>
+      <title>XState.tips</title>
+      <description>Helping you take finite state machines and Statecharts into real world development.</description>
+      <link>https://xstate.tips/</link>
+      <atom:link href="https://xstate.tips/feed.xml" rel="self" type="application/rss+xml" />
+<item><title>Model a carousel in statecharts</title><description>&lt;p&gt;A carousel is a set of items, mostly pictures, listed next to each other and most of the time grouped so that you could navigate between these groups using a next button or a previous button and some dots that will navigate you to a certain group index.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;https://i.imgur.com/MoEHuVo.jpg&quot; alt=&quot;a Carousel tips&quot; /&gt;&lt;/p&gt;
+</description><pubDate>4/13/2020, 5:07:35 PM</pubDate><link>https://xstate.tips/model-a-carousel-in-statecharts</link><guid isPermaLink="true">https://xstate.tips/model-a-carousel-in-statecharts</guid></item>
+<item><title>Model an editing modal in statecharts</title><description>&lt;p&gt;A carousel is a set of items, mostly pictures, listed next to each other and most of the time grouped so that you could navigate between these groups using a next button or a previous button and some dots that will navigate you to a certain group index.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;https://i.imgur.com/MoEHuVo.jpg&quot; alt=&quot;a Carousel tips&quot; /&gt;&lt;/p&gt;
+</description><pubDate>4/13/2020, 5:07:35 PM</pubDate><link>https://xstate.tips/model-an-editing-modal-in-statecharts</link><guid isPermaLink="true">https://xstate.tips/model-an-editing-modal-in-statecharts</guid></item>
+</channel>
+</rss>
