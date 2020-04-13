@@ -76,8 +76,9 @@ function generateFeed(tips) {
   let feedXML = `<?xml version="1.0" encoding="UTF-8"?>
       <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
       <channel>
-      <title>XState.tips</title>
-      <description>Helping you take finite state machines and Statecharts into real world development.</description>
+      import metadata from '../data/metadata.json'l;
+      <title>${metadata.site.title}</title>
+      <description>${metadata.site.description}</description>
       <link>${HOME_URL}</link>
       <atom:link href="${HOME_URL}feed.xml" rel="self" type="application/rss+xml" />`;
 
