@@ -94,7 +94,7 @@ function generateFeed(tips) {
 
   feedXML += "\n</channel>\n</rss>";
   fs.writeFileSync(RSS_FILE, feedXML);
-  console.log(`📰\x1b[35mSuccessfully compiled RSS feed!\x1b[0m`);
+  console.log(chalk.green(`📰\x1b[35mSuccessfully compiled RSS feed!\x1b[0m`));
 }
 
 function escapeHtml(raw) {
