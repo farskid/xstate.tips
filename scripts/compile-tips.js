@@ -87,7 +87,7 @@ function generateFeed(tips) {
     feedXML += `\n<item><title>${tip.title}</title><description>${escapeHtml(
       tip.html
     )}</description><pubDate>${tip.pubDate ||
-      pubDateFallback.toLocaleString()}</pubDate><link>${HOME_URL}${
+      pubDateFallback.toUTCString()}</pubDate><link>${HOME_URL}${
       tip.slug
     }</link><guid isPermaLink="true">${HOME_URL}${tip.slug}</guid></item>`;
   }
