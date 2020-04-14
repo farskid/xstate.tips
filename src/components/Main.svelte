@@ -1,5 +1,6 @@
 <script>
   import tips from "../../data/_tips.json";
+  import Search from "./Search.svelte";
   export let segment;
   let isPageActive;
   $: {
@@ -24,8 +25,8 @@
   }
 
   aside ul {
-    margin: 0;
-    padding: 2em 0;
+    margin: 1em 0;
+    padding: 0;
     list-style: none;
   }
 
@@ -59,6 +60,7 @@
 
 <div class="site-container">
   <aside>
+    <Search />
     <ul>
       {#each tips as tip, index}
         <li>
