@@ -1,4 +1,5 @@
 <script>
+  export let onChange;
   let value = "";
 
   function getLabelClassname(value) {
@@ -41,7 +42,11 @@
   }
 </style>
 
-<form>
+<form on:submit|preventDefault>
   <label class={getLabelClassname(value)} for="search">Search</label>
-  <input bind:value type="search" id="search" />
+  <input
+    bind:value
+    on:input={e => onChange(e.target.value)}
+    type="search"
+    id="search" />
 </form>

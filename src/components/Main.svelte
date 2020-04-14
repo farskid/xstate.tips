@@ -2,9 +2,18 @@
   import tips from "../../data/_tips.json";
   import Search from "./Search.svelte";
   export let segment;
+  let filteredTips = tips;
 
   function isPageActive(segment, tip, index) {
     return (segment === undefined && index === 0) || segment === tip.slug;
+  }
+
+  function filterTips(searchQuery) {
+    if (!searchQuery) {
+      filteredTips = tips;
+    }
+    filteredTips = tips.filter(t => t.title.includes(searchQuery));
+    console.log(filteredTips);
   }
 </script>
 
@@ -58,9 +67,9 @@
 
 <div class="site-container">
   <aside>
-    <Search />
+    <Search onChange={filterTips} />
     <ul>
-      {#each tips as tip, index}
+      {#each filteredTips as tip, index}
         <li>
           <a
             href={tip.slug}
