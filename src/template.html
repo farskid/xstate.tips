@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang='en'>
+
 <head>
 	<meta charset='utf-8'>
 	<meta name='viewport' content='width=device-width,initial-scale=1.0'>
@@ -7,8 +8,8 @@
 
 	%sapper.base%
 
-	<link rel='stylesheet' href='global.css'>
-	<link rel='stylesheet' href='scrollbar.css'>
+	<link media="print" onload="this.media='all'" rel='stylesheet' href='global.css'>
+	<link media="print" onload="this.media='all'" rel='stylesheet' href='scrollbar.css'>
 	<link rel='manifest' href='manifest.json' crossorigin='use-credentials'>
 	<link rel='icon' type='image/jpg' href='favicon.jpg'>
 
@@ -21,6 +22,7 @@
 	     the current page has one -->
 	%sapper.head%
 </head>
+
 <body>
 	<!-- The application will be rendered inside this element,
 	     because `src/client.js` references it -->
@@ -31,4 +33,5 @@
 	     initialise the router -->
 	%sapper.scripts%
 </body>
+
 </html>
