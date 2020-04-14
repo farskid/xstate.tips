@@ -17,7 +17,7 @@ const remarkableConfig = {
   linkify: true
 };
 
-const metadata = JSON.parse(fs.readFileSync(`${DATA_DIR}/metadata.json`));
+const metadata = require(`${DATA_DIR}/metadata.json`);
 const collectMarkdowns = () => {
   return fs.readdirSync(MARKDOWN_DIR);
 };
