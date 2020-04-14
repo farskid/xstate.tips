@@ -13,7 +13,6 @@
       filteredTips = tips;
     }
     filteredTips = tips.filter(t => t.title.includes(searchQuery));
-    console.log(filteredTips);
   }
 </script>
 
