@@ -2,11 +2,9 @@
   import tips from "../../data/_tips.json";
   import Search from "./Search.svelte";
   export let segment;
-  let isPageActive;
-  $: {
-    isPageActive = (tip, index) => {
-      return (segment === undefined && index === 0) || segment === tip.slug;
-    };
+
+  function isPageActive(segment, tip, index) {
+    return (segment === undefined && index === 0) || segment === tip.slug;
   }
 </script>
 
@@ -66,7 +64,7 @@
         <li>
           <a
             href={tip.slug}
-            aria-current={isPageActive(tip, index) ? 'page' : undefined}>
+            aria-current={isPageActive(segment, tip, index) ? 'page' : undefined}>
             {tip.title}
           </a>
         </li>
