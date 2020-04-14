@@ -42,8 +42,8 @@
     background-color: var(--selected);
   }
 
-  aside a:hover {
-    background-color: var(--selected);
+  aside a:not([aria-current]):hover {
+    background-color: var(--hover);
   }
 
   main {
