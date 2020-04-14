@@ -1,6 +1,6 @@
 <script>
   import metadata from "../../data/metadata.json";
-  import ExternalIcon from "./ExternalIcon.svelte";
+  import ExternalLink from "./ExternalLink.svelte";
 </script>
 
 <style>
@@ -49,13 +49,11 @@
     <nav>
       <ul>
         <li>
-          <a
-            rel="noopener noreferrer"
-            href="https://github.com/farskid/xstate.tips"
-            target="_blank">
+          <ExternalLink
+            hasIcon={true}
+            href="https://github.com/farskid/xstate.tips">
             Github
-            <ExternalIcon />
-          </a>
+          </ExternalLink>
         </li>
       </ul>
     </nav>

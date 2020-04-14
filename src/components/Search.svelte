@@ -10,14 +10,12 @@
 <style>
   form {
     position: relative;
-    margin: 1em auto;
-    padding: 0 0.5em;
   }
 
   label {
     position: absolute;
     top: 50%;
-    left: 1.25em;
+    left: 0.75em;
     transform: translateY(-50%);
   }
 
