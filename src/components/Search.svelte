@@ -1,10 +1,7 @@
 <script>
-  export let onChange;
-  let value = "";
+  export let value;
 
-  function getLabelClassname(value) {
-    return value.length > 0 ? "hidden" : undefined;
-  }
+  $: labelClassname = value.length > 0 ? "hidden" : undefined;
 </script>
 
 <style>
@@ -41,10 +38,6 @@
 </style>
 
 <form on:submit|preventDefault>
-  <label class={getLabelClassname(value)} for="search">Search</label>
-  <input
-    bind:value
-    on:input={e => onChange(e.target.value)}
-    type="search"
-    id="search" />
+  <label class={labelClassname} for="search">Search</label>
+  <input {value} on:input type="search" id="search" />
 </form>

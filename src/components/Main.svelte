@@ -4,9 +4,12 @@
   import metadata from "../../data/metadata.json";
   import Search from "./Search.svelte";
   import Hamburger from "./Hamburger.svelte";
+
   export let segment;
+
   let filteredTips = tips;
   let sidebarShownOnMobile = false;
+  let searchQuery = "";
 
   function isPageActive(segment, tip, index) {
     return (segment === undefined && index === 0) || segment === tip.slug;
@@ -37,6 +40,14 @@
 
   function closeSidebar() {
     sidebarShownOnMobile = false;
+  }
+
+  // Reset search box and filteredTips when menu closes on mobile;
+  $: {
+    if (sidebarShownOnMobile === false) {
+      searchQuery = "";
+      filteredTips = tips;
+    }
   }
 </script>
 
@@ -153,7 +164,12 @@
 
 <div class="site-container">
   <aside class={getSidebarClassname(sidebarShownOnMobile)} id="navigation">
-    <Search onChange={filterTips} />
+    <Search
+      value={searchQuery}
+      on:input={e => {
+        searchQuery = e.target.value;
+        filterTips(e.target.value);
+      }} />
     <ul>
       {#each filteredTips as tip, index}
         <li>
