@@ -19,7 +19,9 @@
     if (!searchQuery) {
       filteredTips = tips;
     }
-    filteredTips = tips.filter(t => t.title.includes(searchQuery));
+    filteredTips = tips.filter(t =>
+      t.title.toLowerCase().includes(searchQuery.toLowerCase())
+    );
   }
 
   function getAuthorUrl(author) {
