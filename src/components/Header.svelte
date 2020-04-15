@@ -38,6 +38,17 @@
   ul > li + li {
     margin-left: 1em;
   }
+
+  @media screen and (max-width: 768px) {
+    header {
+      padding: 0.5em;
+      font-size: 0.8em;
+    }
+
+    h1 {
+      font-size: 1.25em;
+    }
+  }
 </style>
 
 <header>
