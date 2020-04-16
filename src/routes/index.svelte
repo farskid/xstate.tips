@@ -9,14 +9,19 @@
 </script>
 
 <script>
+  import { stores } from "@sapper/app";
   import metadata from "../../data/metadata.json";
   import Tip from "../components/Tip.svelte";
+  import Meta from "../components/Meta.svelte";
   export let latestTip;
+
+  const { page } = stores();
 </script>
 
 <svelte:head>
-  <title>{metadata.site.title}</title>
-  <meta name="description" content={metadata.site.description} />
+  <Meta
+    tip={latestTip}
+    fullPageUrl={[metadata.site.baseUrl, $page.path].join('')} />
 </svelte:head>
 
 <Tip>

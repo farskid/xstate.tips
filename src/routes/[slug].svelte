@@ -14,19 +14,17 @@
 </script>
 
 <script>
+  import { stores } from "@sapper/app";
+  import metadata from "../../data/metadata.json";
   import Tip from "../components/Tip.svelte";
+  import Meta from "../components/Meta.svelte";
   export let tip;
+
+  const { page } = stores();
 </script>
 
-<style>
-  h1 {
-    margin-top: 0;
-  }
-</style>
-
 <svelte:head>
-  <title>{tip.title}</title>
-  <meta name="description" content={tip.description} />
+  <Meta {tip} fullPageUrl={[metadata.site.baseUrl, $page.path].join('')} />
 </svelte:head>
 
 <Tip>
