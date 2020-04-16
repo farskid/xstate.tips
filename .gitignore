@@ -4,5 +4,5 @@
 yarn-error.log
 /cypress/screenshots/
 /__sapper__/
-data/_tips.json
-static/feed.xml
+/data/_tips.json
+/static/feed.xml
