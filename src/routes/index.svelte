@@ -10,6 +10,7 @@
 
 <script>
   import metadata from "../../data/metadata.json";
+  import Tip from "../components/Tip.svelte";
   export let latestTip;
 </script>
 
@@ -19,6 +20,6 @@
 </svelte:head>
 
 <h1>{latestTip.title}</h1>
-<div class="content">
+<Tip>
   {@html latestTip.html}
-</div>
+</Tip>
