@@ -1,4 +1,6 @@
-![XState.tips](/static/xstate.tips.png)
+<div align="center">
+  <img src="/static/xstate.tips.png" alt="XState.tips" />
+</div>
 
 XState.tips aims to fill the gap between the world of Finite State machines and Statecharts and the real world of development.
 
