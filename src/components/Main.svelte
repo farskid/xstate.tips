@@ -5,6 +5,7 @@
   import metadata from "../../data/metadata.json";
   import Search from "./Search.svelte";
   import Hamburger from "./Hamburger.svelte";
+  import MainContent from "./MainContent.svelte";
 
   export let segment;
 
@@ -13,29 +14,7 @@
   let sidebarShownOnMobile = false;
   let searchQuery = "";
 
-  $: currentPageSlug = findCurrentPageSlug(segment);
   $: sidebarClassname = sidebarShownOnMobile ? "shown" : undefined;
-
-  function findCurrentPageSlug(segment) {
-    /*
-      segment === undefined means it's either first page load or page hasn't changed in re-render
-      we separate these two cases by checking isHomeSetAsDefault flag
-    */
-    if (segment === undefined) {
-      if (isHomeSetAsDefault) {
-        // This is a re-render without changing the page
-        // Do Nothing!
-      } else {
-        // This is first page load
-        // Default to first tip
-        return tips[0].slug;
-      }
-    } else {
-      // Page has changed
-      // Update current slug with the new segment
-      return segment;
-    }
-  }
 
   function filterTips(searchQuery) {
     if (!searchQuery) {
@@ -64,7 +43,7 @@
 
   // Close menu when segment changes
   $: {
-    if (segment || (!segment && !isHomeSetAsDefault)) {
+    if (segment) {
       sidebarShownOnMobile = false;
     }
   }
@@ -129,11 +108,6 @@
     height: 100%;
   }
 
-  .main-content {
-    height: 10000px; /* Test scroll */
-    padding: 1em 2em;
-  }
-
   .heart {
     color: var(--red);
   }
@@ -164,6 +138,7 @@
       left: 0;
       right: 0;
       bottom: 0;
+      height: calc(100% - var(--site-header-height));
       transform: translate3d(0, 100%, 0);
       -webkit-transform: translate3d(0, 100%, 0);
     }
@@ -193,11 +168,16 @@
         filterTips(e.target.value);
       }} />
     <ul>
+      <li>
+        <a href="/" aria-current={segment === undefined ? 'page' : undefined}>
+          Introductions
+        </a>
+      </li>
       {#each filteredTips as tip, index}
         <li>
           <a
             href={tip.slug}
-            aria-current={currentPageSlug === tip.slug ? 'page' : undefined}>
+            aria-current={segment === tip.slug ? 'page' : undefined}>
             {tip.title}
           </a>
         </li>
@@ -218,17 +198,17 @@
   </aside>
 
   <main class="scroll-container">
-    <div class="main-content">
-      <!-- Required for sapper to inject page content -->
+    <!-- Required for sapper to inject page content -->
+    <MainContent>
       <slot />
-      <button
-        class="floating-button"
-        on:click={toggleSidebar}
-        aria-label="Menu"
-        type="button"
-        aria-controls="navigation">
-        <Hamburger isActive={sidebarShownOnMobile} />
-      </button>
-    </div>
+    </MainContent>
+    <button
+      class="floating-button"
+      on:click={toggleSidebar}
+      aria-label="Menu"
+      type="button"
+      aria-controls="navigation">
+      <Hamburger isActive={sidebarShownOnMobile} />
+    </button>
   </main>
 </div>
