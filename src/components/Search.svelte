@@ -23,7 +23,12 @@
     font-size: 1rem;
     padding: 0.25em 0.75em;
     border: 1px solid var(--border);
-    background-color: transparent;
+    background-color: var(--white);
+    box-shadow: none;
+    border-radius: 0;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
   }
 
   input:focus {
