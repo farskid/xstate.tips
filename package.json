@@ -8,8 +8,8 @@
     "export": "sapper export",
     "start": "node __sapper__/build",
     "start:export": "node __sapper__/export",
-    "compile-tips": "node scripts/compile-tips.js",
-    "build:website": "npm-run-all compile-tips export"
+    "prepare": "node scripts/index.js",
+    "build:website": "npm-run-all prepare export"
   },
   "dependencies": {
     "compression": "^1.7.1",
