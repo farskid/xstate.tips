@@ -1,4 +1,5 @@
 <script>
+  import { tick, afterUpdate } from "svelte";
   import ExternalLink from "./ExternalLink.svelte";
   import tips from "../../data/_tips.json";
   import metadata from "../../data/metadata.json";
@@ -7,12 +8,33 @@
 
   export let segment;
 
+  let isHomeSetAsDefault = false;
   let filteredTips = tips;
   let sidebarShownOnMobile = false;
   let searchQuery = "";
 
-  function isPageActive(segment, tip, index) {
-    return (segment === undefined && index === 0) || segment === tip.slug;
+  $: currentPageSlug = findCurrentPageSlug(segment);
+  $: sidebarClassname = sidebarShownOnMobile ? "shown" : undefined;
+
+  function findCurrentPageSlug(segment) {
+    /*
+      segment === undefined means it's either first page load or page hasn't changed in re-render
+      we separate these two cases by checking isHomeSetAsDefault flag
+    */
+    if (segment === undefined) {
+      if (isHomeSetAsDefault) {
+        // This is a re-render without changing the page
+        // Do Nothing!
+      } else {
+        // This is first page load
+        // Default to first tip
+        return tips[0].slug;
+      }
+    } else {
+      // Page has changed
+      // Update current slug with the new segment
+      return segment;
+    }
   }
 
   function filterTips(searchQuery) {
@@ -28,27 +50,22 @@
     return author.twitter || author.github;
   }
 
-  function getSidebarClassname(sidebarShownOnMobile) {
-    return sidebarShownOnMobile ? "shown" : undefined;
-  }
-
-  function getFloatingButtonText(sidebarShownOnMobile) {
-    return sidebarShownOnMobile ? "Close" : "All Tips";
-  }
-
   function toggleSidebar() {
     sidebarShownOnMobile = !sidebarShownOnMobile;
   }
 
-  function closeSidebar() {
-    sidebarShownOnMobile = false;
-  }
-
-  // Reset search box and filteredTips when menu closes on mobile;
   $: {
-    if (sidebarShownOnMobile === false) {
+    if (!sidebarShownOnMobile) {
+      // Reset search box and filteredTips when menu closes on mobile;
       searchQuery = "";
       filteredTips = tips;
+    }
+  }
+
+  // Close menu when segment changes
+  $: {
+    if (segment || (!segment && !isHomeSetAsDefault)) {
+      sidebarShownOnMobile = false;
     }
   }
 </script>
@@ -69,7 +86,8 @@
     flex-direction: column;
     align-items: stretch;
     padding: 1em 2em;
-    transition: 0.2s ease-out;
+    transition: transform 0.2s ease-out;
+    -webkit-transition: transform 0.2s ease-out;
     background-color: var(--white);
   }
 
@@ -146,11 +164,13 @@
       left: 0;
       right: 0;
       bottom: 0;
-      transform: translateY(100%);
+      transform: translate3d(0, 100%, 0);
+      -webkit-transform: translate3d(0, 100%, 0);
     }
 
     aside.shown {
-      transform: translateY(0);
+      transform: translate3d(0, 0, 0);
+      -webkit-transform: translate3d(0, 0, 0);
     }
 
     .floating-button {
@@ -165,7 +185,7 @@
 </style>
 
 <div class="site-container">
-  <aside class={getSidebarClassname(sidebarShownOnMobile)} id="navigation">
+  <aside class={sidebarClassname} id="navigation">
     <Search
       value={searchQuery}
       on:input={e => {
@@ -176,9 +196,8 @@
       {#each filteredTips as tip, index}
         <li>
           <a
-            on:click={closeSidebar}
             href={tip.slug}
-            aria-current={isPageActive(segment, tip, index) ? 'page' : undefined}>
+            aria-current={currentPageSlug === tip.slug ? 'page' : undefined}>
             {tip.title}
           </a>
         </li>
