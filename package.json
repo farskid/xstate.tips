@@ -3,7 +3,8 @@
   "description": "Tips and tricks of using xstate for UI Development",
   "version": "0.0.1",
   "scripts": {
-    "dev": "sapper dev",
+    "sapper:dev": "sapper dev",
+    "dev": "npm-run-all prepare sapper:dev",
     "build": "sapper build",
     "export": "sapper export",
     "start": "node __sapper__/build",
