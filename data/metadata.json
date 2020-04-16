@@ -1,7 +1,8 @@
 {
   "site": {
     "title": "XState Tips",
-    "description": "Tips and tricks of using xstate for UI Development"
+    "description": "Tips and tricks of using xstate for UI Development",
+    "baseUrl": "https://xstate.tips"
   },
   "authors": [
     {
