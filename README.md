@@ -1,12 +1,11 @@
 <div align="center">
-  <img src="/static/xstate.tips.png" alt="XState.tips" />
+  <img src="https://xstate.tips/xstate.tips.png" alt="XState.tips" />
 </div>
 
 <div align="center">
   <span>
     <img src="https://api.netlify.com/api/v1/badges/db07f96a-ec3a-4306-8eba-3064e42e4b02/deploy-status" alt="Netlify Status" />  
   </span>
-  
   <span>
     <img src="https://lighthouse-badge.appspot.com/?score=100" alt="Lighthouse score: 100/100" />
   </span>
