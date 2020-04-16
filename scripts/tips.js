@@ -56,6 +56,7 @@ module.exports.compileTips = function () {
 
     return {
       ...meta,
+      tags: meta.tags.split(",").map((m) => m.trim()),
       html,
       slug,
     };
