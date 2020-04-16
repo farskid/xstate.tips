@@ -7,6 +7,7 @@ const chalk = require("chalk");
 const DATA_DIR = path.join(process.cwd(), "data");
 const MARKDOWN_DIR = path.join(DATA_DIR, "tips");
 const COMPILE_FILE = path.join(DATA_DIR, "_tips.json");
+
 const remarkableConfig = {
   html: false,
   xhtmlOut: true,
@@ -14,6 +15,8 @@ const remarkableConfig = {
   typographer: true,
   linkify: true,
 };
+
+const metadata = require(`${DATA_DIR}/metadata.json`);
 
 const collectMarkdowns = () => {
   return fs.readdirSync(MARKDOWN_DIR);
@@ -37,26 +40,30 @@ const slugify = (title) =>
     .split(/[。？！，、；：“”【】（）〔〕［］﹃﹄“ ”‘’﹁﹂—…－～《》〈〉「」]/)
     .join("");
 
-// Main
-(function main() {
-  const markdownFiles = collectMarkdowns();
-  const markdownContents = markdownFiles.map((file) => ({
-    name: file,
-    md: fs.readFileSync(path.join(MARKDOWN_DIR, file)).toString(),
-  }));
+const markdownFiles = collectMarkdowns();
 
-  const parser = new MetaRemarkable("full", remarkableConfig);
+const markdownContents = markdownFiles.map((file) => ({
+  name: file,
+  md: fs.readFileSync(path.join(MARKDOWN_DIR, file)).toString(),
+}));
 
-  const compiledContents = markdownContents.map((file) => {
+const parser = new MetaRemarkable("full", remarkableConfig);
+
+module.exports.compileTips = function () {
+  return markdownContents.map((file) => {
     const { meta, html } = parser.render(file.md);
+    const slug = slugify(meta.title);
 
     return {
       ...meta,
       html,
-      slug: slugify(meta.title),
+      slug,
     };
   });
+};
 
+module.exports.saveTips = function (compiledContents) {
+  saveTips(compiledContents);
   console.log(
     chalk.green(
       `✔ Successfully compiled tips to -> ${path.relative(
@@ -65,5 +72,4 @@ const slugify = (title) =>
       )}`
     )
   );
-  saveTips(compiledContents);
-})();
+};
