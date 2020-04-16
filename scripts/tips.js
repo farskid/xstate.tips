@@ -1,4 +1,3 @@
-const { Remarkable } = require("remarkable");
 const MetaRemarkable = require("meta-remarkable");
 const path = require("path");
 const fs = require("fs");
