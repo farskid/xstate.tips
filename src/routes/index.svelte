@@ -19,7 +19,7 @@
   <meta name="description" content={metadata.site.description} />
 </svelte:head>
 
-<h1>{latestTip.title}</h1>
 <Tip>
+  <h1>{latestTip.title}</h1>
   {@html latestTip.html}
 </Tip>

@@ -29,7 +29,7 @@
   <meta name="description" content={tip.description} />
 </svelte:head>
 
-<h1>{tip.title}</h1>
 <Tip>
+  <h1>{tip.title}</h1>
   {@html tip.html}
 </Tip>
