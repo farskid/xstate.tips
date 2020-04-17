@@ -1,6 +1,8 @@
 ---
 title: Modal editing with statecharts
 description: Using statecharts to emulate modal text editors
+author: Taylor Thompson
+tags: Modal, Editing, Finite state machines, Statecharts, XState
 ---
 
 ```js

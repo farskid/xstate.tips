@@ -1,10 +1,21 @@
 {
   "site": {
-    "title": "XState.tips",
-    "description": "Tips and tricks of using xstate for UI Development"
+    "title": "XState Tips",
+    "description": "Tips and tricks of using xstate for UI Development",
+    "baseUrl": "https://xstate.tips"
   },
   "authors": [
-    { "name": "Farzad YZ", "avatar": "", "twitter": "", "github": "" },
-    { "name": "Taylor Thompson", "avatar": "", "twitter": "", "github": "" }
+    {
+      "name": "Farzad YZ",
+      "avatar": "https://github.com/farskid.png",
+      "twitter": "https://twitter.com/@farzad_yz",
+      "github": "https://github.com/farskid"
+    },
+    {
+      "name": "Taylor Thompson",
+      "avatar": "https://github.com/jamestthompson3.png",
+      "twitter": "",
+      "github": "https://github.com/jamestthompson3"
+    }
   ]
 }

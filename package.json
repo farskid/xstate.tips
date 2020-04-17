@@ -3,13 +3,14 @@
   "description": "Tips and tricks of using xstate for UI Development",
   "version": "0.0.1",
   "scripts": {
-    "dev": "sapper dev",
+    "sapper:dev": "sapper dev",
+    "dev": "npm-run-all prepare sapper:dev",
     "build": "sapper build",
     "export": "sapper export",
     "start": "node __sapper__/build",
     "start:export": "node __sapper__/export",
-    "compile-tips": "node scripts/compile-tips.js",
-    "build:website": "npm-run-all compile-tips export"
+    "prepare": "node scripts/index.js",
+    "build:website": "npm-run-all prepare export"
   },
   "dependencies": {
     "compression": "^1.7.1",

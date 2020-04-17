@@ -7,7 +7,7 @@
   export let segment;
 </script>
 
-<Header {segment} />
+<Header />
 <Main {segment}>
   <!-- Sapper will inject page content as children (slot) -->
   <slot />
