@@ -1,6 +1,5 @@
 <style>
   .main-content {
-    height: 10000px; /* Test scroll */
     padding: 1em 2em;
   }
 
@@ -8,11 +7,13 @@
     padding: 0.2em 0.4em;
     margin: 0;
     font-size: 85%;
-    background-color: rgba(27, 31, 35, 0.05);
+    background-color: var(--code-bg);
     border-radius: 0.25em;
+    border: 1px solid var(--border-secondary);
   }
 
-  .main-content :global(img) {
+  .main-content :global(img),
+  .main-content :global(svg) {
     max-width: 100%;
   }
 

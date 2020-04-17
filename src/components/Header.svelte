@@ -1,11 +1,12 @@
 <script>
   import metadata from "../../data/metadata.json";
   import ExternalLink from "./ExternalLink.svelte";
+  import ModeToggle from "./ModeToggle.svelte";
 </script>
 
 <style>
   header {
-    background-color: var(--white);
+    background-color: var(--bg);
     border-bottom: 1px solid var(--border);
     padding: 0.5em 2em;
     height: var(--site-header-height);
@@ -57,6 +58,7 @@
   </h1>
 
   <div class="right">
+    <ModeToggle />
     <nav>
       <ul>
         <li>
