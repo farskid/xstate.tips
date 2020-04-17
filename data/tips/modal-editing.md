@@ -5,6 +5,10 @@ author: Taylor Thompson
 tags: Modal, Editing, Finite state machines, Statecharts, XState
 ---
 
+My favorite development tool is the text editor, [Neovim](https://github.com/neovim/neovim). Part of the reason why I enjoy using Neovim so much is the concept of modal editing. Unlike other popular text editors and IDEs, Neovim employs the concepts of _modes_ to maximize the efficiency of the user and exand the functionality of the text editor.
+
+Modal editing means that you are in one editing mode at a time. In the case of Neovim, this means that you are either in NORMAL, INSERT, VISUAL, VISUAL BLOCK, VISUAL LINE, COMMAND, or REPLACE mode. While in INSERT mode, you can insert text, while in NORMAL mode, all your keystrokes are commands. Since you can only be in one mode at a time, this is an excellent candidate for modeling with statecharts.
+
 ```js
 // MACHINE SETUP
 // *****************************
