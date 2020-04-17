@@ -2,6 +2,7 @@ const path = require("path");
 const fs = require("fs");
 const chalk = require("chalk");
 const { renderWithMeta } = require("./markdown");
+const { slugify } = require("./utils");
 
 const DATA_DIR = path.join(process.cwd(), "data");
 const MARKDOWN_DIR = path.join(DATA_DIR, "tips");
@@ -16,20 +17,6 @@ const collectMarkdowns = () => {
 const saveTips = (tipsJson) => {
   fs.writeFileSync(COMPILE_FILE, JSON.stringify(tipsJson));
 };
-
-const slugify = (title) =>
-  title
-    .toLowerCase()
-    .split(" ")
-    .join("-")
-    .split(/\t/)
-    .join("--")
-    .split(/<\/?[^>]+>/)
-    .join("")
-    .split(/[|$&`~=\\\/@+*!?({[\]})<>=.,;:'"^]/) // eslint-disable-line no-useless-escape
-    .join("")
-    .split(/[。？！，、；：“”【】（）〔〕［］﹃﹄“ ”‘’﹁﹂—…－～《》〈〉「」]/)
-    .join("");
 
 const markdownFiles = collectMarkdowns();
 

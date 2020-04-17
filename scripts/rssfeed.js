@@ -1,6 +1,7 @@
 const path = require("path");
 const fs = require("fs");
 const chalk = require("chalk");
+const { escapeHtml } = require("./utils");
 
 const DATA_DIR = path.join(process.cwd(), "data");
 const HOME_URL = "https://xstate.tips/";
@@ -33,12 +34,3 @@ module.exports.generateFeed = function (tips) {
   fs.writeFileSync(RSS_FILE, feedXML);
   console.log(chalk.green(`📰 Successfully compiled RSS feed!`));
 };
-
-function escapeHtml(raw) {
-  return raw
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
