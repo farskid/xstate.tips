@@ -1,5 +1,4 @@
 <script>
-  import { tick, afterUpdate } from "svelte";
   import ExternalLink from "./ExternalLink.svelte";
   import tips from "../../data/_tips.json";
   import metadata from "../../data/metadata.json";
@@ -50,6 +49,18 @@
 </script>
 
 <style>
+  :global(.is-dark) .site-container {
+    border-top: 1px solid var(--border-secondary);
+  }
+
+  :global(.is-dark) .main-container {
+    border-left: 1px solid var(--border-secondary);
+  }
+
+  :global(.is-dark) aside {
+    border-top: 1px solid var(--border-secondary);
+  }
+
   .site-container {
     display: flex;
     flex: 1;
@@ -67,7 +78,7 @@
     padding: 1em 2em;
     transition: transform 0.2s ease-out;
     -webkit-transition: transform 0.2s ease-out;
-    background-color: var(--white);
+    background-color: var(--bg);
   }
 
   aside :global(form),
@@ -117,7 +128,7 @@
     bottom: 0.5em;
     right: 0.5em;
     z-index: 1;
-    background-color: var(--white);
+    background-color: var(--bg);
     color: var(--text-primary);
     font-size: 1rem;
     border: 1px solid var(--border);
@@ -197,7 +208,7 @@
     </footer>
   </aside>
 
-  <main class="scroll-container">
+  <main class="scroll-container main-container">
     <!-- Required for sapper to inject page content -->
     <MainContent>
       <slot />

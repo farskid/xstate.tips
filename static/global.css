@@ -1,15 +1,30 @@
-:root {
+body {
   /* Generics */
-  --red: rgb(255, 62, 0);
   --selected: rgba(0, 184, 255, 0.28);
   --border: #eee;
-  --white: #fff;
+  --border-secondary: #eee; /* it's only used in dark mode */
+  --bg: #fff;
   --hover: rgba(51, 51, 51, 0.15);
+  --switch: rgb(0, 184, 255);
+  --code-bg: rgba(27, 31, 35, 0.05);
   /* Text */
   --text-primary: #333;
   /* spacing */
   --site-sidebar-width: 300px;
   --site-header-height: 60px;
+}
+
+body.is-dark {
+  /* Generics */
+  --selected: rgb(185, 145, 249);
+  --border: #000;
+  --border-secondary: rgba(255, 255, 255, 0.1);
+  --bg: #2d2d2d;
+  --hover: rgba(255, 255, 255, 0.15);
+  --switch: rgb(185, 145, 249);
+  --code-bg: #222;
+  /* Text */
+  --text-primary: #fff;
 }
 
 * {
@@ -20,6 +35,7 @@ html,
 body,
 #sapper {
   height: 100%;
+  background-color: var(--bg);
 }
 
 body {
