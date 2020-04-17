@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://xstate.tips/xstate.tips.png" alt="XState.tips" />
+  <img src="https://xstate.tips/xstate.tips.svg" alt="XState.tips" />
 </div>
 
 <div align="center">
