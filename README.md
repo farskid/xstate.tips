@@ -1,4 +1,4 @@
-<div align="center" style="background-color:#fff">
+<div align="center" style="background-color:red">
   <img src="https://xstate.tips/xstate.tips.svg" />
 </div>
 
