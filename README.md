@@ -1,5 +1,5 @@
-<div align="center">
-  ![https://xstate.tips/xstate.tips.png](https://xstate.tips/xstate.tips.png)
+<div align="center" style="background-color:#fff">
+  <img src="https://xstate.tips/xstate.tips.svg" />
 </div>
 
 <div align="center">
