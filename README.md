@@ -1,5 +1,5 @@
 <div align="center" style="background-color:red">
-  <img src="https://xstate.tips/xstate.tips.svg" />
+  <img src="https://deploy-preview-18--xstatettips.netlify.app/xstate.tips.svg" />
 </div>
 
 <div align="center">
