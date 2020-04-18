@@ -30,10 +30,16 @@
     align-items: center;
   }
 
+  nav {
+    margin-left: 1em;
+  }
+
   ul {
     list-style: none;
     display: flex;
     align-items: center;
+    padding: 0;
+    margin: 0;
   }
 
   ul > li + li {
