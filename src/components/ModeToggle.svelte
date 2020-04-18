@@ -60,6 +60,10 @@
     position: relative;
     display: flex;
     align-items: center;
+    justify-content: space-around;
+    width: 4em;
+    padding: 0.25em;
+    color: inherit;
   }
   button:focus {
     outline-offset: 0;
@@ -76,6 +80,12 @@
     left: 0;
     transform: translate3d(0, 0, 0);
     transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1;
+  }
+
+  span:not(.handle) {
+    font-size: 1.2em;
+    color: inherit;
   }
 
   :global(.is-dark) .handle {
@@ -87,7 +97,7 @@
 <div>
   <button on:click={toggleMode} aria-label="Toggle dark and light mode">
     <span class="handle" />
-    <span title="dark">🌜</span>
-    <span title="light">🌝</span>
+    <span title="dark">&#9790;</span>
+    <span title="light">&#9728;</span>
   </button>
 </div>
