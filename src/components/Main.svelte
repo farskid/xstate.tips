@@ -180,7 +180,12 @@
       }} />
     <ul>
       <li>
-        <a href="/" aria-current={segment === undefined ? 'page' : undefined}>
+        <a
+          on:click={() => {
+            sidebarShownOnMobile = false;
+          }}
+          href="/"
+          aria-current={segment === undefined ? 'page' : undefined}>
           Introductions
         </a>
       </li>
