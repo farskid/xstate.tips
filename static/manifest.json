@@ -5,6 +5,7 @@
   "short_name": "XState.tips",
   "display": "minimal-ui",
   "start_url": "/",
+  "orientation": "portrait",
   "icons": [
     {
       "src": "logo-192.jpg",
