@@ -2,6 +2,15 @@
   import { onMount } from "svelte";
   let mode = "light";
 
+  const getPrefersColorSchemeQuery = () =>
+    window.matchMedia("(prefers-color-scheme)");
+  const getDarkModeQuery = () =>
+    window.matchMedia("(prefers-color-scheme: dark)");
+  const isDarkModeSupportedInOSLevel = () =>
+    getPrefersColorSchemeQuery().media !== "not all";
+  const isDarkModeActiveOnOSLevel = () =>
+    isDarkModeSupportedInOSLevel() && getDarkModeQuery().matches;
+
   const goDark = () => {
     mode = "dark";
     document.body.classList.add("is-dark");
@@ -21,16 +30,12 @@
   };
 
   onMount(() => {
-    const darkModeQuery = window.matchMedia("(prefers-color-scheme: dark)");
-
     //   Enable dark mode if user's OS is in dark mode
-    const isDarkModeOnByDefault = darkModeQuery.matches;
-    if (isDarkModeOnByDefault) {
+    if (isDarkModeActiveOnOSLevel()) {
       goDark();
     }
 
     function onDarkModeChange(e) {
-      console.log(e);
       if (e.matches) {
         goDark();
       } else {
@@ -39,10 +44,10 @@
     }
 
     // Reflect to dark mode changes on OS level
-    darkModeQuery.addEventListener("change", onDarkModeChange);
+    getDarkModeQuery().addListener(onDarkModeChange);
 
     return () => {
-      darkModeQuery.removeEventListener("change", onDarkModeChange);
+      getDarkModeQuery().removeListener(onDarkModeChange);
     };
   });
 </script>
