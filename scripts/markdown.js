@@ -1,6 +1,6 @@
 const { Remarkable } = require("remarkable");
 const MetaRemarkable = require("meta-remarkable");
-const { linkify } = require("remarkable/linkify");
+const { linkify: linkifyPlugin } = require("remarkable/linkify");
 const ExternalLinkPlugin = require("./markdownPlugins/externalLink");
 
 const remarkableConfig = {
@@ -12,11 +12,11 @@ const remarkableConfig = {
 };
 
 module.exports.render = function (markdown, config = {}) {
-  const options = Object.assign({}, remarkableConfig, config);
+  const { linkify, ...options } = Object.assign({}, remarkableConfig, config);
   let parser = new Remarkable("full", options);
 
-  if (options.linkify) {
-    parser = parser.use(linkify);
+  if (linkify) {
+    parser = parser.use(linkifyPlugin);
   }
 
   parser = parser.use(ExternalLinkPlugin("xstate.tips"));
