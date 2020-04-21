@@ -17,7 +17,7 @@
     max-width: 100%;
   }
 
-  @media screen and (max-width: 768px) {
+  @media only screen and (max-width: 767px) {
     .main-content {
       padding: 0.5em;
     }

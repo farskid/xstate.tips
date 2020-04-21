@@ -46,7 +46,7 @@
     margin-left: 1em;
   }
 
-  @media screen and (max-width: 768px) {
+  @media only screen and (max-width: 767px) {
     header {
       padding: 0.5em;
       font-size: 0.8em;
