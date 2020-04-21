@@ -53,12 +53,16 @@
     border-top: 1px solid var(--border-secondary);
   }
 
-  :global(.is-dark) .main-container {
-    border-left: 1px solid var(--border-secondary);
+  @media only screen and (min-width: 768px) {
+    :global(.is-dark) .main-container {
+      border-left: 1px solid var(--border-secondary);
+    }
   }
 
-  :global(.is-dark) aside {
-    border-top: 1px solid var(--border-secondary);
+  @media only screen and (max-width: 767px) {
+    :global(.is-dark) aside {
+      border-top: 1px solid var(--border-secondary);
+    }
   }
 
   .site-container {
