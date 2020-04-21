@@ -1,7 +1,7 @@
 import tips from "../../data/_tips.json";
 
 const lookup = new Map();
-tips.forEach((tip) => {
+tips.forEach(tip => {
   lookup.set(tip.slug, JSON.stringify(tip));
 });
 
