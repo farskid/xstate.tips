@@ -1,20 +1,19 @@
-name: Build project and Run Lighthouse CI
+name: Lighthouse Check
 on: [push]
+
 jobs:
-  lhci:
-    name: Lighthouse CI
+  lighthouse-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
-      - name: Use Node.js 10.x
-        uses: actions/setup-node@v1
-        with:
-          node-version: 10.x
-      - name: build
-        run: |
-          yarn
-          yarn build:website
-      - name: run Lighthouse CI
-        run: |
-          yarn global add @lhci/cli@0.3.x
-          lhci autorun --upload.target=temporary-public-storage || echo "LHCI failed!"
+    - uses: actions/checkout@master
+    - run: mkdir /tmp/artifacts
+    - name: Run Lighthouse
+      uses: foo-software/lighthouse-check-action@master
+      with:
+        outputDirectory: /tmp/artifacts
+        urls: 'https://xstate.tips'
+    - name: Upload artifacts
+      uses: actions/upload-artifact@master
+      with:
+        name: Lighthouse reports
+        path: /tmp/artifacts
