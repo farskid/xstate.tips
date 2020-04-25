@@ -1,3 +1,11 @@
+// WORKING WITH THE DOM
+// *********************************
+const terminal = document.getElementById("terminal");
+const input = document.getElementsByTagName("input")[0];
+const cursor = document.getElementById("cursor");
+const terminalText = terminal.getElementsByTagName("span")[0];
+const showmode = document.getElementById("showmode");
+
 // MACHINE SETUP
 // *****************************
 //
@@ -8,16 +16,36 @@ const modeMachine = Machine({
   initial: "normal",
   states: {
     normal: {
+      entry: "applyNormalModeStyles",
       on: { INSERT: "insert", VISUAL: "visual", REPLACE: "replace" }
     },
     visual: {
-      on: { NORMAL: "normal" }
+      entry: "applyVisualModeStyles",
+      on: { NORMAL: "normal" },
+      insert: {
+        entry: "applyInsertModeStyles",
+        on: { NORMAL: "normal" }
+      },
+      replace: {
+        entry: "applyReplaceModeStyles"
+        on: { NORMAL: "normal" }
+      }
+    }
+  },
+  actions: {
+    applyInsertModeStyles: () => {
+      showmode.textContent = "-- INSERT --";
+      cursor.style.width = "2.5px";
     },
-    insert: {
-      on: { NORMAL: "normal" }
+    applyReplaceModeStyles: () => {
+      showmode.textContent = "-- REPLACE --";
     },
-    replace: {
-      on: { NORMAL: "normal" }
+    applyNormalModeStyles: () => {
+        showmode.textContent = "";
+        cursor.style.width = "7px";
+    },
+    applyVisualModeStyles: () => {
+      showmode.textContent = "-- VISUAL --";
     }
   }
 });
@@ -33,14 +61,6 @@ function showStateDebug(s) {
   debug.textContent = JSON.stringify(s.value, 2, null);
 }
 window.service = modalService;
-
-// WORKING WITH THE DOM
-// *********************************
-const terminal = document.getElementById("terminal");
-const input = document.getElementsByTagName("input")[0];
-const cursor = document.getElementById("cursor");
-const terminalText = terminal.getElementsByTagName("span")[0];
-const showmode = document.getElementById("showmode");
 
 // MACHINE STATE in UI
 let state = modalService.state.value;
@@ -73,34 +93,10 @@ input.addEventListener(
 document.body.addEventListener("keyup", changeModes);
 function changeModes(e) {
   e.preventDefault();
-  switch (state) {
-    case "normal": {
-      handleNormalModeInput(e.key);
-    }
-    case "insert": {
-      if (e.key === "Escape") {
-        state = modalService.send("NORMAL").value;
-        showmode.textContent = "";
-        cursor.style.width = "7px";
-      }
-      break;
-    }
-    case "visual": {
-      if (e.key === "Escape") {
-        state = modalService.send("NORMAL").value;
-        showmode.textContent = "";
-      }
-      break;
-    }
-    case "replace": {
-      if (e.key === "Escape") {
-        state = modalService.send("NORMAL").value;
-        showmode.textContent = "";
-      }
-      break;
-    }
-    default:
-      break;
+  if (state === "normal") {
+    handleNormalModeInput(e.key);
+  } else {
+    modalService.send("NORMAL")
   }
 }
 
@@ -112,18 +108,14 @@ function handleNormalModeInput(key) {
   switch (key) {
     case "i": {
       state = modalService.send("INSERT").value;
-      showmode.textContent = "-- INSERT --";
-      cursor.style.width = "2.5px";
       break;
     }
     case "v": {
       state = modalService.send("VISUAL").value;
-      showmode.textContent = "-- VISUAL --";
       break;
     }
     case "R": {
       state = modalService.send("REPLACE").value;
-      showmode.textContent = "-- REPLACE --";
       break;
     }
     case "h": {
