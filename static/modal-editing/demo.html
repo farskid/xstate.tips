@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en-US" prefix="og:http://ogp.me/ns#">
+  <head>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Title" />
+    <meta itemprop="description" content="An HTML File" />
+    <script src="https://unpkg.com/xstate@4.7.7/dist/xstate.js"></script>
+    <link rel="stylesheet" href="demo.css"
+  </head>
+  <title>Modal Text Editing</title>
+  <body>
+    <div id="terminal">
+      <span></span>
+      <div id="cursor"></div>
+    </div>
+    <div id="modeline">
+      <h4 id="showmode"></h4>
+    </div>
+    <input type="text" name="command" value="" />
+    <br />
+    <h4>CURRENT MACHINE STATE:</h4>
+    <pre id="debug"></pre>
+    <script src="demo.js"></script>
+  </body>
+</html>
+

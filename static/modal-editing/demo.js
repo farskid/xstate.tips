@@ -47,15 +47,6 @@ let state = modalService.state.value;
 // Autofocus input
 input.focus();
 
-// Cool blinking effect
-setInterval(() => {
-  if (cursor.style.visibility === "visible" && state !== "insert") {
-    cursor.style.visibility = "hidden";
-  } else {
-    cursor.style.visibility = "visible";
-  }
-}, 600);
-
 // HACK always keep invisible input focused
 setInterval(() => {
   if (document.activeElement !== input) {

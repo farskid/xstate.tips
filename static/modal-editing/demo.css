@@ -1,0 +1,43 @@
+@keyframes blink {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+#cursor {
+  width: 5px;
+  height: 1rem;
+  background: #09ff18;
+  animation: blink 1.2s infinite;
+}
+
+#terminal {
+  display: flex;
+  font-family: monospace;
+  font-size: 1rem;
+  background: #2b2b2b;
+  padding: 5px;
+  height: 300px;
+}
+#terminal span {
+  padding-left: 3px;
+  white-space: pre;
+  color: #09ff18;
+}
+input {
+  width: 0;
+  height: 0;
+  opacity: 0;
+}
+#modeline {
+  background: #2b2b2b;
+  color: #dbdbdb;
+  font-family: monospace;
+  height: 15px;
+}
+#showmode {
+  margin: 0;
+}
+

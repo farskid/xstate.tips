@@ -63,3 +63,9 @@ pre {
 a {
   color: inherit;
 }
+
+iframe {
+  border: none;
+  width: 100vw;
+  height: 600px;
+}
