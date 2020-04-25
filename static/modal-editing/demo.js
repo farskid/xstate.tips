@@ -6,43 +6,98 @@ const cursor = document.getElementById("cursor");
 const terminalText = terminal.getElementsByTagName("span")[0];
 const showmode = document.getElementById("showmode");
 
+function applyInsertModeStyles() {
+  console.log("NOT SERIALIZED, WILL GET CALLED");
+  showmode.textContent = "-- INSERT --";
+  cursor.style.width = "2.5px";
+}
+
 // MACHINE SETUP
 // *****************************
 //
-const { Machine, interpret } = XState;
+const { Machine, interpret, assign } = XState;
 
 const modeMachine = Machine({
   id: "input-mode",
   initial: "normal",
+  context: {
+    cursorPointer: undefined,
+    textLength: undefined
+  },
   states: {
     normal: {
       entry: "applyNormalModeStyles",
-      on: { INSERT: "insert", VISUAL: "visual", REPLACE: "replace" }
+      on: {
+        INSERT: "insert",
+        VISUAL: "visual",
+        REPLACE: "replace",
+        CURSOR_LEFT: {
+          target: ".",
+          actions: "moveLeft",
+          internal: true
+        },
+        CURSOR_RIGHT: {
+          target: ".",
+          actions: "moveRight",
+          internal: true
+        }
+      }
     },
     visual: {
       entry: "applyVisualModeStyles",
-      on: { NORMAL: "normal" },
-      insert: {
-        entry: "applyInsertModeStyles",
-        on: { NORMAL: "normal" }
-      },
-      replace: {
-        entry: "applyReplaceModeStyles"
-        on: { NORMAL: "normal" }
+      on: { NORMAL: "normal" }
+    },
+    insert: {
+      entry: applyInsertModeStyles,
+      on: {
+        NORMAL: "normal",
+        UPDATE_TEXT: {
+          target: ".",
+          actions: "updateText"
+        }
       }
+    },
+    replace: {
+      entry: "applyReplaceModeStyles",
+      on: { NORMAL: "normal" }
     }
   },
   actions: {
-    applyInsertModeStyles: () => {
-      showmode.textContent = "-- INSERT --";
-      cursor.style.width = "2.5px";
+    updateText: (ctx, e) => {
+      console.log("UPDATE", e);
+      terminalText.textContent = e.value;
+      assign({
+        textContent: e.value
+      });
     },
+    moveLeft: ctx => {
+      const cursorPointer = ctx.cursorPointer - 1;
+      cursor.style.left = `${(ctx.textLength - cursorPointer) * -7}px`;
+      assign({
+        cursorPointer
+      });
+    },
+    moveRight: ctx => {
+      const cursorPointer = ctx.cursorPointer + 1;
+      const calculatedPosition = (ctx.textLength - cursorPointer) * 7;
+      const lineEnd = calculatedPosition > 0;
+      cursor.style.left = `${lineEnd ? 0 : calculatedPosition}px`;
+      assign({
+        cursorPointer
+      });
+    },
+    // applyInsertModeStyles: () => {
+    //   console.log("APPLYING INSERT STYLES");
+    //   showmode.textContent = "-- INSERT --";
+    //   cursor.style.width = "2.5px";
+    // },
     applyReplaceModeStyles: () => {
       showmode.textContent = "-- REPLACE --";
     },
     applyNormalModeStyles: () => {
-        showmode.textContent = "";
-        cursor.style.width = "7px";
+      console.log("SERIALIZED, DOES NOT GET CALLED");
+      showmode.textContent = "";
+      cursor.style.width = "7px";
     },
     applyVisualModeStyles: () => {
       showmode.textContent = "-- VISUAL --";
@@ -50,20 +105,26 @@ const modeMachine = Machine({
   }
 });
 
-const debug = document.getElementById("debug");
-const modalService = interpret(modeMachine)
-  .onTransition(showStateDebug)
-  .start();
-
 // DEBUG UTILS
 // *********************************
+const debug = document.getElementById("debug");
 function showStateDebug(s) {
   debug.textContent = JSON.stringify(s.value, 2, null);
 }
-window.service = modalService;
 
 // MACHINE STATE in UI
-let state = modalService.state.value;
+let state;
+const modalService = interpret(modeMachine)
+  .onTransition(s => {
+    state = s.value;
+    showStateDebug(s);
+  })
+  .start();
+
+modalService.onEvent(console.log);
+
+// XXX  Remove after dev
+window.machine = modalService;
 
 // Autofocus input
 input.focus();
@@ -79,9 +140,9 @@ setInterval(() => {
 input.addEventListener(
   "input",
   e => {
-    if (state === "insert") {
-      terminalText.textContent = e.target.value;
-    } else {
+    console.log(state);
+    modalService.send({ type: "UPDATE_TEXT", data: e.target.value });
+    if (state !== "insert") {
       // Do this so we don't have a delay between typing the input and showing the value.
       // Also so that we don't add things to the input that get suddenly appened after entering insert mode
       e.target.value = e.target.value.slice(0, e.target.value.length - 1);
@@ -96,30 +157,26 @@ function changeModes(e) {
   if (state === "normal") {
     handleNormalModeInput(e.key);
   } else {
-    modalService.send("NORMAL")
+    if (e.key === "Esc") modalService.send("NORMAL");
   }
 }
 
 function handleNormalModeInput(key) {
-  const cursorPosition = parseInt(
-    getComputedStyle(cursor).left.replace("px", ""),
-    10
-  );
   switch (key) {
     case "i": {
-      state = modalService.send("INSERT").value;
+      modalService.send("INSERT");
       break;
     }
     case "v": {
-      state = modalService.send("VISUAL").value;
+      modalService.send("VISUAL");
       break;
     }
     case "R": {
-      state = modalService.send("REPLACE").value;
+      modalService.send("REPLACE");
       break;
     }
     case "h": {
-      cursor.style.left = `${cursorPosition - 7}px`;
+      modalService.send("CURSOR_LEFT");
       break;
     }
     case "j": {
@@ -129,9 +186,7 @@ function handleNormalModeInput(key) {
       break;
     }
     case "l": {
-      const calculatedPosition = cursorPosition + 7;
-      const lineEnd = calculatedPosition > 0;
-      cursor.style.left = `${lineEnd ? 0 : calculatedPosition}px`;
+      modalService.send("CURSOR_RIGHT");
       break;
     }
     default:
