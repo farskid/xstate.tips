@@ -127,7 +127,6 @@ function handleNormalModeInput(key) {
       break;
     }
     case "h": {
-      console.log(cursorPosition);
       cursor.style.left = `${cursorPosition - 7}px`;
       break;
     }
@@ -139,9 +138,8 @@ function handleNormalModeInput(key) {
     }
     case "l": {
       const calculatedPosition = cursorPosition + 7;
-      console.log({ calculatedPosition });
-      const inBounds = calculatedPosition > 0;
-      cursor.style.left = `${inBounds ? calculatedPosition : 0}px`;
+      const lineEnd = calculatedPosition > 0;
+      cursor.style.left = `${lineEnd ? 0 : calculatedPosition}px`;
       break;
     }
     default:
