@@ -7,10 +7,11 @@
   }
 }
 #cursor {
-  width: 5px;
+  width: 7px;
   height: 1rem;
   background: #09ff18;
   animation: blink 1.2s infinite;
+  position: relative;
 }
 
 #terminal {

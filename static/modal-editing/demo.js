@@ -2,6 +2,7 @@
 // *****************************
 //
 const { Machine, interpret } = XState;
+
 const modeMachine = Machine({
   id: "input-mode",
   initial: "normal",
@@ -74,32 +75,13 @@ function changeModes(e) {
   e.preventDefault();
   switch (state) {
     case "normal": {
-      switch (e.key) {
-        case "i": {
-          state = modalService.send("INSERT").value;
-          showmode.textContent = "-- INSERT --";
-          cursor.style.width = "2.5px";
-          break;
-        }
-        case "v": {
-          state = modalService.send("VISUAL").value;
-          showmode.textContent = "-- VISUAL --";
-          break;
-        }
-        case "R": {
-          state = modalService.send("REPLACE").value;
-          showmode.textContent = "-- REPLACE --";
-          break;
-        }
-        default:
-          break;
-      }
+      handleNormalModeInput(e.key);
     }
     case "insert": {
       if (e.key === "Escape") {
         state = modalService.send("NORMAL").value;
         showmode.textContent = "";
-        cursor.style.width = "5px";
+        cursor.style.width = "7px";
       }
       break;
     }
@@ -115,6 +97,51 @@ function changeModes(e) {
         state = modalService.send("NORMAL").value;
         showmode.textContent = "";
       }
+      break;
+    }
+    default:
+      break;
+  }
+}
+
+function handleNormalModeInput(key) {
+  const cursorPosition = parseInt(
+    getComputedStyle(cursor).left.replace("px", ""),
+    10
+  );
+  switch (key) {
+    case "i": {
+      state = modalService.send("INSERT").value;
+      showmode.textContent = "-- INSERT --";
+      cursor.style.width = "2.5px";
+      break;
+    }
+    case "v": {
+      state = modalService.send("VISUAL").value;
+      showmode.textContent = "-- VISUAL --";
+      break;
+    }
+    case "R": {
+      state = modalService.send("REPLACE").value;
+      showmode.textContent = "-- REPLACE --";
+      break;
+    }
+    case "h": {
+      console.log(cursorPosition);
+      cursor.style.left = `${cursorPosition - 7}px`;
+      break;
+    }
+    case "j": {
+      break;
+    }
+    case "k": {
+      break;
+    }
+    case "l": {
+      const calculatedPosition = cursorPosition + 7;
+      console.log({ calculatedPosition });
+      const inBounds = calculatedPosition > 0;
+      cursor.style.left = `${inBounds ? calculatedPosition : 0}px`;
       break;
     }
     default:
