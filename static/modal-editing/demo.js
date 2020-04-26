@@ -29,12 +29,12 @@ const modeMachine = Machine(
           REPLACE: "replace",
           CURSOR_LEFT: {
             target: ".",
-            actions: "moveLeft",
+            actions: ["moveLeft", "updateCursorPosition"],
             internal: true
           },
           CURSOR_RIGHT: {
             target: ".",
-            actions: "moveRight",
+            actions: ["moveRight", "updateCursorPosition"],
             internal: true
           }
         }
@@ -49,7 +49,7 @@ const modeMachine = Machine(
           NORMAL: "normal",
           UPDATE_TEXT: {
             target: ".",
-            actions: "updateText"
+            actions: ["saveText", "updateBuffer"]
           }
         }
       },
@@ -61,31 +61,31 @@ const modeMachine = Machine(
   },
   {
     actions: {
-      updateText: (ctx, e) => {
-        terminalText.textContent = e.data;
-        assign({
-          textContent: e.data,
-          textLength: e.data.length
-        });
+      saveText: assign((_, e) => ({
+        textContent: e.data,
+        textLength: e.data.length
+      })),
+      updateBuffer: ctx => {
+        terminalText.textContent = ctx.textContent;
       },
-      moveLeft: ({ textLength, cursorPointer: ctxCursor }) => {
-        const cursorPointer = ctxCursor ? ctxCursor - 1 : textLength;
-        console.log({ textLength, cursorPointer });
+      moveLeft: assign(({ cursorPointer, textLength }) => {
+        if (cursorPointer !== undefined) {
+          return { cursorPointer: cursorPointer === 0 ? 0 : cursorPointer - 1 };
+        }
+        return { cursorPointer: textLength - 1 };
+      }),
+      moveRight: assign(({ cursorPointer, textLength }) => {
+        if (cursorPointer) {
+          return {
+            cursorPointer:
+              cursorPointer === textLength ? textLength : cursorPointer + 1
+          };
+        }
+        return { cursorPointer: 0 };
+      }),
+      updateCursorPosition: ({ textLength, cursorPointer }) => {
         const calculatedPosition = (textLength - cursorPointer) * -7;
-        console.log(calculatedPosition);
         cursor.style.left = `${calculatedPosition}px`;
-        assign({
-          cursorPointer
-        });
-      },
-      moveRight: ctx => {
-        const cursorPointer = ctx.cursorPointer + 1;
-        const calculatedPosition = (ctx.textLength - cursorPointer) * 7;
-        const lineEnd = calculatedPosition > 0;
-        cursor.style.left = `${lineEnd ? 0 : calculatedPosition}px`;
-        assign({
-          cursorPointer
-        });
       },
       applyInsertModeStyles: () => {
         showmode.textContent = "-- INSERT --";
@@ -120,8 +120,6 @@ const modalService = interpret(modeMachine)
     showStateDebug(s);
   })
   .start();
-
-modalService.onEvent(console.log);
 
 // XXX  Remove after dev
 window.machine = modalService;
