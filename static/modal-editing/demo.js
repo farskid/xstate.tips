@@ -2,9 +2,11 @@
 // *********************************
 const terminal = document.getElementById("terminal");
 const input = document.getElementsByTagName("input")[0];
-const cursor = document.getElementById("cursor");
 const terminalText = terminal.getElementsByTagName("span")[0];
 const showmode = document.getElementById("showmode");
+const text = document.getElementById("text");
+const TEXT_CURSOR = '<span id="cursor" style="width: 7px;"></span>';
+let cursor;
 
 // MACHINE SETUP
 // *****************************
@@ -22,19 +24,33 @@ const modeMachine = Machine(
     },
     states: {
       normal: {
-        entry: "applyNormalModeStyles",
+        entry: ["getCursorElement", "applyNormalModeStyles"],
         on: {
           INSERT: "insert",
           VISUAL: "visual",
           REPLACE: "replace",
           CURSOR_LEFT: {
             target: ".",
-            actions: ["moveLeft", "updateCursorPosition"],
+            actions: ["moveLeft", "getCursorElement", "updateCursorPosition"],
             internal: true
           },
           CURSOR_RIGHT: {
             target: ".",
-            actions: ["moveRight", "updateCursorPosition"],
+            actions: ["moveRight", "getCursorElement", "updateCursorPosition"],
+            internal: true
+          },
+          EOL: {
+            target: ".",
+            actions: ["endOfLine", "getCursorElement", "updateCursorPosition"],
+            internal: true
+          },
+          SOL: {
+            target: ".",
+            actions: [
+              "startOfLine",
+              "getCursorElement",
+              "updateCursorPosition"
+            ],
             internal: true
           }
         }
@@ -44,7 +60,7 @@ const modeMachine = Machine(
         on: { NORMAL: "normal" }
       },
       insert: {
-        entry: "applyInsertModeStyles",
+        entry: ["getCursorElement", "applyInsertModeStyles"],
         on: {
           NORMAL: "normal",
           UPDATE_TEXT: {
@@ -61,10 +77,23 @@ const modeMachine = Machine(
   },
   {
     actions: {
-      saveText: assign((_, e) => ({
-        textContent: e.data,
-        textLength: e.data.length
-      })),
+      saveText: assign(({ cursorPointer, textContent, textLength }, e) => {
+        let updatedContent;
+        if (cursorPointer !== undefined && cursorPointer !== textLength) {
+          updatedContent = textContent
+            .slice(0, cursorPointer)
+            .concat(e.data)
+            .concat(textContent.slice(cursorPointer));
+        } else {
+          updatedContent = textContent.concat(e.data);
+        }
+        return {
+          textContent: updatedContent,
+          textLength: updatedContent.length,
+          cursorPointer:
+            cursorPointer !== undefined ? cursorPointer + 1 : undefined
+        };
+      }),
       updateBuffer: ctx => {
         terminalText.textContent = ctx.textContent;
       },
@@ -75,28 +104,42 @@ const modeMachine = Machine(
         return { cursorPointer: textLength - 1 };
       }),
       moveRight: assign(({ cursorPointer, textLength }) => {
-        if (cursorPointer) {
+        if (cursorPointer !== undefined) {
           return {
             cursorPointer:
               cursorPointer === textLength ? textLength : cursorPointer + 1
           };
         }
-        return { cursorPointer: 0 };
+        return { cursorPointer: textLength };
       }),
-      updateCursorPosition: ({ textLength, cursorPointer }) => {
-        const calculatedPosition = (textLength - cursorPointer) * -7;
-        cursor.style.left = `${calculatedPosition}px`;
+      endOfLine: assign(({ textLength }) => ({
+        cursorPointer: textLength
+      })),
+      startOfLine: assign(() => ({
+        cursorPointer: 0
+      })),
+      getCursorElement: () => {
+        cursor = document.getElementById("cursor");
+      },
+      updateCursorPosition: ({ textContent, cursorPointer }) => {
+        text.innerHTML = textContent
+          .slice(0, cursorPointer)
+          .concat(TEXT_CURSOR)
+          .concat(textContent.slice(cursorPointer));
       },
       applyInsertModeStyles: () => {
         showmode.textContent = "-- INSERT --";
-        cursor.style.width = "2.5px";
+        cursor.style.width = "1.5px";
       },
       applyReplaceModeStyles: () => {
         showmode.textContent = "-- REPLACE --";
       },
-      applyNormalModeStyles: () => {
+      applyNormalModeStyles: ({ textContent, cursorPointer, textLength }) => {
+        text.innerHTML = textContent
+          .slice(0, cursorPointer || textLength)
+          .concat(TEXT_CURSOR)
+          .concat(cursorPointer > 0 ? textContent.slice(cursorPointer) : "");
         showmode.textContent = "";
-        cursor.style.width = "7px";
       },
       applyVisualModeStyles: () => {
         showmode.textContent = "-- VISUAL --";
@@ -139,7 +182,7 @@ input.addEventListener(
   "input",
   e => {
     if (state === "insert") {
-      modalService.send({ type: "UPDATE_TEXT", data: e.target.value });
+      modalService.send({ type: "UPDATE_TEXT", data: e.data });
     } else {
       // Do this so we don't have a delay between typing the input and showing the value.
       // Also so that we don't add things to the input that get suddenly appened after entering insert mode
@@ -165,6 +208,10 @@ function handleNormalModeInput(key) {
       modalService.send("INSERT");
       break;
     }
+    case "a": {
+      modalService.send(["CURSOR_RIGHT", "INSERT"]);
+      break;
+    }
     case "v": {
       modalService.send("VISUAL");
       break;
@@ -175,6 +222,14 @@ function handleNormalModeInput(key) {
     }
     case "h": {
       modalService.send("CURSOR_LEFT");
+      break;
+    }
+    case "$": {
+      modalService.send("EOL");
+      break;
+    }
+    case "0": {
+      modalService.send("SOL");
       break;
     }
     case "j": {
