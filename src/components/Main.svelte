@@ -53,12 +53,16 @@
     border-top: 1px solid var(--border-secondary);
   }
 
-  :global(.is-dark) .main-container {
-    border-left: 1px solid var(--border-secondary);
+  @media only screen and (min-width: 768px) {
+    :global(.is-dark) .main-container {
+      border-left: 1px solid var(--border-secondary);
+    }
   }
 
-  :global(.is-dark) aside {
-    border-top: 1px solid var(--border-secondary);
+  @media only screen and (max-width: 767px) {
+    :global(.is-dark) aside {
+      border-top: 1px solid var(--border-secondary);
+    }
   }
 
   .site-container {
@@ -91,6 +95,7 @@
     padding: 0;
     list-style: none;
     flex: 1;
+    overflow-y: auto;
   }
 
   aside li + li {
@@ -141,7 +146,7 @@
   }
 
   /* Responsiveness */
-  @media screen and (max-width: 768px) {
+  @media only screen and (max-width: 767px) {
     aside {
       z-index: 1;
       position: fixed;
@@ -157,6 +162,11 @@
     aside.shown {
       transform: translate3d(0, 0, 0);
       -webkit-transform: translate3d(0, 0, 0);
+    }
+
+    aside ul {
+      margin-top: 0.5em;
+      margin-bottom: 0.5em;
     }
 
     .floating-button {
@@ -180,7 +190,12 @@
       }} />
     <ul>
       <li>
-        <a href="/" aria-current={segment === undefined ? 'page' : undefined}>
+        <a
+          on:click={() => {
+            sidebarShownOnMobile = false;
+          }}
+          href="/"
+          aria-current={segment === undefined ? 'page' : undefined}>
           Introductions
         </a>
       </li>

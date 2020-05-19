@@ -16,12 +16,13 @@ body {
 
 body.is-dark {
   /* Generics */
-  --selected: rgb(185, 145, 249);
+  /* --selected: rgb(75, 7, 184); */
+  --selected: rgb(15, 98, 0);
   --border: #000;
   --border-secondary: rgba(255, 255, 255, 0.1);
   --bg: #2d2d2d;
   --hover: rgba(255, 255, 255, 0.15);
-  --switch: rgb(185, 145, 249);
+  --switch: rgb(15, 98, 0);
   --code-bg: #222;
   /* Text */
   --text-primary: #fff;

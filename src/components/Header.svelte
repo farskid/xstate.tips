@@ -30,17 +30,23 @@
     align-items: center;
   }
 
+  nav {
+    margin-left: 1em;
+  }
+
   ul {
     list-style: none;
     display: flex;
     align-items: center;
+    padding: 0;
+    margin: 0;
   }
 
   ul > li + li {
     margin-left: 1em;
   }
 
-  @media screen and (max-width: 768px) {
+  @media only screen and (max-width: 767px) {
     header {
       padding: 0.5em;
       font-size: 0.8em;

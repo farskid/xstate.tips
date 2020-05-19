@@ -14,25 +14,25 @@ const collectMarkdowns = () => {
   return fs.readdirSync(MARKDOWN_DIR);
 };
 
-const saveTips = (tipsJson) => {
+const saveTips = tipsJson => {
   fs.writeFileSync(COMPILE_FILE, JSON.stringify(tipsJson));
 };
 
 const markdownFiles = collectMarkdowns();
 
-const markdownContents = markdownFiles.map((file) => ({
+const markdownContents = markdownFiles.map(file => ({
   name: file,
   md: fs.readFileSync(path.join(MARKDOWN_DIR, file)).toString(),
 }));
 
 module.exports.compileTips = function () {
-  return markdownContents.map((file) => {
+  return markdownContents.map(file => {
     const { meta, html } = renderWithMeta(file.md);
     const slug = slugify(meta.title);
 
     return {
       ...meta,
-      tags: meta.tags.split(",").map((m) => m.trim()),
+      tags: meta.tags.split(",").map(m => m.trim()),
       html,
       slug,
     };

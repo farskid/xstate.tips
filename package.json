@@ -4,13 +4,14 @@
   "version": "0.0.1",
   "scripts": {
     "sapper:dev": "sapper dev",
-    "dev": "npm-run-all prepare sapper:dev",
+    "dev": "cross-env-shell NODE_ENV=development npm-run-all build:prepare sapper:dev",
     "build": "sapper build",
     "export": "sapper export",
     "start": "node __sapper__/build",
     "start:export": "node __sapper__/export",
-    "prepare": "node scripts/index.js",
-    "build:website": "npm-run-all prepare export"
+    "format": "prettier --write '**/*.{js,css,md,html,xml,json}'",
+    "build:prepare": "node scripts/index.js",
+    "build:website": "cross-env-shell NODE_ENV=development npm-run-all build:prepare export"
   },
   "dependencies": {
     "compression": "^1.7.1",
@@ -19,12 +20,25 @@
   },
   "devDependencies": {
     "chalk": "^4.0.0",
+    "cross-env": "^7.0.2",
+    "husky": ">=4",
+    "lint-staged": "^10.1.4",
     "meta-remarkable": "^0.1.0",
     "npm-run-all": "^4.1.5",
+    "prettier": "^2.0.4",
     "remarkable": "^2.0.0",
     "sapper": "^0.27.0",
     "svelte": "^3.0.0",
     "svelte-loader": "^2.9.0",
     "webpack": "^4.7.0"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{js,css,md,html,xml,json}": "prettier --write",
+    "scripts/**": "yarn build:prepare"
   }
 }
