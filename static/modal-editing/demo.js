@@ -5,7 +5,8 @@ const input = document.getElementsByTagName("input")[0];
 const terminalText = terminal.getElementsByTagName("span")[0];
 const showmode = document.getElementById("showmode");
 const text = document.getElementById("text");
-const TEXT_CURSOR = '<span id="cursor" style="width: 7px;"></span>';
+const col = document.getElementById("col");
+const TEXT_CURSOR = textContent => `<span id="cursor">${textContent}</span>`;
 let cursor;
 
 // MACHINE SETUP
@@ -79,6 +80,7 @@ const modeMachine = Machine(
     actions: {
       saveText: assign(({ cursorPointer, textContent, textLength }, e) => {
         let updatedContent;
+        let updatedCursorPointer;
         if (cursorPointer !== undefined && cursorPointer !== textLength) {
           updatedContent = textContent
             .slice(0, cursorPointer)
@@ -87,15 +89,23 @@ const modeMachine = Machine(
         } else {
           updatedContent = textContent.concat(e.data);
         }
+        if (e.data == null) {
+          updatedContent = textContent.slice(0, textLength - 1);
+          updatedCursorPointer =
+            cursorPointer !== undefined ? cursorPointer - 1 : undefined;
+        } else {
+          updatedCursorPointer =
+            cursorPointer !== undefined ? cursorPointer + 1 : undefined;
+        }
         return {
           textContent: updatedContent,
           textLength: updatedContent.length,
-          cursorPointer:
-            cursorPointer !== undefined ? cursorPointer + 1 : undefined
+          cursorPointer: updatedCursorPointer
         };
       }),
       updateBuffer: ctx => {
         terminalText.textContent = ctx.textContent;
+        col.innerText = `1,${ctx.cursorPointer || ctx.textLength || 0}`;
       },
       moveLeft: assign(({ cursorPointer, textLength }) => {
         if (cursorPointer !== undefined) {
@@ -121,11 +131,22 @@ const modeMachine = Machine(
       getCursorElement: () => {
         cursor = document.getElementById("cursor");
       },
-      updateCursorPosition: ({ textContent, cursorPointer }) => {
+      updateCursorPosition: ({ textContent, cursorPointer, textLength }) => {
+        const getInnerText = () => {
+          if (cursorPointer !== undefined) {
+            return cursorPointer;
+          } else if (textLength !== undefined) {
+            return textLength;
+          }
+          return 0;
+        };
+        col.innerText = `1,${getInnerText()}`;
         text.innerHTML = textContent
           .slice(0, cursorPointer)
-          .concat(TEXT_CURSOR)
-          .concat(textContent.slice(cursorPointer));
+          .concat(
+            TEXT_CURSOR(textContent.slice(cursorPointer, cursorPointer + 1))
+          )
+          .concat(textContent.slice(cursorPointer + 1));
       },
       applyInsertModeStyles: () => {
         showmode.textContent = "-- INSERT --";
@@ -135,10 +156,16 @@ const modeMachine = Machine(
         showmode.textContent = "-- REPLACE --";
       },
       applyNormalModeStyles: ({ textContent, cursorPointer, textLength }) => {
+        col.innerText = `1,${cursorPointer || textLength || 0}`;
+        const innerText = content => (cursorPointer > 0 ? content : "");
         text.innerHTML = textContent
           .slice(0, cursorPointer || textLength)
-          .concat(TEXT_CURSOR)
-          .concat(cursorPointer > 0 ? textContent.slice(cursorPointer) : "");
+          .concat(
+            TEXT_CURSOR(
+              innerText(textContent.slice(cursorPointer, cursorPointer + 1))
+            )
+          )
+          .concat(innerText(textContent.slice(cursorPointer + 1)));
         showmode.textContent = "";
       },
       applyVisualModeStyles: () => {

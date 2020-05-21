@@ -3,16 +3,17 @@ body {
 }
 @keyframes blink {
   from {
-    opacity: 1;
+    background: #09ff18;
+    color: #000;
   }
   to {
-    opacity: 0;
+    background: transparent;
+    color: #09ff18;
   }
 }
 #cursor {
-  width: 7px;
   height: 1rem;
-  background: #09ff18;
+  padding: 0px 3px;
   animation: blink 1.2s infinite;
   position: relative;
   display: block;
@@ -41,13 +42,26 @@ input {
   height: 0;
   opacity: 0;
 }
-#modeline {
-  background: #2b2b2b;
-  color: #dbdbdb;
+#statusline {
+  color: #2b2b2b;
+  background: #dbdbdb;
+  border: 1px solid #000;
   font-family: monospace;
   height: 15px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+.modeline {
+  background: #000;
+  color: #dbdbdb;
+  height: 15px;
+  font-family: monospace;
 }
 #showmode {
   margin: 0;
 }
 
+h4, h5 {
+  margin: 0px;
+}
