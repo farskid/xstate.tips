@@ -5,133 +5,28 @@ author: Taylor Thompson
 tags: Modal, Editing, Finite state machines, Statecharts, XState
 ---
 
-My favorite development tool is the text editor, [Neovim](https://github.com/neovim/neovim). Part of the reason why I enjoy using Neovim so much is the concept of modal editing. Unlike other popular text editors and IDEs, Neovim employs the concepts of _modes_ to maximize the efficiency of the user and exand the functionality of the text editor.
+## Intro to Modal Editing
+
+My favorite development tool is the text editor, [Neovim](https://github.com/neovim/neovim). Part of the reason why I enjoy using Neovim so much is the concept of modal editing. Unlike other popular text editors and IDEs, Neovim employs the concepts of _modes_ to maximize the efficiency of the user and extend the functionality of the text editor.
 
 Modal editing means that you are in one editing mode at a time. In the case of Neovim, this means that you are either in NORMAL, INSERT, VISUAL, VISUAL BLOCK, VISUAL LINE, COMMAND, or REPLACE mode. While in INSERT mode, you can insert text, while in NORMAL mode, all your keystrokes are commands. Since you can only be in one mode at a time, this is an excellent candidate for modeling with statecharts.
 
 <iframe src="/modal-editing/demo.html"></iframe>
-```js
-// MACHINE SETUP
-// *****************************
-//
-const { Machine, interpret } = XState;
-const modeMachine = Machine({
-  id: "input-mode",
-  initial: "normal",
-  states: {
-    normal: {
-      on: { INSERT: "insert", VISUAL: "visual", REPLACE: "replace" }
-    },
-    visual: {
-      on: { NORMAL: "normal" }
-    },
-    insert: {
-      on: { NORMAL: "normal" }
-    },
-    replace: {
-      on: { NORMAL: "normal" }
-    }
-  }
-});
 
-const debug = document.getElementById("debug");
-const modalService = interpret(modeMachine)
-  .onTransition(showStateDebug)
-  .start();
 
-// DEBUG UTILS
-// *********************************
-function showStateDebug(s) {
-  debug.textContent = JSON.stringify(s.value, 2, null);
-}
-window.service = modalService;
+## Benefits of Message Passing
 
-// WORKING WITH THE DOM
-// *********************************
-const terminal = document.getElementById("terminal");
-const input = document.getElementsByTagName("input")[0];
-const cursor = document.getElementById("cursor");
-const terminalText = terminal.getElementsByTagName("span")[0];
-const showmode = document.getElementById("showmode");
+Message passing to communicate state updates is of the advantages to using a state machine to manage the modal editor. It allows use to attach an event listener to all strokes and pipe these events straight into the state machine:
 
-// MACHINE STATE in UI
-let state = modalService.state.value;
-
-// Autofocus input
-input.focus();
-
-// HACK always keep invisible input focused
-setInterval(() => {
-  if (document.activeElement !== input) {
-    input.focus();
-  }
-}, 100);
-
-// Update the terminal value with the text typed in input
-input.addEventListener(
-  "input",
-  e => {
-    if (state === "insert") {
-      terminalText.textContent = e.target.value;
-    } else {
-      // Do this so we don't have a delay between typing the input and showing the value.
-      // Also so that we don't add things to the input that get suddenly appened after entering insert mode
-      e.target.value = e.target.value.slice(0, e.target.value.length - 1);
-    }
-  },
-  false
-);
-
+```javascript
 document.body.addEventListener("keyup", changeModes);
 function changeModes(e) {
   e.preventDefault();
-  switch (state) {
-    case "normal": {
-      switch (e.key) {
-        case "i": {
-          state = modalService.send("INSERT").value;
-          showmode.textContent = "-- INSERT --";
-          cursor.style.width = "2.5px";
-          break;
-        }
-        case "v": {
-          state = modalService.send("VISUAL").value;
-          showmode.textContent = "-- VISUAL --";
-          break;
-        }
-        case "R": {
-          state = modalService.send("REPLACE").value;
-          showmode.textContent = "-- REPLACE --";
-          break;
-        }
-        default:
-          break;
-      }
-    }
-    case "insert": {
-      if (e.key === "Escape") {
-        state = modalService.send("NORMAL").value;
-        showmode.textContent = "";
-        cursor.style.width = "5px";
-      }
-      break;
-    }
-    case "visual": {
-      if (e.key === "Escape") {
-        state = modalService.send("NORMAL").value;
-        showmode.textContent = "";
-      }
-      break;
-    }
-    case "replace": {
-      if (e.key === "Escape") {
-        state = modalService.send("NORMAL").value;
-        showmode.textContent = "";
-      }
-      break;
-    }
-    default:
-      break;
-  }
+  modalService.send(e.key);
 }
 ```
+
+By passing messages to the state machine, we avoid logic branching altogether: no `if` or `switch` statements, no ternary operators, and perhaps most importantly, our actions are _deterministic_. Deterimism gives us confidence that we will never see our editor in a state that is not explicitly defined by our state machine, no matter how many actions we trigger, or in what order they are triggered.
+
+## Readability
+Being able to co-locate all of the state changing actions inside of the state machine also helps when determining which actions are modifying which pieces of state, rather than trying to find this information scattered across different files or different event handlers.

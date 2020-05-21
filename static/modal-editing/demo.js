@@ -25,45 +25,45 @@ const modeMachine = Machine(
     },
     states: {
       normal: {
-        entry: ["getCursorElement", "applyNormalModeStyles"],
+        entry: ["applyNormalModeStyles"],
         on: {
-          INSERT: "insert",
-          VISUAL: "visual",
-          REPLACE: "replace",
-          CURSOR_LEFT: {
+          i: "insert",
+          v: "visual",
+          R: "replace",
+          h: {
             target: ".",
-            actions: ["moveLeft", "getCursorElement", "updateCursorPosition"],
+            actions: ["moveLeft", "updateCursorPosition"],
             internal: true
           },
-          CURSOR_RIGHT: {
+          a: {
+            target: "insert",
+            actions: ["moveRight", "updateCursorPosition"]
+          },
+          l: {
             target: ".",
-            actions: ["moveRight", "getCursorElement", "updateCursorPosition"],
+            actions: ["moveRight", "updateCursorPosition"],
             internal: true
           },
-          EOL: {
+          $: {
             target: ".",
-            actions: ["endOfLine", "getCursorElement", "updateCursorPosition"],
+            actions: ["endOfLine", "updateCursorPosition"],
             internal: true
           },
-          SOL: {
+          0: {
             target: ".",
-            actions: [
-              "startOfLine",
-              "getCursorElement",
-              "updateCursorPosition"
-            ],
+            actions: ["startOfLine", "updateCursorPosition"],
             internal: true
           }
         }
       },
       visual: {
         entry: "applyVisualModeStyles",
-        on: { NORMAL: "normal" }
+        on: { Escape: "normal" }
       },
       insert: {
         entry: ["getCursorElement", "applyInsertModeStyles"],
         on: {
-          NORMAL: "normal",
+          Escape: "normal",
           UPDATE_TEXT: {
             target: ".",
             actions: ["saveText", "updateBuffer"]
@@ -72,7 +72,7 @@ const modeMachine = Machine(
       },
       replace: {
         entry: "applyReplaceModeStyles",
-        on: { NORMAL: "normal" }
+        on: { Escape: "normal" }
       }
     }
   },
@@ -191,9 +191,6 @@ const modalService = interpret(modeMachine)
   })
   .start();
 
-// XXX  Remove after dev
-window.machine = modalService;
-
 // Autofocus input
 input.focus();
 
@@ -222,54 +219,5 @@ input.addEventListener(
 document.body.addEventListener("keyup", changeModes);
 function changeModes(e) {
   e.preventDefault();
-  if (state === "normal") {
-    handleNormalModeInput(e.key);
-  } else {
-    if (e.key === "Escape") modalService.send("NORMAL");
-  }
-}
-
-function handleNormalModeInput(key) {
-  switch (key) {
-    case "i": {
-      modalService.send("INSERT");
-      break;
-    }
-    case "a": {
-      modalService.send(["CURSOR_RIGHT", "INSERT"]);
-      break;
-    }
-    case "v": {
-      modalService.send("VISUAL");
-      break;
-    }
-    case "R": {
-      modalService.send("REPLACE");
-      break;
-    }
-    case "h": {
-      modalService.send("CURSOR_LEFT");
-      break;
-    }
-    case "$": {
-      modalService.send("EOL");
-      break;
-    }
-    case "0": {
-      modalService.send("SOL");
-      break;
-    }
-    case "j": {
-      break;
-    }
-    case "k": {
-      break;
-    }
-    case "l": {
-      modalService.send("CURSOR_RIGHT");
-      break;
-    }
-    default:
-      break;
-  }
+  modalService.send(e.key);
 }
