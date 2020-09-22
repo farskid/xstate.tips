@@ -1,71 +1,95 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
+  <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
     <meta name="theme-color" content="#333333" />
     <meta name="robots" content="index, follow" />
-    <meta name="description"
-        content="Tips and tricks of using XState for modeling with state machines and statecharts" />
+    <meta
+      name="description"
+      content="Tips and tricks of using XState for modeling with state machines and statecharts"
+    />
     <meta property="og:type" content="website" />
     <meta property="og:image" content="https://xstate.tips/favicon.jpg" />
     <title>XState.tips</title>
     <style>
-        body {
-            margin: 0;
-            background-color: black;
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 1.5rem;
-            line-height: 1.4;
-        }
+      body {
+        margin: 0;
+        background-color: black;
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        font-family: "Courier New", Courier, monospace;
+        font-size: 1.5rem;
+        line-height: 1.4;
+      }
 
-        main {
-            display: inline-block;
-        }
+      main {
+        display: inline-block;
+      }
 
-        h1 {
-            font-size: 6rem;
-        }
+      h1 {
+        font-size: 6rem;
+        background: linear-gradient(
+          to right,
+          #ff0 20%,
+          #234567 40%,
+          #32fd43 60%,
+          #ff0 80%
+        );
+        background-size: 200% auto;
 
-        p {
-            letter-spacing: 1px;
-        }
+        color: #000;
+        background-clip: text;
+        text-fill-color: transparent;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
 
-        ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
+        animation: shine 1s linear infinite;
+      }
 
-        li {
-            display: inline-flex;
-        }
+      p {
+        letter-spacing: 1px;
+      }
 
-        li+li {
-            margin-left: 1rem;
-        }
+      ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
 
-        a {
-            color: violet;
+      li {
+        display: inline-flex;
+      }
+
+      li + li {
+        margin-left: 1rem;
+      }
+
+      a {
+        color: violet;
+      }
+
+      @keyframes shine {
+        to {
+          background-position: 200% center;
         }
+      }
     </style>
-</head>
+  </head>
 
-<body>
+  <body>
     <main>
-        <h1>Coming Soon</h1>
-        <p>Meanwhile, follow us on Twitter to get notified of the release!</p>
-        <ul>
-            <li><a href="https://twitter.com/farskid">Farzad YZ</a></li>
-            <li><a href="https://twitter.com/jamestthompson3">Taylor Thompson</a></li>
-        </ul>
+      <h1>Coming Soon</h1>
+      <p>Meanwhile, follow us on Twitter to get notified of the release!</p>
+      <ul>
+        <li><a href="https://twitter.com/farskid">Farzad YZ</a></li>
+        <li>
+          <a href="https://twitter.com/jamestthompson3">Taylor Thompson</a>
+        </li>
+      </ul>
     </main>
-</body>
-
+  </body>
 </html>
