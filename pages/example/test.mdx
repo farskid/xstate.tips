@@ -1,0 +1,61 @@
+import { Machine, interpret } from "xstate";
+import { useMachine } from "@xstate/react";
+import { useState } from "react";
+import { State, Observe } from "mdx-observable";
+import { MachineViz } from "../components/src/MachineViz";
+
+export const machine = Machine({
+  initial: "a",
+  states: { a: { on: { MOVE: "b" } }, b: { on: { MOVE: "a" } } },
+});
+
+export const service = interpret(machine);
+service.start();
+
+# Here's a button, click it!
+
+export const MyDynamicButton = ({ service }) => {
+  const [current, send] = useMachine(machine);
+  return (
+    <Observe>
+      {({ setState }) => {
+        return (
+          <button
+            onClick={() => setState({ currentState: service.send("MOVE") })}
+          >
+            Move
+          </button>
+        );
+      }}
+    </Observe>
+  );
+};
+
+Click it! <MyDynamicButton service={service} />
+
+<State initialState={{ currentState: service._state }}>
+  <Observe>{({ currentState }) => <p>state: {currentState.value}</p>}</Observe>
+</State>
+
+export const TTT = () => {
+  const [current, send, service] = useMachine(machine, { devtools: true });
+  React.useEffect(() => {
+    service.onEvent((evt) => {
+      if (evt.trackingId) {
+        service.send({ type: evt.eventType });
+      }
+    });
+  }, []);
+  return (
+    <>
+      <h1>Here's a button, click it!</h1>
+      <button onClick={() => ({ currentState: send("MOVE") })}>Move</button>
+      <p>state: {current.value}</p>
+      <div style={{ position: "relative", height: 200, width: "100%" }}>
+        <MachineViz machine={machine} state={service.state} />
+      </div>
+    </>
+  );
+};
+
+<TTT />
