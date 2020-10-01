@@ -1,5 +1,6 @@
 import { Machine, interpret } from "xstate";
 import { useMachine } from "@xstate/react";
+import { Inspector } from "../components/Inspector.jsx";
 import { useState } from "react";
 import { State, Observe } from "mdx-observable";
 import { MachineViz } from "../components/src/MachineViz";
@@ -58,4 +59,7 @@ export const TTT = () => {
   );
 };
 
-<TTT />
+<Inspector>
+  <TTT />
+</Inspector>
+;
