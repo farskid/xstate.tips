@@ -1,6 +1,6 @@
 import React, { useLayoutEffect, useState } from "react";
 import { createMachine, assign, sendParent, send } from "xstate";
-import { inspect } from "@xstate/inspect";
+import { inspect } from "../../xstate-inspect";
 
 import "../themes/dark.scss";
 import { useMachine } from "@xstate/react";

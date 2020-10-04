@@ -1,5 +1,5 @@
 import React from "react";
-import { inspect } from "@xstate/inspect";
+import { inspect } from "./xstate-inspect";
 
 export function useInspector({ iframe }) {
   React.useEffect(() => {

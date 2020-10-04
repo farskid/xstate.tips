@@ -26,6 +26,7 @@ import {
 import { MachineMeasure, MachineRectMeasurements } from "./MachineMeasure";
 import { Popover } from "./Popover";
 import { ResultBox } from "./types";
+import Editor from "./Editor";
 import { useState } from "react";
 
 interface CanvasCtx {
@@ -125,7 +126,8 @@ const MachineVizContainer: React.FC<MachineVizProps> = ({
     setMeasurements,
   ] = React.useState<MachineRectMeasurements | null>(null);
   const [machineVizState, send] = useService(service);
-  const popoverData = machineVizState.context.popover;
+  // console.log({ service, machineVizState });
+  const popoverData = (machineVizState || service.initialState).context.popover;
 
   React.useLayoutEffect(() => {
     canvasService.subscribe(({ context }) => {
@@ -271,13 +273,7 @@ export function MachineViz({
       canvasTapped: () => onCanvasTap?.(),
     },
   });
-  React.useEffect(() => {
-    service.onEvent(console.log);
-  }, []);
-  const trackerRef = React.useRef(undefined!);
-  React.useEffect(() => {
-    trackerRef.current = new Tracker();
-  }, []);
+  const tracker = React.useMemo(() => new Tracker(), []);
 
   const selectionNodes = selection.map((sn) => {
     return typeof sn === "string" ? machine.getStateNodeById(sn) : sn;
@@ -285,16 +281,9 @@ export function MachineViz({
 
   return (
     <StateContext.Provider
-      value={{
-        state,
-        tracker: trackerRef.current,
-        service,
-        selection: selectionNodes,
-      }}
+      value={{ state, tracker, service, selection: selectionNodes }}
     >
-      {service.initialized && (
-        <MachineVizContainer machine={machine} state={state} mode={mode} />
-      )}
+      <MachineVizContainer machine={machine} state={state} mode={mode} />
     </StateContext.Provider>
   );
 }
