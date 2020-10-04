@@ -151,19 +151,7 @@ const MenuTriggerButton = styled.button`
 
 export function ExamplesLayout({ children, examples = [] }) {
   const [isMenuOpen, setMenuOpenState] = React.useState(false);
-  const sidebarRef = React.useRef();
-  React.useEffect(() => {
-    const onClickHandler = (e) => {
-      console.log(e.target.id, sidebarRef.current.id);
-      if (!e.target.id !== sidebarRef.current.id) {
-        setMenuOpenState(false);
-      }
-    };
-    document.addEventListener("click", onClickHandler);
-    return () => {
-      document.removeEventListener("click", onClickHandler);
-    };
-  }, []);
+
   return (
     <LayoutContainer>
       <GlobalStyle />
@@ -193,8 +181,12 @@ export function ExamplesLayout({ children, examples = [] }) {
             </MenuLink>
           </LinksList>
           <MenuTriggerButton
-            onClick={() => {
-              setMenuOpenState(!isMenuOpen);
+            id="menu-trigger"
+            onFocus={() => {
+              setMenuOpenState(true);
+            }}
+            onBlur={() => {
+              setMenuOpenState(false);
             }}
           >
             <svg viewBox="0 0 35 35" width="20" height="20">
@@ -207,7 +199,6 @@ export function ExamplesLayout({ children, examples = [] }) {
       </LayoutHeader>
       <LayoutMain>
         <LayoutSidebar
-          ref={sidebarRef}
           id="sidebar"
           className={cls({
             open: isMenuOpen,
