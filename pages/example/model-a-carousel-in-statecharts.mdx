@@ -1,0 +1,50 @@
+import { Machine, interpret } from "xstate";
+import { useMachine } from "@xstate/react";
+import { Inspector } from "../components/Inspector.jsx";
+import { useState } from "react";
+import { MachineViz } from "../components/xstate-viz/src/MachineViz";
+import { CodeSandbox } from "../components/embeds";
+
+export const machine = Machine({
+  initial: "a",
+  states: { a: { on: { MOVE: "b" } }, b: { on: { MOVE: "a" } } },
+});
+
+export const TTT = () => {
+  const [current, send, service] = useMachine(machine, { devtools: true });
+  return (
+    <>
+      <h1>Here's a button, click it!</h1>
+      <button onClick={() => ({ currentState: send("MOVE") })}>Move</button>
+      <p>state: {current.value}</p>
+      {/* <div style={{ position: "relative", height: 200, width: "100%" }}>
+        <MachineViz machine={machine} state={service.state} />
+      </div> */}
+    </>
+  );
+};
+
+# TodoMVC Examples
+
+Both demos share the same machines.
+
+## TodoMVC with React
+
+- Uses React with hooks
+- Two machines:
+  - `todosMachine` controls the overall Todos application
+  - `todoMachine` controls each individual todo item.
+
+<CodeSandbox codeSandboxId="xstate-todomvc-33wr94qv1" />
+
+## TodoMVC with Vue
+
+- Uses Vue with [Composition API](https://vue-composition-api-rfc.netlify.com/)
+- Two machines:
+
+  - `todosMachine` controls the overall Todos application
+  - `todoMachine` controls each individual todo item.
+
+<CodeSandbox codeSandboxId="blue-fire-zd796" />
+
+<TTT />
