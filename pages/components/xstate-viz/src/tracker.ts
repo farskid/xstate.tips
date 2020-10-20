@@ -18,10 +18,12 @@ function isHidden(el: HTMLElement) {
 export class Tracker {
   public data: Record<string, TrackerData> = {};
 
-  constructor(private parentElement: Element = document.body) {}
+  constructor(private parentElement?: Element) {}
 
   private getParent(el: Element) {
-    return el.closest('[data-xviz="machine"]') || this.parentElement;
+    return (
+      el.closest('[data-xviz="machine"]') || this.parentElement || document.body
+    );
   }
 
   public update(id: string, el: Element) {
@@ -81,6 +83,7 @@ export class Tracker {
   }
 
   public listen(id: string, listener: TrackerListener) {
+    this.parentElement = document.body;
     if (!this.data[id]) {
       this.register(id);
     }
