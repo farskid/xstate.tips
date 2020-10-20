@@ -10,16 +10,71 @@ export const machine = Machine({
   states: { a: { on: { MOVE: "b" } }, b: { on: { MOVE: "a" } } },
 });
 
+export const inputMachine = Machine({
+  id: "input-mode",
+  initial: "normal",
+  context: {
+    cursorPointer: undefined,
+    textLength: undefined,
+  },
+  states: {
+    normal: {
+      entry: "applyNormalModeStyles",
+      on: {
+        INSERT: "insert",
+        VISUAL: "visual",
+        REPLACE: "replace",
+        CURSOR_LEFT: {
+          target: ".",
+          actions: "moveLeft",
+          internal: true,
+        },
+        CURSOR_RIGHT: {
+          target: ".",
+          actions: "moveRight",
+          internal: true,
+        },
+      },
+    },
+    visual: {
+      entry: "applyVisualModeStyles",
+      on: { NORMAL: "normal" },
+    },
+    insert: {
+      entry: "applyInsertModeStyles",
+      on: {
+        NORMAL: "normal",
+        UPDATE_TEXT: {
+          target: ".",
+          actions: "updateText",
+        },
+      },
+    },
+    replace: {
+      entry: "applyReplaceModeStyles",
+      on: { NORMAL: "normal" },
+    },
+  },
+});
+
 export const TTT = () => {
-  const [current, send, service] = useMachine(machine, { devtools: true });
+  const [current, send, service] = useMachine(inputMachine, { devtools: true });
+  console.log(service);
   return (
     <>
       <h1>Here's a button, click it!</h1>
-      <button onClick={() => ({ currentState: send("MOVE") })}>Move</button>
-      <p>state: {current.value}</p>
-      {/* <div style={{ position: "relative", height: 200, width: "100%" }}>
-        <MachineViz machine={machine} state={service.state} />
-      </div> */}
+      <p>
+        Available Events:{" "}
+        {current.nextEvents.map((event) => (
+          <button key={event} onClick={() => ({ currentState: send(event) })}>
+            {event}
+          </button>
+        ))}
+      </p>
+      <p>
+        State: <code>{current.value}</code>
+      </p>
+      <MachineViz machine={inputMachine} state={service.state} />
     </>
   );
 };
@@ -35,7 +90,7 @@ Both demos share the same machines.
   - `todosMachine` controls the overall Todos application
   - `todoMachine` controls each individual todo item.
 
-<CodeSandbox codeSandboxId="xstate-todomvc-33wr94qv1" />
+<!-- <CodeSandbox codeSandboxId="xstate-todomvc-33wr94qv1" /> -->
 
 ## TodoMVC with Vue
 
@@ -45,6 +100,6 @@ Both demos share the same machines.
   - `todosMachine` controls the overall Todos application
   - `todoMachine` controls each individual todo item.
 
-<CodeSandbox codeSandboxId="blue-fire-zd796" />
+<!-- <CodeSandbox codeSandboxId="blue-fire-zd796" /> -->
 
 <TTT />
