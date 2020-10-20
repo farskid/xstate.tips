@@ -1,0 +1,40 @@
+{
+  "name": "xstate.tips",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@mdx-js/loader": "^1.6.16",
+    "@next/mdx": "^9.5.2",
+    "@reach/tabs": "^0.11.2",
+    "@xstate/graph": "^1.1.0",
+    "@xstate/immer": "^0.1.0",
+    "@xstate/inspect": "^0.1.1",
+    "@xstate/react": "^0.8.1",
+    "classnames": "^2.2.6",
+    "codemirror": "^5.58.1",
+    "immer": "^7.0.8",
+    "mdx-embed": "^0.0.14",
+    "mdx-observable": "^0.2.0",
+    "next": "9.5.2",
+    "next-mdx-enhanced": "^4.0.0",
+    "react": "16.13.1",
+    "react-codemirror2": "^7.2.1",
+    "react-dom": "16.13.1",
+    "react-markdown": "^4.3.1",
+    "sass": "^1.26.11",
+    "styled-components": "^5.2.0",
+    "swr": "^0.3.2",
+    "xstate": "^4.13.0"
+  },
+  "devDependencies": {
+    "@types/node": "^14.11.2",
+    "@types/react": "^16.9.49",
+    "babel-plugin-styled-components": "^1.11.1",
+    "typescript": "^4.0.3"
+  }
+}

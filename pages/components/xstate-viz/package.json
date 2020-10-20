@@ -1,0 +1,104 @@
+{
+  "name": "@xstate/viz",
+  "version": "0.3.4",
+  "description": "XState visualization tools",
+  "keywords": [
+    "state",
+    "machine",
+    "statechart",
+    "scxml",
+    "state",
+    "graph",
+    "visualizer",
+    "visualization",
+    "react"
+  ],
+  "author": "David Khourshid <davidkpiano@gmail.com>",
+  "homepage": "https://github.com/davidkpiano/xstate/tree/master/packages/xstate-viz#readme",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "sideEffects": false,
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "files": [
+    "lib/**/*.js",
+    "lib/**/*.d.ts",
+    "themes/**/*.css",
+    "themes/**/*.css.map"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/davidkpiano/xstate.git"
+  },
+  "scripts": {
+    "clean": "rm -rf dist lib tsconfig.tsbuildinfo",
+    "build": "tsc",
+    "test": "jest",
+    "styles": "sass themes:themes",
+    "preversion": "npm run clean && npm run build && npm run styles && npm run test",
+    "prepublish": "npm run clean && npm run build && npm run styles && npm run test",
+    "storybook": "start-storybook -p 6006",
+    "build-storybook": "build-storybook"
+  },
+  "bugs": {
+    "url": "https://github.com/davidkpiano/xstate/issues"
+  },
+  "peerDependencies": {
+    "@xstate/fsm": "^1.0.0",
+    "react": "^16.8.0",
+    "xstate": "^4.7.0"
+  },
+  "peerDependenciesMeta": {
+    "xstate": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@babel/core": "^7.10.5",
+    "@storybook/addon-actions": "^5.3.18",
+    "@storybook/addon-links": "^5.3.18",
+    "@storybook/addons": "^5.3.18",
+    "@storybook/preset-scss": "^1.0.2",
+    "@storybook/preset-typescript": "^3.0.0",
+    "@storybook/react": "^5.3.18",
+    "@testing-library/react": "^8.0.9",
+    "@types/jsdom": "^12.2.3",
+    "@types/react": "^16.9.11",
+    "@types/react-dom": "^16.9.4",
+    "@xstate/fsm": "*",
+    "babel-loader": "^8.1.0",
+    "concurrently": "^5.1.0",
+    "css-loader": "^3.5.3",
+    "jest": "^26.1.0",
+    "jsdom": "^14.0.0",
+    "jsdom-global": "^3.0.2",
+    "lerna-alias": "3.0.3-0",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
+    "sass": "^1.26.9",
+    "sass-loader": "^8.0.2",
+    "style-loader": "^1.2.1",
+    "ts-jest": "^24.1.9",
+    "tsdx": "^0.11.0",
+    "tslib": "^1.10.0",
+    "typescript": "^4.0.2",
+    "xstate": "*"
+  },
+  "dependencies": {
+    "@reach/tabs": "^0.10.3",
+    "@xstate/immer": "^0.1.0",
+    "@xstate/react": "^1.0.0-rc.3",
+    "codemirror": "^5.57.0",
+    "immer": "^6.0.8",
+    "react-codemirror2": "^7.2.1",
+    "react-json-tree": "^0.11.2",
+    "react-markdown": "^4.3.1",
+    "styled-components": "^4.4.1"
+  },
+  "prettier": {
+    "trailingComma": "es5"
+  }
+}

@@ -1,0 +1,47 @@
+html,
+body {
+  padding: 0;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
+    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+}
+
+@media screen and (min-width: 80rem) {
+  html,
+  body {
+    font-size: 1.25rem;
+  }
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.spacing-vertical > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.spacing-vertical > * + * {
+  margin-top: 1rem;
+}
+
+.spacing-horizontal > * {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.spacing-horizontal > * + * {
+  margin-left: 1rem;
+}
+
+@media screen and (max-width: 48rem) {
+  .hidden-mobile {
+    display: none;
+  }
+}
