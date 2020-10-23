@@ -1,0 +1,782 @@
+import { CodeSandbox } from "../components/mdx-embed/Codesandbox";
+import { StandaloneViz } from "../components/StandaloneViz";
+
+# Using React and XState to Build a Sign In Form
+
+[](https://css-tricks.com/using-react-and-xstate-to-build-a-sign-in-form/)
+
+## Update 15th June 2019
+
+A number of changes to XState have occurred since writing this article. An updated version of a sign-in form using React & XState can be found [here](https://css-tricks.com/using-react-and-xstate-to-build-a-sign-in-form/)
+
+---
+
+To make a sign in form with good UX requires UI state management, meaning we’d like to minimize the cognitive load to complete it and reduce the number of required user actions while making an intuitive experience. Think about it: even a relatively simple email and password sign in form needs to handle a number of different states, like empty fields, errors, password requirements, loading and success.
+
+Thankfully, state management is what React was made for and I was able to create a sign in form with it using an approach that features [XState](https://xstate.js.org/), a JavaScript state management library using finite machines.
+
+State management? Finite machines? We’re going to walk through these concepts together while putting together a solid sign in form.
+
+Jumping ahead, here’s what we’re going to build together:
+
+![](https://i1.wp.com/res.cloudinary.com/css-tricks/image/upload/v1548112291/xstate-form-01_wfmqrn.png?ssl=1)
+
+![](https://i1.wp.com/res.cloudinary.com/css-tricks/image/upload/v1548112291/xstate-form-01_wfmqrn.png?ssl=1)
+
+<CodeSandbox id="l3r07jkxx9" />
+
+### First, let’s set up
+
+We’ll need a few tools before getting started. Here’s what to grab:
+
+- A UI library: [React](https://reactjs.org/)
+- A styling library: [styled-components](https://www.styled-components.com/)
+- A state management library: [XState](https://xstate.js.org/)
+
+Once those are in hand, we can make sure our project folder is set up for development. Here’s an outline of how the files should be structured:
+
+```
+public/
+  |--src/
+    |--Loader/
+    |--SignIn/
+      |--contactAuthService.js
+      |--index.jsx
+      |--isPasswordShort.js
+      |--machineConfig.js
+      |--styles.js
+    |--globalStyles.js
+    |--index.jsx
+package.json
+```
+
+### A little background on XState
+
+We already mentioned that XState is a state management JavaScript library. Its approach uses finite state machines which makes it ideal for this sort of project. For example:
+
+- It is a thoroughly tried and tested approach to state management. Finite state machines have been around for 30+ years.
+- It is built accordance to [specification](https://www.w3.org/TR/scxml/).
+- It allows logic to be completely separated from implementation, making it easily testable and modular.
+- It has a visual interpreter which gives great feedback of what’s been coded and makes communicating the system to another person that much easier.
+
+For more information on finite-state machines [check out David Khourshid’s article](https://css-tricks.com/robust-react-user-interfaces-with-finite-state-machines/).
+
+### Machine Config
+
+The machine config is the _core_ of XState. It is a [statechart](https://statecharts.github.io/) and it will define the _logic_ of our form. I have broken it down into the following parts, which we’ll go over one by one.
+
+#### 1. The States
+
+We need a way to control what to show, hide, enable and disable. We will control this using named-states, which include:
+
+**dataEntry:** This is the state when the user can enter an email and password into the provided fields. We can consider this the default state. The current field will be highlighted in blue.
+
+![](https://i1.wp.com/res.cloudinary.com/css-tricks/image/upload/v1548112291/xstate-form-01_wfmqrn.png?ssl=1)
+
+![](https://i1.wp.com/res.cloudinary.com/css-tricks/image/upload/v1548112291/xstate-form-01_wfmqrn.png?ssl=1)
+
+**awaitingResponse:** This is after the browser makes a request to the authentication service and we are waiting for the response. We’ll disable the form and replace the button with a loading indicator when the form is in this state.
+
+![](https://i1.wp.com/res.cloudinary.com/css-tricks/image/upload/v1548112492/xstate-form-02_wbfrqn.png?ssl=1)
+
+![](https://i1.wp.com/res.cloudinary.com/css-tricks/image/upload/v1548112492/xstate-form-02_wbfrqn.png?ssl=1)
+
+**emailErr:** Whoops! This state is thrown when there is a problem with the email address the user has entered. We’ll highlight that field, display the error, and disable the other field and button.
+
+![](https://i2.wp.com/res.cloudinary.com/css-tricks/image/upload/v1548112534/xstate-form-03_hyvgzb.png?ssl=1)
+
+![](https://i2.wp.com/res.cloudinary.com/css-tricks/image/upload/v1548112534/xstate-form-03_hyvgzb.png?ssl=1)
+
+**passwordErr:** This is another error state, this time when there is a problem with the password the user has entered. Like the previous error, we’ll highlight the field, display the error, and disable the rest of the form.
+
+![](https://i0.wp.com/res.cloudinary.com/css-tricks/image/upload/v1548112569/xstate-form-04_kwvby7.png?ssl=1)
+
+![](https://i0.wp.com/res.cloudinary.com/css-tricks/image/upload/v1548112569/xstate-form-04_kwvby7.png?ssl=1)
+
+**serviceErr:** We reach this state when we are unable contact the authentication service, preventing the submitted data to be checked. We’ll display an error along with a “Retry” button to re-attempt a service connection.
+
+![](https://i0.wp.com/res.cloudinary.com/css-tricks/image/upload/v1548112599/xstate-form-05_e7xr6b.png?ssl=1)
+
+![](https://i0.wp.com/res.cloudinary.com/css-tricks/image/upload/v1548112599/xstate-form-05_e7xr6b.png?ssl=1)
+
+**signedIn:** Success! This is when the user has successfully authenticated and proceeds past the sign in form. Normally, this would take the user to some view, but we’ll simply confirm authentication since we’re focusing solely on the form.
+
+![](https://i2.wp.com/res.cloudinary.com/css-tricks/image/upload/v1548112660/xstate-form-06_oztp1h.png?ssl=1)
+
+![](https://i2.wp.com/res.cloudinary.com/css-tricks/image/upload/v1548112660/xstate-form-06_oztp1h.png?ssl=1)
+
+See the machinConfig.js file in the SignIn directory? Crack that open so we can define our states. We list them as properties of a `states` object. We also need to define an initial state, which mentioned earlier, will be the `dataEntry` state, allowing the user to enter data into the form fields.
+
+```js
+const machineConfig = {
+  id: "signIn",
+  initial: "dataEntry",
+  states: {
+    dataEntry: {},
+    awaitingResponse: {},
+    emailErr: {},
+    passwordErr: {},
+    serviceErr: {},
+    signedIn: {},
+  },
+};
+export default machineConfig;
+```
+
+![](https://i1.wp.com/res.cloudinary.com/css-tricks/image/upload/v1548112694/s_24AD0D577DEF92AA37A76FC5744753D49AF15464EA3D38F1AA80DEAF095489D4_1544680442083_statechart-states_nhjcyd.png?ssl=1)
+
+![](https://i1.wp.com/res.cloudinary.com/css-tricks/image/upload/v1548112694/s_24AD0D577DEF92AA37A76FC5744753D49AF15464EA3D38F1AA80DEAF095489D4_1544680442083_statechart-states_nhjcyd.png?ssl=1)
+
+Each part of this article will show the code of machineConfig.js along with a diagram produced from the code using XState’s [visualizer](https://statecharts.github.io/xstate-viz/).
+
+#### 2. The Transitions
+
+Now that we have defined our states, we need to define how to change from one state to another and, in XState, we do that with a type of event called a _transition_. We define transitions within each state. For example, If the `ENTER_EMAIL` transition is triggered when we’re in the `emailErr` state, then the system will move to state `dataEntry`.
+
+```js
+emailErr: {
+  on: {
+    ENTER_EMAIL: {
+      target: "dataEntry";
+    }
+  }
+}
+```
+
+Note that nothing would happen if a different type of transition was triggered (such as `ENTER_PASSWORD`) while in the `emailErr` state. Only transitions that are defined within the state are valid.
+
+When a transition has no target, it is an external (by default) self-transition. When triggered, the state will exit and re-enter itself. As an example, the machine will change from `dataEntry` back to `dataEntry` when the `ENTER_EMAIL` transition is triggered.
+
+Here’s how that is defined:
+
+```js
+dataEntry: {
+  on: {
+    ENTER_EMAIL: {
+    }
+  }
+}
+```
+
+Sounds weird, I know, but we’ll explain it a little later. Here’s the machineConfig.js file so far.
+
+```js
+const machineConfig ={
+  id:'signIn',
+  initial:'dataEntry',
+  states:{
+    dataEntry:{
+      on:{
+        ENTER_EMAIL:{},
+        ENTER_PASSWORD:{},
+        EMAIL_BLUR:{},
+        PASSWORD_BLUR:{},
+        SUBMIT:{
+          target:'awaitingResponse',
+        },
+      },
+    },
+    awaitingResponse:{},
+    emailErr:{
+      on:{
+        ENTER_EMAIL:{
+          target:'dataEntry',
+        },
+      },
+    },
+    passwordErr:{
+      on:{
+        ENTER_PASSWORD:{
+          target:'dataEntry',
+        },
+      },
+    },
+    serviceErr:{
+      on:{
+        SUBMIT:{
+          target:'awaitingResponse',
+        },
+      },
+    },
+    signedIn:{},
+  },};
+  exportdefault machineConfig;
+```
+
+![](https://i1.wp.com/res.cloudinary.com/css-tricks/image/upload/v1548112722/s_24AD0D577DEF92AA37A76FC5744753D49AF15464EA3D38F1AA80DEAF095489D4_1544946919704_Screenshot2018-12-16at18.55.02_rrwd2l.png?ssl=1)
+
+![](https://i1.wp.com/res.cloudinary.com/css-tricks/image/upload/v1548112722/s_24AD0D577DEF92AA37A76FC5744753D49AF15464EA3D38F1AA80DEAF095489D4_1544946919704_Screenshot2018-12-16at18.55.02_rrwd2l.png?ssl=1)
+
+#### 3. Context
+
+We need a way to save what the user enters into the input fields. We can do that in XState with context, which is an object within the machine that enables us to store data. So, we’ll need to define that in our file as well.
+
+Email and password are both empty strings by default. When the user enters their email or password, this is where we’ll store it.
+
+```js
+const machineConfig ={
+  id:'signIn',
+  context:{
+    email:'',
+    password:'',
+  },
+  ...
+```
+
+#### Hierarchical States
+
+We will need a way to be more specific about our errors. Instead of simply telling the user there is an email error, we need to tell them what kind of error happened. Perhaps it’s email with the wrong format or there is no account linked to the entered email — we should let the user know so there’s no guessing. This is where we can use hierarchical states which are essentially state machines within state machines. So, instead of having a `emailErr` state, we can add sub-states, such as `emailErr.badFormat` or `emailErr.noAccount`.
+
+For the `emailErr` state, we have defined two sub-states: `badFormat` and `noAccount`. This means the machine can no longer only be in the `emailErr` state; it would be either in the `emailErr.badFormat` state or the `emailErr.noAccount` state and having them parsed out allows us to provide more context to the user in the form of unique messaging in each sub-state.
+
+```js
+const machineConfig ={
+  ...
+  states:{
+    ...
+    emailErr:{
+      on:{
+        ENTER_EMAIL:{
+          target:'dataEntry',
+        },
+      },
+      initial:'badFormat',
+      states:{
+        badFormat:{},
+        noAccount:{},
+      },
+    },
+    passwordErr:{
+      on:{
+        ENTER_PASSWORD:{
+          target:'dataEntry',
+        },
+      },
+      initial:'tooShort',
+      states:{
+        tooShort:{},
+        incorrect:{},
+      },
+    },
+    ...
+```
+
+![](https://i1.wp.com/res.cloudinary.com/css-tricks/image/upload/v1548112747/s_24AD0D577DEF92AA37A76FC5744753D49AF15464EA3D38F1AA80DEAF095489D4_1544947120112_Screenshot2018-12-16at18.58.29_wklgqo.png?ssl=1)
+
+![](https://i1.wp.com/res.cloudinary.com/css-tricks/image/upload/v1548112747/s_24AD0D577DEF92AA37A76FC5744753D49AF15464EA3D38F1AA80DEAF095489D4_1544947120112_Screenshot2018-12-16at18.58.29_wklgqo.png?ssl=1)
+
+#### 5. Guards
+
+When the user blurs an input or clicks submit, we need to check if the email and/or password are valid. If even one of those values is in a bad format, we need to prompt the user to change it. Guards allows us to transition to a state depending on those types of conditions.
+
+Here, we’re using the `EMAIL_BLUR` transition to change the state to `emailErr.badFormat` only if the condition `isBadEmailFormat` returns true. We are doing a similar thing to `PASSWORD_BLUR`.
+
+We’re also changing the `SUBMIT` transition’s value to an array of objects with a target and condition property. When the `SUBMIT` transition is triggered, the machine will go through each of the conditions, from first to last, and change the state of the first condition that returns true. For example, if `isBadEmailFormat` returns true, the machine will change to state `emailErr.badFormat`. However, if `isBadEmailFormat` returns false, the machine will move to the next condition statement and check if it returns true.
+
+```js
+const machineConfig ={
+  ...
+  states:{
+    ...
+    dataEntry:{
+      ...
+      on:{
+        EMAIL_BLUR:{
+          cond:'isBadEmailFormat',
+          target:'emailErr.badFormat'
+        },
+        PASSWORD_BLUR:{
+          cond:'isPasswordShort',
+          target:'passwordErr.tooShort'
+        },
+        SUBMIT:[
+          {
+            cond:'isBadEmailFormat',
+            target:'emailErr.badFormat'
+          },
+          {
+            cond:'isPasswordShort',
+            target:'passwordErr.tooShort'
+          },
+          {
+            target:'awaitingResponse'
+          }
+        ],
+      ...
+```
+
+![](https://i2.wp.com/res.cloudinary.com/css-tricks/image/upload/v1548112768/s_24AD0D577DEF92AA37A76FC5744753D49AF15464EA3D38F1AA80DEAF095489D4_1544947223265_Screenshot2018-12-16at19.00.15_dbkbcz.png?ssl=1)
+
+![](https://i2.wp.com/res.cloudinary.com/css-tricks/image/upload/v1548112768/s_24AD0D577DEF92AA37A76FC5744753D49AF15464EA3D38F1AA80DEAF095489D4_1544947223265_Screenshot2018-12-16at19.00.15_dbkbcz.png?ssl=1)
+
+#### 6. Invoke
+
+All of the work we’ve done so far would be for nought if we didn’t make a request to an authentication service. The result of what’s entered and submitted to the form will inform many of the states we defined. So, invoking that request should result in one of two states:
+
+- Transition to the `signedIn` state if it returns successfully, or
+- transition to one of our error states if it fails.
+
+The invoke method allows us to declare a promise and transition to different states, depending on what that promise returns. The `src` property takes a function that has two parameters: `context` and `event` (but we’re only using `context` here). We return a promise (our authentication request) with the values of email and password from the context. If the promise returns successfully, we will transition to the state defined in the `onDone` property. If an error is returned, we will transition to the state defined in the `onError` property.
+
+```js
+const machineConfig ={
+  ...
+  states:{
+    ...
+    // We’re in a state of waiting for a response
+    awaitingResponse:{
+      // Make a call to the authentication service
+      invoke:{
+        src:'requestSignIn',
+        // If successful, move to the signedIn state
+        onDone:{
+          target:'signedIn'
+        },
+        // If email input is unsuccessful, move to the emailErr.noAccount sub-state
+        onError:[
+          {
+            cond:'isNoAccount',
+            target:'emailErr.noAccount'
+          },
+          {
+            // If password input is unsuccessful, move to the passwordErr.incorrect sub-state
+            cond:'isIncorrectPassword',
+            target:'passwordErr.incorrect'
+          },
+          {
+            // If the service itself cannot be reached, move to the serviceErr state
+            cond:'isServiceErr',
+            target:'serviceErr'
+          }
+        ]
+      },
+    },
+    ...
+```
+
+![](https://i0.wp.com/res.cloudinary.com/css-tricks/image/upload/v1548112791/s_24AD0D577DEF92AA37A76FC5744753D49AF15464EA3D38F1AA80DEAF095489D4_1544947277997_Screenshot2018-12-16at19.01.09_ya87ru.png?ssl=1)
+
+![](https://i0.wp.com/res.cloudinary.com/css-tricks/image/upload/v1548112791/s_24AD0D577DEF92AA37A76FC5744753D49AF15464EA3D38F1AA80DEAF095489D4_1544947277997_Screenshot2018-12-16at19.01.09_ya87ru.png?ssl=1)
+
+#### 7. Actions
+
+We need a way to save what the user enters into the email and password fields. Actions enable side effects to be triggered when a transition occurs. Below, we have defined an action (`cacheEmail`) within the `ENTER_EMAIL` transition of the `dataEntry` state. This means if the machine is in `dataEntry` and the transition `ENTER_EMAIL` is triggered, the action `cacheEmail` will also be triggered.
+
+```js
+const machineConfig ={
+  ...
+  states:{
+    ...
+    // On submit, target the two fields
+    dataEntry:{
+      on:{
+        ENTER_EMAIL:{
+          actions:'cacheEmail'
+        },
+        ENTER_PASSWORD:{
+          actions:'cachePassword'
+        },
+      },
+      ...
+    },
+    // If there’s an email error on that field, trigger email cache action
+    emailErr:{
+      on:{
+        ENTER_EMAIL:{
+          actions:'cacheEmail',
+          ...
+        }
+      }
+    },
+    // If there’s a password error on that field, trigger password cache action
+    passwordErr:{
+      on:{
+        ENTER_PASSWORD:{
+          actions:'cachePassword',
+          ...
+        }
+      }
+    },
+    ...
+```
+
+![](https://i1.wp.com/res.cloudinary.com/css-tricks/image/upload/v1548112816/s_24AD0D577DEF92AA37A76FC5744753D49AF15464EA3D38F1AA80DEAF095489D4_1544947350735_Screenshot2018-12-16at19.02.15_ohiuyz.png?ssl=1)
+
+![](https://i1.wp.com/res.cloudinary.com/css-tricks/image/upload/v1548112816/s_24AD0D577DEF92AA37A76FC5744753D49AF15464EA3D38F1AA80DEAF095489D4_1544947350735_Screenshot2018-12-16at19.02.15_ohiuyz.png?ssl=1)
+
+#### 8. Final State
+
+We need to way to indicate if the user has successfully authenticated and, depending on the result, trigger the next stage of the user journey. Two things are required for this:
+
+- We declare that one of the states is the final state, and
+- define an `onDone` property that can trigger actions when that final state is reached.
+
+Within the `signedIn` state, we add `type: final`. We also add an `onDone` property with action `onAuthentication`. Now, when the state `signedIn` is reached, the action `onAuthentication` will be triggered and the machine will be _done_ (no longer executable).
+
+```js
+const machineConfig ={
+  ...
+  states:{
+    ...
+    signedIn:{
+      type:'final'
+    },
+    onDone:{
+      actions:'onAuthentication'
+    },
+    ...
+```
+
+![](https://i2.wp.com/res.cloudinary.com/css-tricks/image/upload/v1548112838/s_24AD0D577DEF92AA37A76FC5744753D49AF15464EA3D38F1AA80DEAF095489D4_1544947399353_Screenshot2018-12-16at19.03.11_jfqwsc.png?ssl=1)
+
+![](https://i2.wp.com/res.cloudinary.com/css-tricks/image/upload/v1548112838/s_24AD0D577DEF92AA37A76FC5744753D49AF15464EA3D38F1AA80DEAF095489D4_1544947399353_Screenshot2018-12-16at19.03.11_jfqwsc.png?ssl=1)
+
+#### 9. Test
+
+A great feature of XState is that the machine configuration is completely independent of the actual implementation. This means we can test it now and get confidence with what we’ve made before connecting it to the UI and backend service. We can copy and paste the machine config file into XState’s [visualizer](https://statecharts.github.io/xstate-viz/) and get a auto-generated statechart diagram that not only outlines all the defined states with arrows that illustrate how they’re all connected, but allows us to interact with the chart as well. This is built-in testing!
+
+![](https://i1.wp.com/css-tricks.com/wp-content/uploads/2019/01/s_24AD0D577DEF92AA37A76FC5744753D49AF15464EA3D38F1AA80DEAF095489D4_1543554645569_Nov-30-201816-09-34.gif?ssl=1)
+
+![](https://i1.wp.com/css-tricks.com/wp-content/uploads/2019/01/s_24AD0D577DEF92AA37A76FC5744753D49AF15464EA3D38F1AA80DEAF095489D4_1543554645569_Nov-30-201816-09-34.gif?ssl=1)
+
+### Connecting the machine to a React component
+
+Now that we’ve written our statechart, it’s time to connect it to our UI and backend service. An XState machine options object allows us to map strings we declared in the config to functions.
+
+We’ll begin by defining a React class component with three refs:
+
+```js
+// SignIn/index.jsx
+import React, {
+  Component,
+  createRef,
+} from "react";
+class SignInextendsComponent {
+  emailInputRef = createRef();
+  passwordInputRef = createRef();
+  submitBtnRef = createRef();
+
+  render() {
+    returnnull;
+  }
+}
+export default SignIn;
+```
+
+### Map out the actions
+
+We declared the following actions in our machine config:
+
+- `focusEmailInput`
+- `focusPasswordInput`
+- `focusSubmitBtn`
+- `cacheEmail`
+- `cachePassword`
+- `onAuthentication`
+
+Actions are mapped in the machine config’s `actions` property. Each function takes two arguments: context (`ctx`) and event (`evt`).
+
+`focusEmailInput` and `focusPasswordInput` are pretty straightforward, however, there is a bug. These elements are being focused when coming from a disabled state. The function to focus these elements is firing right before the elements are re-enabled. The `delay` function gets around that.
+
+`cacheEmail` and `cachePassword` need to update the context. To do this, we use the _assign_ function (provided by XState). Whatever is returned by the assign function is added to our context. In our case, it is reading the input’s value from the event object and then adding that value to the context’s email or password. From there `property.assign` is added to the context. Again, in our case, it is reading the input’s value from the event object and adding that value to the context’s email or password property.
+
+```js
+// SignIn/index.jsx
+import{ actions }from'xstate'
+const { assign } = actions
+
+const delay=func=>setTimeout(()=>func())
+class SignInextendsComponent{
+  ...
+  machineOptions ={
+    actions:{
+      focusEmailInput:()=>{
+        delay(this.emailInputRef.current.focus())
+      },
+      focusPasswordInput:()=>{
+        delay(this.passwordInputRef.current.focus())
+      },
+      focusSubmitBtn:()=>{
+        delay(this.submitBtnRef.current.focus())
+      },
+      cacheEmail:assign((ctx, evt)=>({
+        email: evt.value
+      })),
+      cachePassword:assign((ctx, evt)=>({
+        password: evt.value
+      })),
+      // We’ll log a note in the console to confirm authentication
+      onAuthentication:()=>{
+        console.log('user authenticated')
+      }
+    },
+  }}
+```
+
+### Put up our guards
+
+We declared the following guards in our machine config:
+
+- `isBadEmailFormat`
+- `isPasswordShort`
+- `isNoAccount`
+- `isIncorrectPassword`
+- `isServiceErr`
+
+Guards are mapped in the machine configuration’s `guards` property. The `isBadEmailFormat` and `isPasswordShort` guards make use of the `context` to read the email and password entered by the user then pass them on to the appropriate functions. `isNowAccount`,`isIncorrectPassword` and `isServiceErr` make use of the event object to read what kind of error was returned from the call to the authentication service.
+
+```js
+// isPasswordShort.js
+const isPasswordShort = (password) =>
+  password.length < 6;
+export default isPasswordShort;
+```
+
+```js
+// SignIn/index.jsx
+import { isEmail }from'validator'
+import isPasswordShort from'./isPasswordShort'
+class SignInextendsComponent {
+  ...
+  machineOptions ={
+    ...
+    guards:{
+      isBadEmailFormat:ctx=>!isEmail(ctx.email),
+      isPasswordShort:ctx=>isPasswordShort(ctx.password),
+      isNoAccount:(ctx, evt)=> evt.data.code ===1,
+      isIncorrectPassword:(ctx, evt)=> evt.data.code ===2,
+      isServiceErr:(ctx, evt)=> evt.data.code ===3
+    },
+  },
+  ...}
+```
+
+### Hook up the services
+
+We declared the following service in our machine configuration (within our `invoke` definition): `requestSignIn`.
+
+Services are mapped in the machine configuration’s `services` property. In this case, the function is a promise and is passed to the email password from the _context_.
+
+```js
+// contactAuthService.js
+// error code 1 - no account
+// error code 2 - wrong password
+// error code 3 - no response
+const isSuccess = () =>
+  Math.random() >= 0.8;
+const generateErrCode = () =>
+  Math.floor(Math.random() * 3) + 1;
+const contactAuthService = (
+  email,
+  password
+) =>
+  new Promise((resolve, reject) => {
+    console.log(`email: ${email}`);
+    console.log(
+      `password: ${password}`
+    );
+    setTimeout(() => {
+      if (isSuccess()) resolve();
+      reject({
+        code: generateErrCode(),
+      });
+    }, 1500);
+  });
+export default contactAuthService;
+```
+
+```js
+// SignIn/index.jsx
+import contactAuthService from'./contactAuthService.js'
+class SignInextendsComponent{
+  ...
+  machineOptions ={
+    ...
+    services:{
+      requestSignIn:ctx=>contactAuthService(ctx.email, ctx.password)
+    }
+  },
+  ...}
+```
+
+### react-xstate-js connects React and XState
+
+Now that we have our machine config and options at the ready, we can create the actual machine! In order to use XState in a _real world_ scenario, that requires an interpreter. [react-xstate-js](https://github.com/bradwoods/react-xstate-js) is an interpreter that connects React with XState using the render props approach. (Full disclosure, I developed this library.) It takes two props — `config` and `options` — and returns an XState `service` and `state` object.
+
+```js
+// SignIn/index.jsx
+...import{ Machine }from'react-xstate-js'
+import machineConfig from'./machineConfig'
+class SignInextendsComponent{
+  ...
+  render(){
+    <Machine config={machineConfig} options={this.machineOptions}>
+      {({ service, state })=>null}
+    </Machine>
+  }}
+```
+
+### Let’s make the UI!
+
+OK, we have a functional machine but the user needs to see the form in order to use it. That means it’s time to create the markup for the UI component. There are two things we need to do to communicate with our machine:
+
+#### 1. Read the state
+
+To determine what state we are in, we can use the state’s `matches` method and return a boolean. For example: `state.matches('dataEntry')`.
+
+#### 2. Fire a transition
+
+To fire a transition, we use the service’s `send` method. It takes an object with the transitions type we want to trigger as well as any other key and value pairs we want in the `evt` object. For example: `service.send({ type: 'SUBMIT' })`.
+
+```js
+// SignIn/index.jsx
+...import{
+  Form,
+  H1,
+  Label,
+  Recede,
+  Input,
+  ErrMsg,
+  Button,
+  Authenticated,
+  MetaWrapper,
+  Pre
+}from'./styles'
+class SignInextendsComponent{
+  ...
+  render(){
+    <Machine config={machineConfig} options={this.machineOptions}>
+      {({ service, state })=>{
+        const disableEmail =
+          state.matches('passwordErr')||
+          state.matches('awaitingResponse')||
+          state.matches('serviceErr')
+
+        const disablePassword =
+          state.matches('emailErr')||
+          state.matches('awaitingResponse')||
+          state.matches('serviceErr')
+
+        const disableSubmit =
+          state.matches('emailErr')||
+          state.matches('passwordErr')||
+          state.matches('awaitingResponse')
+
+        const fadeHeading =
+          state.matches('emailErr')||
+          state.matches('passwordErr')||
+          state.matches('awaitingResponse')||
+          state.matches('serviceErr')
+
+        return(
+          <Form
+            onSubmit={e=>{
+              e.preventDefault()
+              service.send({ type:'SUBMIT'})
+            }}
+            noValidate
+          >
+            <H1 fade={fadeHeading}>Welcome Back</H1>
+
+            <Label htmlFor="email" disabled={disableEmail}>
+              email
+            </Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="charlie@gmail.com"
+              onBlur={()=>{
+                service.send({ type:'EMAIL_BLUR'})
+              }}
+              value={state.context.email}
+              err={state.matches('emailErr')}
+              disabled={disableEmail}
+              onChange={e=>{
+                service.send({
+                  type:'ENTER_EMAIL',
+                  value:e.target.value
+                })
+              }}
+              ref={this.emailInputRef}
+              autoFocus
+            />
+            <ErrMsg>
+              {state.matches({ emailErr:'badFormat'})&&
+                "email format doesn't look right"}
+              {state.matches({ emailErr:'noAccount'})&&
+                'no account linked with this email'}
+            </ErrMsg>
+
+            <Label htmlFor="password" disabled={disablePassword}>
+              password <Recede>(min.6 characters)</Recede>
+            </Label>
+            <Input
+              id="password"
+              type="password"
+              placeholder="Passw0rd!"
+              value={state.context.password}
+              err={state.matches('passwordErr')}
+              disabled={disablePassword}
+              onBlur={()=>{
+                service.send({ type:'PASSWORD_BLUR'})
+              }}
+              onChange={e=>{
+                service.send({
+                  type:'ENTER_PASSWORD',
+                  value:e.target.value
+                })
+              }}
+              ref={this.passwordInputRef}
+            />
+            <ErrMsg>
+              {state.matches({ passwordErr:'tooShort'})&&
+                'password too short (min. 6 characters)'}
+              {state.matches({ passwordErr:'incorrect'})&&
+                'incorrect password'}
+            </ErrMsg>
+
+            <Button
+              type="submit"
+              disabled={disableSubmit}
+              loading={state.matches('awaitingResponse')}
+              ref={this.submitBtnRef}
+            >
+              {state.matches('awaitingResponse')&&(
+                <>
+                  loading
+                  <Loader />
+                </>
+              )}
+              {state.matches('serviceErr')&&'retry'}
+              {!state.matches('awaitingResponse')&&
+                !state.matches('serviceErr')&&
+                'sign in'
+              }
+            </Button>
+            <ErrMsg>
+              {state.matches('serviceErr')&&'problem contacting server'}
+            </ErrMsg>
+
+            {state.matches('signedIn')&&(
+              <Authenticated>
+                <H1>authenticated</H1>
+              </Authenticated>
+            )}
+          </Form>
+        )
+      }}
+    </Machine>
+  }}
+```
+
+### We have a form!
+
+And there you have it. A sign in form that has a great user experience controlled by XState. Not only were we able to create a form a user can interact with, we also put a lot of thought into the many states and types of interactions that’s need to be considered, which is a good exercise for any piece of functionality that would go into a component.
+
+Hit up the comments form if there’s something that doesn’t make sense or if there’s something else you think might need to be considered in the form. Would love to hear your thoughts!
+
+#### More resources
+
+- [XState Documentation](https://xstate.js.org/docs/)
+- [react-xstate-js Repository](https://github.com/bradwoods/react-xstate-js)
+- [Finite State Machine with React](https://css-tricks.com/finite-state-machines-with-react/) by Jon Bellah (great for next steps to level up our finite machine)

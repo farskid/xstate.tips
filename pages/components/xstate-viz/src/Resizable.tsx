@@ -1,5 +1,5 @@
 import { useMachine } from "@xstate/react";
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import { assign, createMachine } from "xstate";
 
 const resizeMachine = createMachine<
@@ -36,7 +36,7 @@ const resizeMachine = createMachine<
         mouseup: {
           target: "idle",
           actions: assign({
-            width: (ctx) => ctx.width + ctx.dx,
+            width: (ctx) => (ctx.width as number) + ctx.dx,
             dx: 0,
           }),
         },
@@ -76,7 +76,7 @@ export const Resizable: React.FC<{}> = ({ children, ...attrs }) => {
       <div
         data-xviz-resizable-handle="left"
         onMouseDown={(e) => {
-          send(e as MouseEvent);
+          send(e as any);
         }}
         style={{
           position: "absolute",

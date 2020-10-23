@@ -4,6 +4,7 @@ import { Inspector } from "../components/Inspector.jsx";
 import { useState } from "react";
 import { MachineViz } from "../components/xstate-viz/src/MachineViz";
 import { CodeSandbox } from "../components/embeds";
+import { StandaloneViz } from "../components/StandaloneViz";
 
 export const machine = Machine({
   initial: "a",
@@ -58,23 +59,9 @@ export const inputMachine = Machine({
 });
 
 export const TTT = () => {
-  const [current, send, service] = useMachine(inputMachine, { devtools: true });
-  console.log(service);
   return (
     <>
-      <h1>Here's a button, click it!</h1>
-      <p>
-        Available Events:{" "}
-        {current.nextEvents.map((event) => (
-          <button key={event} onClick={() => ({ currentState: send(event) })}>
-            {event}
-          </button>
-        ))}
-      </p>
-      <p>
-        State: <code>{current.value}</code>
-      </p>
-      <MachineViz machine={inputMachine} state={service.state} />
+      <StandaloneViz machine={inputMachine} />
     </>
   );
 };

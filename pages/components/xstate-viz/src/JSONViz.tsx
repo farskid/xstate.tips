@@ -83,7 +83,7 @@ export const JSONViz: React.FC<{
       <JSONPrimitiveViz
         valueKey={valueKey}
         path={path.concat(valueKey)}
-        value={value}
+        value={value as any}
         renderValue={renderValue}
       />
     );

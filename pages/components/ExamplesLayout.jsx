@@ -1,7 +1,8 @@
 import * as React from "react";
-import styled, { createGlobalStyle } from "styled-components";
+import styled, {
+  createGlobalStyle,
+} from "styled-components";
 import NextLink from "next/link";
-import cls from "classnames";
 
 const GlobalStyle = createGlobalStyle`
   body {
@@ -15,97 +16,116 @@ const Flex = styled.div`
   justify-content: center;
 `;
 
-const LayoutContainer = styled.div`
-  position: relative;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-`;
+const LayoutContainer = styled.div``;
 
 const LayoutSidebar = styled.aside`
-  display: block;
-  width: 20%;
-  min-width: 0;
-  flex: none;
-  max-height: 100vh;
-  overflow-y: auto;
-  padding-bottom: 2em;
+  border-right: 1px solid
+    rgb(36, 36, 36);
+  min-width: 320px;
+  display: flex;
+  flex-direction: column;
+  padding-top: 2em;
   position: sticky;
-  top: 0;
-
-  @media screen and (max-width: 48em) {
-    display: none;
-    max-height: none;
-    width: 100%;
-    position: relative;
-
-    &.open {
-      display: block;
-    }
-  }
+  top: 100px;
 `;
 
 const LayoutMain = styled.main`
-  min-height: 100vh;
   display: flex;
-  flex: 1 1 auto;
-  min-width: 0;
-
-  @media screen and (max-width: 48em) {
-    flex-direction: column;
-  }
+  flex-direction: row;
 `;
 const LayoutContent = styled.div`
-  min-width: 0;
-  width: 100%;
-  max-width: 64em;
+  position: relative;
+  max-width: 48em;
   margin-left: auto;
   margin-right: auto;
-  padding: 2em;
+  margin-top: 5em;
+  font-size: 1.25em;
 
-  @media screen and (max-width: 48em) {
-    flex-direction: column;
-    padding: 1em;
+  h1 {
+    font-size: 2.5em;
+    font-weight: 700;
+    line-height: normal;
+    color: inherit;
+  }
+
+  h2 {
+    font-size: 1.5em;
+    margin: 1em 0;
+  }
+
+  p,
+  ul {
+    color: rgb(200, 200, 200);
   }
 
   a {
-    color: blue;
+    color: #40a9f3;
   }
 
   iframe {
     display: block;
     margin: 1em auto;
   }
+
+  img {
+    max-width: 100%;
+    width: 100%;
+    background: rgb(36, 36, 36);
+    border: 1px solid rgb(36, 36, 36);
+  }
+
+  pre {
+    background: rgb(21, 21, 21);
+    border: 1px solid rgb(36, 36, 36);
+    padding: 1em;
+    border-radius: 0.25rem;
+    margin: 2rem 0px 4rem;
+    line-height: 1.5;
+    font-feature-settings: normal;
+    font-size: 1em;
+  }
+
+  code {
+    background: rgb(21, 21, 21);
+    padding: 0.25em 0.5em;
+    font-size: 85%;
+    margin: 0;
+    border-radius: 0.25em;
+    line-height: 1.45em;
+    font-family: source-code-pro, Menlo,
+      Monaco, Consolas, "Courier New",
+      monospace;
+  }
+
+  pre code {
+    background-color: transparent;
+  }
 `;
 
-const LayoutHeader = styled(Flex)`
-  justify-content: space-between;
-  padding: 1em;
+const LayoutHeader = styled.div`
+  box-shadow: rgb(36, 36, 36) 0px 1px
+    0px;
+  height: 3em;
+  width: 100%;
+  background: rgb(4, 4, 4);
 `;
-const Logo = styled.div`
-  width: 2em;
-  height: 2em;
-  border: 1px solid;
-`;
+
 const SearchInput = styled.input`
-  display: inline-block;
-  border: 1px solid;
-  border-radius: 0.25em;
-  padding: 0.25em 0.5em;
-
-  @media screen and (min-width: 48em) {
-    width: 15em;
-  }
-
-  &:focus {
-    outline-color: blue;
-  }
+  background: rgb(36, 36, 36);
+  height: 2em;
+  line-height: 1.5em;
+  margin-right: 1.5em;
+  padding: 0.5em 0.5em 0.5em 1.5em;
+  width: 320px;
+  color: rgb(255, 255, 255);
+  border: 1px solid rgb(52, 52, 52);
+  border-radius: 2px;
 `;
 const LinksList = styled.ul`
   padding: 0;
-  margin: 0;
-  display: flex;
   list-style: none;
+  display: flex;
+  align-items: baseline;
 `;
 const MenuLink = styled.li``;
 const List = styled.ul`
@@ -118,103 +138,95 @@ const ListItem = styled.li`
     padding: 0 1em;
     display: block;
     font-weight: 500;
-    color: #444;
-    font-size: 0.8em;
+    text-transform: capitalize;
+    color: rgb(153, 153, 153);
 
     &:hover {
-      color: blue;
+      color: #fff;
     }
   }
 `;
 
-const MenuTriggerButton = styled.button`
-  display: none;
-  background: none;
-  border: none;
-  width: 3em;
-  height: 3em;
-  padding: 0;
-
-  &:focus {
-    outline: 1px solid;
-  }
-
-  @media (max-width: 48em) {
-    display: block;
-  }
-
-  svg {
-    width: 3em;
-    display: block;
-  }
+const HeaderNav = styled.nav`
+  padding: 0px 1em;
+  margin: auto;
+  display: flex;
+  height: 100%;
+  align-items: center;
+  justify-content: space-between;
 `;
 
-export function ExamplesLayout({ children, examples = [] }) {
-  const [isMenuOpen, setMenuOpenState] = React.useState(false);
+const HeaderNavContent = styled.div`
+  display: flex;
+  align-items: center;
+  width: calc(100vw - 2em);
+  justify-content: space-between;
+`;
 
+export function ExamplesLayout({
+  children,
+  examples = [],
+}) {
   return (
     <LayoutContainer>
       <GlobalStyle />
-      <LayoutHeader as="header" className="spacing-horizontal">
-        <Flex className="spacing-horizontal">
-          <Logo />
-          <form>
-            <SearchInput placeholder="🔎 Search" />
-          </form>
-        </Flex>
-        <Flex className="spacing-horizontal">
-          <LinksList className="spacing-horizontal">
-            <MenuLink>
-              <a href="#" target="_blank">
-                Link
-              </a>
-            </MenuLink>
-            <MenuLink className="hidden-mobile">
-              <a href="#" target="_blank">
-                Link
-              </a>
-            </MenuLink>
-            <MenuLink className="hidden-mobile">
-              <a href="#" target="_blank">
-                Link
-              </a>
-            </MenuLink>
-          </LinksList>
-          <MenuTriggerButton
-            id="menu-trigger"
-            onFocus={() => {
-              setMenuOpenState(true);
-            }}
-            onBlur={() => {
-              setMenuOpenState(false);
-            }}
-          >
-            <svg viewBox="0 0 35 35" width="20" height="20">
-              <rect width="35" height="5"></rect>
-              <rect y="15" width="35" height="5"></rect>
-              <rect y="30" width="35" height="5"></rect>
-            </svg>
-          </MenuTriggerButton>
-        </Flex>
+      <LayoutHeader
+        as="header"
+        className="spacing-horizontal"
+      >
+        <HeaderNav>
+          <HeaderNavContent>
+            <Flex className="spacing-horizontal">
+              <LinksList className="spacing-horizontal">
+                <MenuLink>
+                  <a href="https://xstate.tips">
+                    <span
+                      style={{
+                        fontSize:
+                          "1.5em",
+                      }}
+                    >
+                      XState.tips
+                    </span>
+                  </a>
+                </MenuLink>
+                <MenuLink>
+                  <a
+                    href="https://github.com/farskid/xstate.tips"
+                    target="_blank"
+                  >
+                    Github
+                  </a>
+                </MenuLink>
+              </LinksList>
+            </Flex>
+            <Flex>
+              <form>
+                <SearchInput placeholder="Search" />
+              </form>
+            </Flex>
+          </HeaderNavContent>
+        </HeaderNav>
       </LayoutHeader>
       <LayoutMain>
-        <LayoutSidebar
-          id="sidebar"
-          className={cls({
-            open: isMenuOpen,
-          })}
-        >
+        <LayoutSidebar>
           <List className="spacing-vertical">
-            {examples.map((ex, index) => (
-              <ListItem key={index}>
-                <NextLink href={`/example/${ex}`}>
-                  <a>{ex}</a>
-                </NextLink>
-              </ListItem>
-            ))}
+            {examples.map(
+              (ex, index) => (
+                <ListItem key={index}>
+                  <NextLink
+                    href={`/example/${ex.slug}`}
+                  >
+                    <a>{ex.title}</a>
+                  </NextLink>
+                </ListItem>
+              )
+            )}
           </List>
         </LayoutSidebar>
-        <LayoutContent>{children}</LayoutContent>
+        <LayoutContent>
+          {children}
+        </LayoutContent>
       </LayoutMain>
     </LayoutContainer>
   );

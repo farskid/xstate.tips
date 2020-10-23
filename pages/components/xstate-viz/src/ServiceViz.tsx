@@ -1,6 +1,6 @@
-import * as React from 'react';
-import { Interpreter, State } from 'xstate';
-import { MachineViz } from './MachineViz';
+import * as React from "react";
+import { Interpreter, State } from "xstate";
+import { MachineViz } from "./MachineViz";
 
 export function ServiceViz({ service }: { service: Interpreter<any, any> }) {
   const [state, setState] = React.useState<State<any, any>>(service.state);

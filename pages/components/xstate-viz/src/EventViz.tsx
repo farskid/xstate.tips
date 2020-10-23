@@ -127,6 +127,7 @@ export function EventViz({ transition, index }: EventVizProps) {
       data-xviz-triggered={triggered || undefined}
       data-xviz-active={active || undefined}
       title={`event: ${transition.eventType} → #${eventTarget.id}`}
+      style={{ cursor: "pointer" }}
       onClick={(e) => {
         e.stopPropagation();
         service.send({

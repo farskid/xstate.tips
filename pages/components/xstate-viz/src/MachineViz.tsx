@@ -75,7 +75,7 @@ interface MachineVizProps {
   onEventTap?: (data: EventTapEvent) => void;
   onCanvasTap?: () => void;
   style?: React.CSSProperties;
-  mode: "read" | "play";
+  mode?: "read" | "play";
   selection?: Array<string | StateNode>;
 }
 
@@ -92,8 +92,8 @@ export function useConstant<T>(fn: () => T): T {
 const EventPopover: React.FC<{
   data: EventTapEvent;
   onSubmit: (data: EventObject) => void;
-  onClickAddData: () => void;
-}> = ({ data, onClickAddData, children }) => {
+  onClickAddData?: () => void;
+}> = ({ data, onClickAddData = () => {}, children }) => {
   const [rawData, setRawData] = useState("{}");
   return (
     <Popover
@@ -120,6 +120,11 @@ const MachineVizContainer: React.FC<MachineVizProps> = ({
   const canvasService = useConstant(() => interpret(canvasMachine).start());
   const { service, tracker } = React.useContext(StateContext);
   const ref = useTracking(`machine:${machine.id}`);
+  const vizRef = React.useRef<HTMLDivElement>(null!);
+  const [vizRefDimensions, setVizRefDimensions] = React.useState({
+    width: 1,
+    height: 1,
+  });
   const groupRef = React.useRef<SVGGElement | null>(null);
   const [
     measurements,
@@ -129,7 +134,7 @@ const MachineVizContainer: React.FC<MachineVizProps> = ({
   // console.log({ service, machineVizState });
   const popoverData = (machineVizState || service.initialState).context.popover;
 
-  React.useLayoutEffect(() => {
+  React.useEffect(() => {
     canvasService.subscribe(({ context }) => {
       if (!groupRef.current) {
         return;
@@ -148,8 +153,20 @@ const MachineVizContainer: React.FC<MachineVizProps> = ({
   }, [machine]);
 
   React.useEffect(() => {
+    console.log("=========================", vizRef.current);
+
+    if (vizRef.current) {
+      const { width, height } = vizRef.current.getBoundingClientRect();
+      console.log(width, height);
+      setVizRefDimensions({ width, height });
+    }
+  }, [vizRef.current]);
+
+  React.useEffect(() => {
     tracker.updateAll();
   }, [machine]);
+
+  console.log(measurements);
 
   return (
     <div
@@ -167,9 +184,10 @@ const MachineVizContainer: React.FC<MachineVizProps> = ({
         "--xviz-zoom": 1,
         ...style,
       }}
-      onWheel={(e) => {
-        canvasService.send(e);
-      }}
+      // onWheel={(e) => {
+      //   console.log(e);
+      //   canvasService.send(e);
+      // }}
     >
       {!measurements && (
         <MachineMeasure
@@ -211,10 +229,14 @@ const MachineVizContainer: React.FC<MachineVizProps> = ({
               data-xviz="machine-foreignObject"
               x={0}
               y={0}
-              width={1000}
-              height={1000}
+              width={vizRefDimensions.width}
+              height={vizRefDimensions.height}
             >
-              <div data-xviz="machine" title={`machine: #${machine.id}`}>
+              <div
+                ref={vizRef}
+                data-xviz="machine"
+                title={`machine: #${machine.id}`}
+              >
                 <StateNodeViz stateNode={machine} />
               </div>
               <div data-xviz="popovers">
@@ -273,6 +295,9 @@ export function MachineViz({
       canvasTapped: () => onCanvasTap?.(),
     },
   });
+  React.useEffect(() => {
+    service.onEvent(console.log);
+  }, []);
   const tracker = React.useMemo(() => new Tracker(), []);
 
   const selectionNodes = selection.map((sn) => {
