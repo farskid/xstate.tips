@@ -25,8 +25,6 @@ const LayoutSidebar = styled.aside`
   display: flex;
   flex-direction: column;
   padding-top: 2em;
-  position: sticky;
-  top: 100px;
 `;
 
 const LayoutMain = styled.main`
@@ -132,6 +130,8 @@ const List = styled.ul`
   list-style: none;
   padding: 1em 0;
   margin: 0;
+  position: sticky;
+  top: 2em;
 `;
 const ListItem = styled.li`
   a {
