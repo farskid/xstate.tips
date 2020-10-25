@@ -13,10 +13,7 @@ const mdxComponents = {
   pre: (props) => props.children,
   code: (props) => {
     const { className = "" } = props;
-    const language = className.replace(
-      "language-",
-      ""
-    );
+    const language = className.replace("language-", "");
     return (
       <SyntaxHighlighter
         className={className}
@@ -28,41 +25,20 @@ const mdxComponents = {
   },
 };
 
+// For now, we only have examples layout but this scales to adding new layouts dynamically for future cases.
 const getLayout = (route) => {
   return ExamplesLayout;
-  if (route.includes("/example")) {
-    return ExamplesLayout;
-  }
-
-  return <div />;
 };
 
-function MyApp({
-  Component,
-  pageProps,
-}) {
+function MyApp({ Component, pageProps }) {
   const router = useRouter();
-  const Layout = getLayout(
-    router.route
-  );
-  const response = useSWR(
-    "/api/example",
-    {
-      fetcher: (...args) =>
-        fetch(...args).then((r) =>
-          r.json()
-        ),
-    }
-  );
+  const Layout = getLayout(router.route);
+  const response = useSWR("/api/example", {
+    fetcher: (...args) => fetch(...args).then((r) => r.json()),
+  });
   return (
-    <MDXProvider
-      components={mdxComponents}
-    >
-      <Layout
-        examples={
-          response?.data?.examples
-        }
-      >
+    <MDXProvider components={mdxComponents}>
+      <Layout examples={response?.data?.examples}>
         <Component {...pageProps} />
       </Layout>
     </MDXProvider>
