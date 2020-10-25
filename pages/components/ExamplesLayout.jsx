@@ -129,6 +129,19 @@ const LayoutContent = styled.div`
     padding: 0;
     font-size: 100%;
   }
+
+  blockquote {
+    background-color: rgb(220, 207, 143);
+    padding: 0 1em;
+    margin: 0 auto;
+    font-weight: 700;
+    border-left: 0.5em solid rgb(136 126 81);
+
+    * {
+      color: #222;
+      margin: 0 auto;
+    }
+  }
 `;
 
 const LayoutHeader = styled.div`
@@ -249,7 +262,7 @@ const DesktopList = styled.nav`
   }
 `;
 
-export function ExamplesLayout({ children, examples = [] }) {
+export function ExamplesLayout({ children, examples }) {
   const router = useRouter();
   const mobileMenu = React.useRef();
   // Close mobile menu after page changes
@@ -304,30 +317,10 @@ export function ExamplesLayout({ children, examples = [] }) {
         <LayoutSidebar>
           <DesktopList>
             <List>
-              {examples.map((ex, index) => (
-                <ListItem key={index}>
-                  <NextLink href={`/example/${ex.slug}`}>
-                    <a
-                      className={
-                        router.pathname.split("/").pop() === ex.slug
-                          ? "current"
-                          : ""
-                      }
-                    >
-                      {ex.title}
-                    </a>
-                  </NextLink>
-                </ListItem>
-              ))}
-            </List>
-          </DesktopList>
-          <MobileList>
-            <details ref={mobileMenu}>
-              <summary>All tips</summary>
-              <List>
-                {examples.map((ex, index) => (
+              {examples.length > 0 &&
+                examples.map((ex, index) => (
                   <ListItem key={index}>
-                    <NextLink href={`/example/${ex.slug}`}>
+                    <NextLink href={ex.href}>
                       <a
                         className={
                           router.pathname.split("/").pop() === ex.slug
@@ -340,6 +333,28 @@ export function ExamplesLayout({ children, examples = [] }) {
                     </NextLink>
                   </ListItem>
                 ))}
+            </List>
+          </DesktopList>
+          <MobileList>
+            <details ref={mobileMenu}>
+              <summary>All tips</summary>
+              <List>
+                {examples.length > 0 &&
+                  examples.map((ex, index) => (
+                    <ListItem key={index}>
+                      <NextLink href={ex.href}>
+                        <a
+                          className={
+                            router.pathname.split("/").pop() === ex.slug
+                              ? "current"
+                              : ""
+                          }
+                        >
+                          {ex.title}
+                        </a>
+                      </NextLink>
+                    </ListItem>
+                  ))}
               </List>
             </details>
           </MobileList>
@@ -348,10 +363,4 @@ export function ExamplesLayout({ children, examples = [] }) {
       </LayoutMain>
     </LayoutContainer>
   );
-}
-
-function repeat(array, times) {
-  return Array(times)
-    .fill()
-    .reduce((total) => total.concat(array), []);
 }

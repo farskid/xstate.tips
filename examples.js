@@ -11,6 +11,7 @@ module.exports.getAllExamples = function getAllExamples() {
     .map((ex) => path.basename(ex, path.extname(ex)))
     .map((ex) => ({
       slug: ex,
+      href: path.join("/example/", ex),
       title: slugToTitle(ex),
     }));
 };

@@ -120,11 +120,6 @@ const MachineVizContainer: React.FC<MachineVizProps> = ({
   const canvasService = useConstant(() => interpret(canvasMachine).start());
   const { service, tracker } = React.useContext(StateContext);
   const ref = useTracking(`machine:${machine.id}`);
-  const vizRef = React.useRef<HTMLDivElement>(null!);
-  const [vizRefDimensions, setVizRefDimensions] = React.useState({
-    width: 1,
-    height: 1,
-  });
   const groupRef = React.useRef<SVGGElement | null>(null);
   const [
     measurements,
@@ -134,7 +129,7 @@ const MachineVizContainer: React.FC<MachineVizProps> = ({
   // console.log({ service, machineVizState });
   const popoverData = (machineVizState || service.initialState).context.popover;
 
-  React.useEffect(() => {
+  React.useLayoutEffect(() => {
     canvasService.subscribe(({ context }) => {
       if (!groupRef.current) {
         return;
@@ -153,20 +148,8 @@ const MachineVizContainer: React.FC<MachineVizProps> = ({
   }, [machine]);
 
   React.useEffect(() => {
-    console.log("=========================", vizRef.current);
-
-    if (vizRef.current) {
-      const { width, height } = vizRef.current.getBoundingClientRect();
-      console.log(width, height);
-      setVizRefDimensions({ width, height });
-    }
-  }, [vizRef.current]);
-
-  React.useEffect(() => {
     tracker.updateAll();
   }, [machine]);
-
-  console.log(measurements);
 
   return (
     <div
@@ -185,7 +168,6 @@ const MachineVizContainer: React.FC<MachineVizProps> = ({
         ...style,
       }}
       // onWheel={(e) => {
-      //   console.log(e);
       //   canvasService.send(e);
       // }}
     >
@@ -229,14 +211,10 @@ const MachineVizContainer: React.FC<MachineVizProps> = ({
               data-xviz="machine-foreignObject"
               x={0}
               y={0}
-              width={vizRefDimensions.width}
-              height={vizRefDimensions.height}
+              width={1000}
+              height={1000}
             >
-              <div
-                ref={vizRef}
-                data-xviz="machine"
-                title={`machine: #${machine.id}`}
-              >
+              <div data-xviz="machine" title={`machine: #${machine.id}`}>
                 <StateNodeViz stateNode={machine} />
               </div>
               <div data-xviz="popovers">
@@ -295,9 +273,6 @@ export function MachineViz({
       canvasTapped: () => onCanvasTap?.(),
     },
   });
-  React.useEffect(() => {
-    service.onEvent(console.log);
-  }, []);
   const tracker = React.useMemo(() => new Tracker(), []);
 
   const selectionNodes = selection.map((sn) => {

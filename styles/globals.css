@@ -33,11 +33,6 @@ a {
   box-sizing: border-box;
 }
 
-foreignObject {
-  height: auto;
-  width: auto;
-}
-
 .spacing-vertical > * {
   margin-top: 0;
   margin-bottom: 0;

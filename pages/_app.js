@@ -36,9 +36,20 @@ function MyApp({ Component, pageProps }) {
   const response = useSWR("/api/example", {
     fetcher: (...args) => fetch(...args).then((r) => r.json()),
   });
+  const pagesList = React.useMemo(
+    () =>
+      [
+        {
+          slug: "contributing",
+          href: "/contributing",
+          title: "Contributing Guide",
+        },
+      ].concat(response?.data?.examples || []),
+    [response.data]
+  );
   return (
     <MDXProvider components={mdxComponents}>
-      <Layout examples={response?.data?.examples}>
+      <Layout examples={pagesList}>
         <Component {...pageProps} />
       </Layout>
     </MDXProvider>

@@ -1,6 +1,4 @@
-// const { getAllExamples } = require("./pages/api/example");
 const { getAllExamples } = require("./examples");
-const path = require("path");
 
 const withMDX = require("@next/mdx")({
   extension: /\.mdx?$/,
@@ -15,7 +13,7 @@ module.exports = withMDX({
     return [
       {
         source: "/",
-        destination: path.join("/example/", firstExample.slug),
+        destination: firstExample.href,
         permanent: false,
       },
       { source: "/example", destination: "/", permanent: false },
