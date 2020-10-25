@@ -1,12 +1,14 @@
 import * as React from "react";
-import styled, {
-  createGlobalStyle,
-} from "styled-components";
+import { useRouter } from "next/router";
+import styled, { createGlobalStyle } from "styled-components";
 import NextLink from "next/link";
 
 const GlobalStyle = createGlobalStyle`
   body {
     overflow-x: hidden;
+    background: #181914
+    url("data:image/jpeg;base64,/9j/4AAQSkZJRgABAgAAZABkAAD/7AARRHVja3kAAQAEAAAAMAAA/+4ADkFkb2JlAGTAAAAAAf/bAIQACQYGBgcGCQcHCQ0IBwgNDwsJCQsPEQ4ODw4OERENDg4ODg0RERQUFhQUERoaHBwaGiYmJiYmKysrKysrKysrKwEJCAgJCgkMCgoMDwwODA8TDg4ODhMVDg4PDg4VGhMRERERExoXGhYWFhoXHR0aGh0dJCQjJCQrKysrKysrKysr/8AAEQgAjACMAwEiAAIRAQMRAf/EAF4AAQEBAAAAAAAAAAAAAAAAAAABBwEBAQAAAAAAAAAAAAAAAAAAAAIQAAEDAwIHAQEAAAAAAAAAAADwAREhYaExkUFRcYGxwdHh8REBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8AyGFEjHaBS2fDDs2zkhKmBKktb7km+ZwwCnXPkLVmCTMItj6AXFxRS465/BTnkAJvkLkJe+7AKKoi2AtRS2zuAWsCb5GOlBN8gKfmuGHZ8MFqIth3ALmFoFwbwKWyAlTAp17uKqBvgBD8sM4fTjhvAhkzhaRkBMKBrfs7jGPIpzy7gFrAqnC0C0gB0EWwBDW2cBVQwm+QtPpa3wBO3sVvszCnLAhkzgL5/RLf13cLQd8/AGlu0Cb5HTx9KuAEieGJEdcehS3eRTp2ATdt3CpIm+QtZwAhROXFeb7swp/ahaM3kBE/jSIUBc/AWrgBN8uNFAl+b7sAXFxFn2YLUU5Ns7gFX8C4ib+hN8gFWXwK3bZglxEJm+gKdciLPsFV/TClsgJUwKJ5FVA7tvIFrfZhVfGJDcsCKaYgAqv6YRbE+RWOWBtu7+AL3yRalXLyKqAIIfk+zARbDgFyEsncYwJvlgFRW+GEWntIi2P0BooyFxcNr8Ep3+ANLbMO+QyhvbiqdgC0kVvgUUiLYgBS2QtPbiVI1/sgOmG9uO+Y8DW+7jS2zAOnj6O2BndwuIAUtkdRN8gFoK3wwXMQyZwHVbClsuNLd4E3yAUR6FVDBR+BafQGt93LVMxJTv8ABts4CVLhcfYWsCb5kC9/BHdU8CLYFY5bMAd+eX9MGthhpbA1vu4B7+RKkaW2Yq4AQtVBBFsAJU/AuIXBhN8gGWnstefhiZyWvLAEnbYS1uzSFP6Jvn4Baxx70JKkQojLib5AVTey1jjgkKJGO0AKWyOm7N7cSpgSpAdPH0Tfd/gp1z5C1ZgKqN9J2wFxcUUuAFLZAm+QC0Fb4YUVRFsAOvj4KW2dwtYE3yAWk/wS/PLMKfmuGHZ8MAXF/Ja32Yi5haAKWz4Ydm2cSpgU693Atb7km+Zwwh+WGcPpxw3gAkzCLY+iYUDW/Z3Adc/gpzyFrAqnALkJe+7DoItgAtRS2zuKqGE3yAx0oJvkdvYrfZmALURbDuL5/RLf13cAuDeBS2RpbtAm+QFVA3wR+3fUtFHoBDJnC0jIXH0HWsgMY8inPLuOkd9chp4z20ALQLSA8cI9jYAIa2zjzjBd8gRafS1vgiUho/kAKcsCGTOGWvoOpkAtB3z8Hm8x2Ff5ADp4+lXAlIvcmwH/2Q==")
+    repeat left top;
   }
 `;
 
@@ -19,17 +21,33 @@ const Flex = styled.div`
 const LayoutContainer = styled.div``;
 
 const LayoutSidebar = styled.aside`
-  border-right: 1px solid
-    rgb(36, 36, 36);
-  min-width: 320px;
+  border-right: 1px solid rgb(36, 36, 36);
+  width: 25em;
   display: flex;
   flex-direction: column;
   padding-top: 2em;
+
+  @media screen and (max-width: 64em) {
+    width: 100%;
+    border-right: none;
+    padding-top: 0;
+  }
+
+  a {
+    white-space: nowrap;
+    overflow-x: hidden;
+    max-width: 100%;
+    text-overflow: ellipsis;
+  }
 `;
 
 const LayoutMain = styled.main`
   display: flex;
   flex-direction: row;
+
+  @media screen and (max-width: 64em) {
+    flex-direction: column;
+  }
 `;
 const LayoutContent = styled.div`
   position: relative;
@@ -38,6 +56,17 @@ const LayoutContent = styled.div`
   margin-right: auto;
   margin-top: 5em;
   font-size: 1.25em;
+
+  @media screen and (max-width: 86em) {
+    padding: 0 2em;
+    width: auto;
+    font-size: 1em;
+  }
+
+  @media screen and (max-width: 64em) {
+    max-width: 100%;
+    margin-top: 0;
+  }
 
   h1 {
     font-size: 2.5em;
@@ -63,20 +92,21 @@ const LayoutContent = styled.div`
   iframe {
     display: block;
     margin: 1em auto;
+    border-radius: 0.25rem !important;
   }
 
   img {
     max-width: 100%;
-    width: 100%;
     background: rgb(36, 36, 36);
     border: 1px solid rgb(36, 36, 36);
+    border-radius: 0.25rem !important;
   }
 
   pre {
     background: rgb(21, 21, 21);
-    border: 1px solid rgb(36, 36, 36);
+    border: 1px solid #fff !important;
     padding: 1em;
-    border-radius: 0.25rem;
+    border-radius: 0.25rem !important;
     margin: 2rem 0px 4rem;
     line-height: 1.5;
     font-feature-settings: normal;
@@ -90,22 +120,21 @@ const LayoutContent = styled.div`
     margin: 0;
     border-radius: 0.25em;
     line-height: 1.45em;
-    font-family: source-code-pro, Menlo,
-      Monaco, Consolas, "Courier New",
+    font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
       monospace;
   }
 
   pre code {
     background-color: transparent;
+    padding: 0;
+    font-size: 100%;
   }
 `;
 
 const LayoutHeader = styled.div`
-  box-shadow: rgb(36, 36, 36) 0px 1px
-    0px;
+  border-bottom: rgb(36, 36, 36) 1px solid;
   height: 3em;
   width: 100%;
-  background: rgb(4, 4, 4);
 `;
 
 const SearchInput = styled.input`
@@ -118,9 +147,14 @@ const SearchInput = styled.input`
   color: rgb(255, 255, 255);
   border: 1px solid rgb(52, 52, 52);
   border-radius: 2px;
+
+  @media screen and (max-width: 64em) {
+    width: auto;
+  }
 `;
 const LinksList = styled.ul`
   padding: 0;
+  margin: 0;
   list-style: none;
   display: flex;
   align-items: baseline;
@@ -131,19 +165,31 @@ const List = styled.ul`
   padding: 1em 0;
   margin: 0;
   position: sticky;
-  top: 2em;
+  top: 1em;
+
+  @media screen and (max-width: 64em) {
+    position: relative;
+    top: 0;
+  }
 `;
 const ListItem = styled.li`
+  &:hover {
+    background-color: #242424;
+    a {
+      color: #40a9f3;
+    }
+  }
+
   a {
-    padding: 0 1em;
+    padding: 0.5em 1em;
     display: block;
     font-weight: 500;
     text-transform: capitalize;
     color: rgb(153, 153, 153);
+  }
 
-    &:hover {
-      color: #fff;
-    }
+  a.current {
+    color: #fff;
   }
 `;
 
@@ -163,71 +209,149 @@ const HeaderNavContent = styled.div`
   justify-content: space-between;
 `;
 
-export function ExamplesLayout({
-  children,
-  examples = [],
-}) {
+const MobileList = styled.nav`
+  @media screen and (min-width: 64em) {
+    display: none;
+  }
+
+  details {
+    summary {
+      list-style-type: none;
+      padding: 0.75em 1.5em;
+      font-size: 1.5em;
+      border-bottom: 1px solid rgb(36, 36, 36);
+      z-index: 10;
+
+      &::-webkit-details-marker {
+        display: none;
+      }
+      &:focus {
+        outline: none;
+      }
+    }
+
+    &[open] summary {
+      position: sticky;
+      top: 0;
+      background-color: rgba(36, 36, 36);
+      border-bottom: 1px solid rgb(0, 0, 0);
+    }
+  }
+
+  ${List} {
+    border-bottom: 1px solid rgb(36, 36, 36);
+  }
+`;
+
+const DesktopList = styled.nav`
+  @media screen and (max-width: 64em) {
+    display: none;
+  }
+`;
+
+export function ExamplesLayout({ children, examples = [] }) {
+  const router = useRouter();
+  const mobileMenu = React.useRef();
+  // Close mobile menu after page changes
+  React.useEffect(() => {
+    mobileMenu.current.open = false;
+  }, [router.pathname]);
   return (
     <LayoutContainer>
       <GlobalStyle />
-      <LayoutHeader
-        as="header"
-        className="spacing-horizontal"
-      >
+      <LayoutHeader as="header" className="spacing-horizontal">
         <HeaderNav>
           <HeaderNavContent>
             <Flex className="spacing-horizontal">
               <LinksList className="spacing-horizontal">
                 <MenuLink>
                   <a href="https://xstate.tips">
-                    <span
+                    <em
                       style={{
-                        fontSize:
-                          "1.5em",
+                        fontSize: "1.5em",
                       }}
                     >
                       XState.tips
-                    </span>
-                  </a>
-                </MenuLink>
-                <MenuLink>
-                  <a
-                    href="https://github.com/farskid/xstate.tips"
-                    target="_blank"
-                  >
-                    Github
+                    </em>
                   </a>
                 </MenuLink>
               </LinksList>
             </Flex>
             <Flex>
-              <form>
-                <SearchInput placeholder="Search" />
-              </form>
+              {/* TODO: enable when Algolia is ready */}
+              {/* <form>
+                <SearchInput placeholder="Search" className="hidden-mobile" />
+                <details className="hidden-desktop">
+                  <summary>Search</summary>
+                  <SearchInput placeholder="Search" />
+                </details>
+              </form> */}
+              <LinksList className="spacing-horizontal">
+                <MenuLink>
+                  <a
+                    href="https://github.com/farskid/xstate.tips"
+                    target="_blank"
+                  >
+                    Contribute
+                  </a>
+                </MenuLink>
+              </LinksList>
             </Flex>
           </HeaderNavContent>
         </HeaderNav>
       </LayoutHeader>
       <LayoutMain>
         <LayoutSidebar>
-          <List className="spacing-vertical">
-            {examples.map(
-              (ex, index) => (
+          <DesktopList>
+            <List>
+              {examples.map((ex, index) => (
                 <ListItem key={index}>
-                  <NextLink
-                    href={`/example/${ex.slug}`}
-                  >
-                    <a>{ex.title}</a>
+                  <NextLink href={`/example/${ex.slug}`}>
+                    <a
+                      className={
+                        router.pathname.split("/").pop() === ex.slug
+                          ? "current"
+                          : ""
+                      }
+                    >
+                      {ex.title}
+                    </a>
                   </NextLink>
                 </ListItem>
-              )
-            )}
-          </List>
+              ))}
+            </List>
+          </DesktopList>
+          <MobileList>
+            <details ref={mobileMenu}>
+              <summary>All tips</summary>
+              <List>
+                {examples.map((ex, index) => (
+                  <ListItem key={index}>
+                    <NextLink href={`/example/${ex.slug}`}>
+                      <a
+                        className={
+                          router.pathname.split("/").pop() === ex.slug
+                            ? "current"
+                            : ""
+                        }
+                      >
+                        {ex.title}
+                      </a>
+                    </NextLink>
+                  </ListItem>
+                ))}
+              </List>
+            </details>
+          </MobileList>
         </LayoutSidebar>
-        <LayoutContent>
-          {children}
-        </LayoutContent>
+        <LayoutContent>{children}</LayoutContent>
       </LayoutMain>
     </LayoutContainer>
   );
+}
+
+function repeat(array, times) {
+  return Array(times)
+    .fill()
+    .reduce((total) => total.concat(array), []);
 }

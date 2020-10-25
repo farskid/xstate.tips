@@ -1,0 +1,2647 @@
+# Multistep form handling with Finite State Machines, Formik and TypeScript | The Widlarz Group Website
+
+[](https://thewidlarzgroup.com/multistep-form-xstate-formik/)
+
+June 17, 2020
+
+- **[Introduction](/multistep-form-xstate-formik/#introduction)**
+- **[#0 Our case](/multistep-form-xstate-formik/#part-0---our-case)**
+- **[#1 XState machines and Typescript](/multistep-form-xstate-formik/#part-1---xstate-machines-and-typescript)**
+
+  - **[Let’s start!](/multistep-form-xstate-formik/#lets-get-our-hands-dirty-already-)**
+  - **[Adding TypeScript](/multistep-form-xstate-formik/#what-about-typescript-)**
+
+- **[#2 Mobile App](/multistep-form-xstate-formik/#part-2---mobile-app)**
+
+  - **[Mocking the back-end](/multistep-form-xstate-formik/#mocking-the-back-end)**
+  - **[Installing all the necessary dependencies](/multistep-form-xstate-formik/#installing-all-the-necessary-dependencies)**
+  - **[Adding navigation to our app](/multistep-form-xstate-formik/#adding-navigation-to-our-app)**
+  - **[Adding machines](/multistep-form-xstate-formik/#adding-machines)**
+  - **[Update machine](/multistep-form-xstate-formik/#updatemachine)**
+  - **[Test-drive our update machine](/multistep-form-xstate-formik/#test-drive-our-updatemachine)**
+  - **[User data machine](/multistep-form-xstate-formik/#userdatamachine)**
+  - **[Initial data fetch and redirecting](/multistep-form-xstate-formik/#fetching-initial-user-data-and-checking-where-to-redirect-them)**
+  - **[Blocking gestures and handling Android back button](/multistep-form-xstate-formik/#blocking-the-gestures-and-android-hardware-back-button)**
+  - **[Changing the way of navigating between the screens](/multistep-form-xstate-formik/#changing-the-way-we-navigate-between-screens)**
+  - **[Invoking child machines](/multistep-form-xstate-formik/#invoking-child-machines)**
+  - **[Handling forms with Formik and Yup](/multistep-form-xstate-formik/#handling-forms-with-formik-and-yup)**
+
+- **[#3 Summary](/multistep-form-xstate-formik/#summary)**
+
+## [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#introduction)Introduction
+
+Lately, I had a chance to work on a mobile app that utilizes this concept of finite state machines. Having no prior knowledge on such thing as a state machine, I quickly got to liking it!
+
+Basically, the concept of such state machines is that we have a finite number of states and we can transition between these states while also exchanging some data. We can declare multiple machines which can handle different tasks and behave in a different way, as well as declare some universal ones that can be re-used. That being said, we can think of our app as a combination of state machines that, based on their states, render different parts of UI. For example, fetching data from the back-end - we are either in a `fetching` state (we can render some kind of a loader at this time) or in a `done` state where we can display all the fetched data along with some kind of information about our request status, e.g. whether it was successful or not.
+
+If you want to start developing an app based on state machines, there’s this cool library called XState - the one that I used in the aforementioned project and got familiar with (but not entirely, at least yet! 🙂).
+
+If you want to read more about it, and about finite states machines concept in general, go here:
+[XState](https://xstate.js.org/docs/about/concepts.html)
+
+In this article, I will try to share some knowledge about it with you. We will develop a simple React Native app, which handles multi-step forms. Apart from XState, we will use Formik and TypeScript.
+
+## [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#part-0---our-case)Part 0 - Our case
+
+### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#what-we-want-to-achieve-and-how)What we want to achieve and how?
+
+#### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#we-want-to)We want to:
+
+- have the user update their address, billing and contact information
+- check what information is not yet updated and based on this redirect the user to the appropriate form step (screen)
+- save progress as the user goes between each form step (when a user decides to complete the form later, the app will redirect them to the place when they left off)
+
+#### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#how)How?
+
+Back-end wise, let’s imagine that we have these two endpoints - one for getting the user data and the second one for updating (e.g. `https://myapi.com/api/user` with GET and PUT methods).
+
+For the sake of this article, we will use just two simple functions instead of calling the real API. In a real-life scenario just exchange these functions with `fetch` or `axios`.
+
+As you might have already noticed, we have to call the back-end multiple times while updating (each step will update the user - remember, we want to save progress as we go. We could, of course, save all the data locally and send the request at the end but you know, saving progress, yay! 🔥)
+
+So in order to DRY, we can declare the state machine that takes in the previous userData and handles BE calls (in our case just mock functions with timers). We can then reuse it for every screen.
+
+Apart from declaring this machine, we will also create another one: a parent, which states will represent every screen. We will also use it to handle redirecting.
+
+#### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#final-app)Final app
+
+![](https://thewidlarzgroup.com/8104a0b294fd2628816fe7f3f4796682/wholeFlowFinal_fast.gif)
+
+---
+
+## [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#part-1---xstate-machines-and-typescript)Part 1 - XState machines and Typescript
+
+### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#lets-get-our-hands-dirty-already-)Let’s get our hands dirty already 😎!
+
+Before we dive into the VS Code (or whatever IDE you will be using), let’s use this cool [Xstate Visualizer](https://xstate.js.org/viz/) and try to initially declare our machines.
+
+When we visit this page, we will see this graphical visualization of example machine:
+
+![initVisualizer](https://thewidlarzgroup.com/static/166f4e64ff9c572b5ecdd16947270211/6d370/initVisualizer.png)
+
+To the side, there’s also a preview code for it:
+
+```
+const fetchMachine =Machine({
+  id:"fetch",
+  initial:"idle",
+  context:{
+    retries:0,
+  },
+  states:{
+    idle:{
+      on:{
+        FETCH:"loading",
+      },
+    },
+    loading:{
+      on:{
+        RESOLVE:"success",
+        REJECT:"failure",
+      },
+    },
+    success:{
+      type:"final",
+    },
+    failure:{
+      on:{
+        RETRY:{
+          target:"loading",
+          actions:assign({
+            retries:(context, event)=> context.retries +1,
+          }),
+        },
+      },
+    },
+  },})
+```
+
+As we can see, we have 4 possible states that the machine can be in + a bunch of different events, thanks to which we can transition between states. Notice that:
+
+1. Some of the states can be e.g. final (we cannot transition somewhere else when we get into this state + we can pass the data back to the parent at this point, but more on this later on)
+2. We can transition only between given states with a given set of events. We won’t be able to transition e.g. from `idle` to `failure`.
+
+That’s the beauty of state machines 💪🏽🔥!
+
+Ok! So now, that we know all the basics, let’s try to declare our first machine -> the one that will be responsible for updating the user.
+
+#### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#re-usable-child-machine-%E2%99%80)Re-usable child machine 👷🏼‍♀
+
+Possible states that can represent all the necessary actions that need to be done while editing the user data on one particular screen:
+
+1. `fetch` -> we will fetch the latest user data, just to be sure and up to date with back-end
+2. `edit` -> when in this state, we will be able to input new data / edit previous. Also, this will be the point when we are transitioned back to when error occurs
+3. `pending` -> we will transition to this state after being done with editing the inputs. Back-end call will be made
+4. `done` -> we will transition to this state when the updating is successful. Also, this is the `final` state and will indicate that we can either go and update another part of our form or just redirect the user to some kind of a success indication screen/page.
+
+With code (for now just JavaScript), it would look like this:
+
+```
+const updateMachine =Machine({
+  id:"updateMachine",
+  initial:"fetch",
+  states:{
+    fetch:{},
+    edit:{},
+    pending:{},
+    done:{
+      type:"final",
+    },
+  },})
+```
+
+How it looks in visualizer:
+
+![updateMachineStates](https://thewidlarzgroup.com/static/ee32671e8efaef3153c2f444d7108f83/6d370/updateMachineStates.png)
+
+What about the events? A possible set of them:
+
+1. `NEXT` -> this one would be used for transitioning to next machine states (fetch -> edit -> pending -> done)
+2. `ERROR` -> this event would be used to indicate that an error happened (e.g. when calling back-end in pending state)
+
+Let’s put it all together:
+
+```
+const updateMachine =Machine({
+  id:"updateMachine",
+  initial:"fetch",
+  states:{
+    fetch:{
+      on:{
+        NEXT:"edit",
+        ERROR:"edit",
+      },
+    },
+    edit:{
+      on:{
+        NEXT:"pending",
+      },
+    },
+    pending:{
+      on:{
+        NEXT:"done",
+        ERROR:"edit",
+      },
+    },
+    done:{
+      type:"final",
+    },
+  },})
+```
+
+Visualization (you can click through all possible states/events):
+
+![updateMachineFinal](https://thewidlarzgroup.com/static/65f5477844efb3aede04e0061c8f625d/6d370/updateMachineFinal.png)
+
+There is one more thing that we have to take care of! We should declare the machine context -> data, that can be updated and used within machine states. With our `updateMachine`, we would want to have access to all the user information fields as well as something like `error` and `errorMsg`. Let’s add it to our machine:
+
+```
+const updateMachine =Machine({
+    initial:'fetch',
+    ...
+    context:{
+        userData:null,
+        error:false,
+        errorMsg:''
+    }
+    ...
+  });
+```
+
+Now that we have our `updateMachine` ready, let’s do the same with the parent one (this parent will invoke the previous child machine in every state that represents given form part. More on that later)!
+
+#### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#parent-machine-%EF%B8%8F)Parent machine ⬆️
+
+Let’s start with all possible states. I decided to divide my form into these steps:
+
+1. `init` -> first state in which we will initially check the user data and conditionally redirect the user to a specific screen
+2. `basic` -> state representing the form part for updating first/last name, e-mail and phone data
+3. `address` -> updating address data: street, city, post code and country
+4. `payment` -> updating all necessary payment data: account number, credit card number, credit card expiration date and CVV code
+5. `complete` -> state that we will be redirected to when all the user data is present and filled :). For different reasons, this one will not be final (more on this later on)
+
+```
+const userDataMachine =Machine({
+  id:"userDataMachine",
+  initial:"init",
+  states:{
+    init:{},
+    basic:{},
+    address:{},
+    payment:{},
+    complete:{},
+  },})
+```
+
+![userDataMachineStates](https://thewidlarzgroup.com/static/08f24e9a2acd0c3cdb15feb4a2545e73/6d370/userDataMachineStates.png)
+
+Events would be somehow similar to the previous machine, except instead of `ERROR`, we can use something like `BACK`. Makes sense, doesn’t it?
+
+Wait…
+
+What about when we want to redirect from `init` to let’s say `payment` because that is the only data that the user did not update yet (after e.g. exiting the app with a plan to finish it the next day or something like that). Well, we can declare some more events:
+
+1. `BASIC` -> will redirect us to `basic` state
+2. `ADDRESS` -> will redirect us to `address` state
+3. `PAYMENT` -> will redirect us to `payment` state
+
+So with everything together, we end up with this setup:
+
+```
+const userDataMachine =Machine({
+  id:"userDataMachine",
+  initial:"init",
+  states:{
+    init:{
+      on:{
+        BASIC:"basic",
+        ADDRESS:"address",
+        PAYMENT:"payment",
+      },
+    },
+    basic:{
+      on:{
+        NEXT:"address",
+      },
+    },
+    address:{
+      on:{
+        NEXT:"payment",
+        BACK:"basic",
+      },
+    },
+    payment:{
+      on:{
+        NEXT:"complete",
+        BACK:"address",
+      },
+    },
+    complete:{
+      on:{
+        BACK:"payment",
+      },
+    },
+  },})
+```
+
+![userDataMachineFinal](https://thewidlarzgroup.com/static/b7e668c883f9e1fc74e6d83cb97e79da/6d370/userDataMachineFinal.png)
+
+As for the context, we will reuse the code from the child machine. Later on, when declaring our machines in the code, we could make this a shared context variable and init our machines with it :)
+
+```
+const userDataMachine =Machine({
+    id:'userDataMachine',
+    ...
+    context:{
+        userData:null,
+        error:false,
+        errorMsg:''
+    }
+    ...
+  });
+```
+
+As we can see, initially, we will check what information about the user is lacking. Based on this information, we will redirect the user to a given form part. While being in one of the form states, we can go between each one of them, and after updating all the information, we will be redirected to the complete state.
+
+### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#what-about-typescript-)What about TypeScript? 💎
+
+As stated in the introduction to this article, we will use TypeScript to write our app, thus we also need to add some types, yay!
+
+Let’s start again with our child machine: `updateMachine`.
+
+As you would guess, we have 3 things to cover with types:
+
+- machine context
+- machine states
+- machine events
+
+For the context, we simply do it with an `interface`, just like so:
+
+#### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#updatemachine-context)updateMachine Context:
+
+```
+interfaceUpdateMachineContext{
+  userData: UserData |null;
+  error: boolean;
+  errorMsg: string;}
+```
+
+Let’s don’t forget to also export it! `export interface UpdateMachineContext...`
+
+#### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#updatemachine-states)updateMachine States:
+
+As for the states, we will first declare an enum with possible states, and then the state object, just like so:
+
+```
+exportenum UpdateStates {
+  fetch ='fetch',
+  edit ='edit',
+  pending ='pending',
+  done ='done',}
+```
+
+And for a state object we will use our enum:
+
+```
+exportinterfaceUpdateMachineStates{
+  states:{
+    [UpdateStates.fetch]:{},
+    [UpdateStates.edit]:{},
+    [UpdateStates.pending]:{},
+    [UpdateStates.done]:{},
+  };}
+```
+
+#### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#updatemachine-events)updateMachine Events:
+
+With events, we can use an enum again, representing every possible event, and then we will extend an EventObject that we import from `xstate` library (more about that later on)
+
+```
+exportenum UpdateEvents {
+  NEXT='NEXT',
+  ERROR='ERROR'}
+```
+
+```
+type EventTypesSchema = UpdateEvents.NEXT| UpdateEvents.ERROR
+```
+
+And then, finally:
+
+```
+exportinterfaceUpdateMachineEventsextendsEventObject{
+  type: EventTypesSchema;}
+```
+
+<sub>
+  EventObject is imported from `xstate`
+  library
+</sub>
+
+#### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#userdatamachine-context)userDataMachine Context
+
+Now let’s do the same with our parent machine.
+
+```
+interfaceUserDataMachineCOntext{
+  userData: UserData |null;
+  error: boolean;
+  errorMsg: string;}
+```
+
+#### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#userdatamachine-states)userDataMachine States:
+
+```
+exportenum UserDataStates {
+  init ='init',
+  basic ='basic',
+  address ='address',
+  payment ='payment',
+  complete ='complete',}exportinterfaceUserDataMachineStates{
+  states:{
+      [UserDataStates.init]:{},
+      [UserDataStates.basic]:{},
+      [UserDataStates.address]:{},
+      [UserDataStates.payment]:{},
+      [UserDataStates.complete]:{},
+  }}
+```
+
+#### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#userdatamachine-events)userDataMachine Events:
+
+```
+exportenum UserDataEvents {
+  BASIC='BASIC',
+  ADDRESS='ADDRESS',
+  PAYMENT='PAYMENT',
+  NEXT='NEXT',
+  BACK='BACK'}
+
+type EventTypesSchema =
+    | UserDataEvents.BASIC
+    | UserDataEvents.ADDRESS
+    | UserDataEvents.PAYMENT
+    | UserDataEvents.NEXT
+    | UserDataEvents.BACKexportinterfaceUserDataMachineEventsextendsEventObject{
+    type: EventTypesSchema
+}
+```
+
+WE ARE DONE with these types at last! Quite a lot of work and we did not even start coding the actual app, but it is worth the time, you’ll see. Especially, when we work with multiple machines context/states at the same time! 😀
+
+---
+
+## [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#part-2---mobile-app)Part 2 - Mobile App
+
+##### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#starting-point-of-this-step-checkpoint-1)Starting point of this step: [Checkpoint #1](https://github.com/TheWidlarzGroup/multistep-form-xstate-formik/tree/project-init)
+
+If you don’t want to create your own project from scratch, I have setup a simple hello world app in React Native with UI Kitten library (for our UI), declared UserData interface for our users’ data and two functions to mock our back-end calls (see: [Checkpoint #1](https://github.com/TheWidlarzGroup/multistep-form-xstate-formik/tree/project-init)).
+
+Don’t forget to run these commands if you are starting out with this starter repo:
+
+`yarn`
+
+and then
+
+`cd ios && pod install && cd ..`
+
+### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#mocking-the-back-end)Mocking the back-end
+
+To start with, here are our two functions that will mock back-end calls:
+
+`src/data/Api.ts`:
+
+```
+exportconstgetUser=async(prevUser?: UserData)=>{
+  console.log("Pending...")
+
+  const scenario =getRandomNumber(1,4)
+
+  awaitnewPromise(res=>setTimeout(res,1000))
+
+  if(prevUser){
+    return prevUser
+  }else{
+    switch(scenario){
+      case1:
+        return userEmpty
+      case2:
+        return userWithContact
+      case3:
+        return userWithAddress
+      case4:
+        return userComplete
+      default:
+        return userEmpty
+    }
+  }}
+```
+
+Depending on whether we provide the `prevUser` as an argument to this function or not, it will return either the same thing as provided, or generate a random user response. `userEmpty` / `userWithAddress` etc are just objects of UserData type, e.g.:
+
+```
+const userWithAddress: UserData ={
+  name:"John",
+  surname:"Doe",
+  email:"john.doe@mail.com",
+  phone:"857 254 712",
+  street:"18th Dev Street",
+  city:"South Dev City",
+  code:"99-888",
+  country:"Devburg",
+  account:null,
+  creaditCardNo:null,
+  creditCardExp:null,
+  creditCardCvv:null,}
+```
+
+The second function will be used to update the user:
+
+```
+exportconstupdateUser=async(updated: UserData)=>{
+  console.log("Updating...")
+
+  awaitnewPromise(res=>setTimeout(res,1000))
+
+  return updated
+}
+```
+
+### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#installing-all-the-necessary-dependencies)Installing all the necessary dependencies
+
+Now it is time to install all the necessary dependencies.
+
+What do we need?
+
+- React Navigation along with gesture-handler, reanimated and stack navigation for navigating throughout our app
+- xstate and xstate for react
+- Formik and yup for forms
+
+Let’s install it all 😀
+
+Run:
+
+`yarn add @react-navigation/native @react-navigation/stack react-native-screens react-native-safe-area-context @react-native-community/masked-view react-native-gesture-handler react-native-reanimated xstate @xstate/react formik yup`
+
+### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#adding-navigation-to-our-app)Adding navigation to our app
+
+###### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#if-you-want-to-skip-adding-the-navigation-yourself-you-can-go-to-the-next-step-and-use-files-from-another-checkpoint-)If you want to skip adding the navigation yourself, you can go to the next step and use files from another checkpoint 😀
+
+Now, that we have our project ready, we can add navigation to it. In our `App.tsx` we will setup the navigator + add all the necessary screens.
+
+`App.tsx`:
+
+```
+const Stack =createStackNavigator()constApp=()=>{
+  return(
+    <NavigationContainer>
+      <ApplicationProvidermapping={mapping}theme={darkTheme}>
+        <Layoutstyle={styles.wrapper}>
+          <SafeAreaViewstyle={styles.wrapper}>
+            <StatusBarbarStyle="light-content"/>
+            <Stack.NavigatorscreenOptions={{ headerShown:false}}>
+              <Stack.Screenname="Home"component={Home}/>
+              <Stack.Screenname="FormName"component={FormName}/>
+              <Stack.Screenname="FormAddress"component={FormAddress}/>
+              <Stack.Screenname="FormPayment"component={FormPayment}/>
+              <Stack.Screenname="Success"component={Success}/>
+            </Stack.Navigator>
+          </SafeAreaView>
+        </Layout>
+      </ApplicationProvider>
+    </NavigationContainer>
+  )}const styles = StyleSheet.create({
+  wrapper:{ flex:1},})exportdefault App
+```
+
+Let’s also add all the screens. We can make a new folder in our `src` and create all the screens we need inside it:
+
+`mkdir src/screens`
+
+`cd src/screens`
+
+`touch FormAddress.tsx FormName.tsx FormPayment.tsx Home.tsx Success.tsx`
+
+Each screen that contains particular parts of the form, at least in our case, will be basically the same. The only things that will change will be `Inputs` and actions assigned to each `button` (prev and next button) thus in order not to repeat ourselves, we can create some kind of a wrapper component for our form 😀
+
+Let’s navigate back into our root directory and:
+
+`mkdir src/components`
+
+and
+
+`touch src/components/FormWrapper.tsx`.
+
+Our _FormWrapper_ component will render the screen’s title, its children (being different inputs) and buttons that will trigger different actions. Actions will be passed to it as props. Also, its content is wrapped with `KeyboardAvoidingView` so we are sure that upon focusing `InputField` the keyboard will not cover it.
+
+Our `FormWrapper.tsx`:
+
+```
+interfaceProps{
+  backBtnAction:()=>void;
+  nextBtnAction:()=>void;
+  children: React.ReactChild;
+  title: string;}constFormWrapper=({
+  backBtnAction,
+  nextBtnAction,
+  children,
+  title,}: Props)=>{
+  return(
+    <Layoutstyle={styles.container}>
+      <Textstyle={styles.title}category="h2">
+        {title}
+      </Text>
+      <KeyboardAvoidingView
+        keyboardVerticalOffset={theme.spacing.value *4}
+        style={[styles.container]}
+        behavior="height"
+      >
+        <Viewstyle={styles.top}>
+          <ScrollViewshowsVerticalScrollIndicator={false}>
+            <Viewstyle={styles.form}>{children}</View>
+          </ScrollView>
+        </View>
+        <Viewstyle={styles.bottom}>
+          <Button
+            style={styles.next}
+            size="medium"
+            appearance="ghost"
+            status="basic"
+            onPress={backBtnAction}
+          >
+            Back
+          </Button>
+          <Button
+            style={styles.next}
+            size="medium"
+            appearance="outline"
+            status="success"
+            onPress={nextBtnAction}
+          >
+            Next
+          </Button>
+        </View>
+      </KeyboardAvoidingView>
+    </Layout>
+  )}const styles = StyleSheet.create({
+  container:{
+    flex:1,
+  },
+  title:{
+    paddingHorizontal: theme.spacing.value *2,
+    paddingTop: theme.spacing.value *2,
+  },
+  top:{
+    flex:20,
+    width:"100%",
+    paddingHorizontal: theme.spacing.value *2,
+  },
+  bottom:{
+    flex:2,
+    width:"100%",
+    flexDirection:"row",
+    justifyContent:"space-between",
+    paddingHorizontal: theme.spacing.value *2,
+    backgroundColor:"transparent",
+    position:"absolute",
+    bottom:0,
+    paddingBottom:20,
+  },
+  form:{
+    marginTop: theme.spacing.value *4,
+  },
+  next:{
+    alignSelf:"flex-end",
+  },
+  prev:{
+    alignSelf:"flex-start",
+  },})exportdefault FormWrapper
+```
+
+Now, that we have our _FormWrapper_ being ready, we can go back and add inputs in each screen. I divided the form into 3 parts -> `Name`,`Address` and `Payment`. Let’s create them:
+
+In the first step (Name and contact screen), we want to have four inputs:
+
+- first name field
+- last name field
+- e-mail field
+- phone field
+
+With our wrapper, the output component would look like this:
+
+```
+constFormName=()=>{
+  const{ goBack, navigate }=useNavigation()
+
+  const backBtn =useCallback(()=>goBack(),[goBack])
+  const goNext =useCallback(()=>navigate("FormAddress"),[navigate])
+
+  return(
+    <FormWrapper
+      title="Name and contact"
+      nextBtnAction={goNext}
+      backBtnAction={backBtn}
+    >
+      <>
+        <Input
+          style={styles.input}
+          caption="Your first name"
+          label="First name"
+          placeholder="John"
+          // value=""
+          onChangeText={()=>null}
+        />
+        <Input
+          style={styles.input}
+          caption="Your last name"
+          label="Last name"
+          placeholder="Doe"
+          // value=""
+          onChangeText={()=>null}
+        />
+
+        <Input
+          style={styles.input}
+          caption="You e-mail address"
+          label="E-mail"
+          placeholder="mail@mail.com"
+          // value=""
+          onChangeText={()=>null}
+        />
+        <Input
+          style={styles.input}
+          caption="Your phone number"
+          label="Phone"
+          keyboardType="number-pad"
+          placeholder="123 123 123"
+          // value=""
+          onChangeText={()=>null}
+        />
+      </>
+    </FormWrapper>
+  )}const styles = StyleSheet.create({
+  input:{
+    marginBottom: theme.spacing.value *2,
+  },})exportdefault FormName
+```
+
+We used the `useNavigation` hook in order to have access to navigate and goBack methods.
+
+Do the same with the rest of the screens so that every field from `UserData` interface is represented by an input in one of these 3 screens.
+
+Apart from the inputs, we will also add some kind of success screen and home screen (`Home.tsx` and `Success.tsx` files we created earlier). For now, our home screen can be just a simple screen with a button that will redirect us to the first form screen:
+
+```
+constHome=()=>{
+  const{ navigate }=useNavigation()
+
+  constgoNext=()=>navigate("FormName")
+
+  return(
+    <Layoutstyle={styles.container}>
+      <Textcategory="h1">Form App</Text>
+      <Buttonsize="large"appearance="ghost"status="primary"onPress={goNext}>
+        Form
+      </Button>
+    </Layout>
+  )}const styles = StyleSheet.create({
+  container:{
+    flex:1,
+    justifyContent:"center",
+    alignItems:"center",
+  },})exportdefault Home
+```
+
+Similarily, our Success screen can look like this:
+
+```
+constSuccess=()=>{
+  return(
+    <Layoutstyle={{ flex:1, justifyContent:"center", alignItems:"center"}}>
+      <Textcategory="h2">Success screen</Text>
+    </Layout>
+  )}exportdefault Success
+```
+
+After being done with the navigation, at least for now, our code should look like so: [Checkpoint #2](https://github.com/TheWidlarzGroup/multistep-form-xstate-formik/tree/navigation)
+
+### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#adding-machines)Adding machines
+
+###### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#starting-point-files-for-this-step-checkpoint-2)Starting point files for this step: [Checkpoint #2](https://github.com/TheWidlarzGroup/multistep-form-xstate-formik/tree/navigation)
+
+After taking care of the navigation, we can finally dive into the xstate 😀
+
+Remember how we defined our machines’ types earlier? Now, it is time to add them to our codebase.
+
+We can create a separate folder to store both our machines and their types.
+
+From our root, let’s run this in the terminal:
+
+`mkdir src/machines`
+
+`touch src/machines/userDataMachine.types.ts src/machines/updateMachine.types.ts`
+
+In these newly created files, let’s add our types for each machine - just copy and paste everything that we have done in the previous part [#1 XState machines and Typescript](/multistep-form-xstate-formik/#part-1---xstate-machines-and-typescript).
+
+Our `.types.ts` files should look like this:
+
+`updateMachine.types.ts`:
+
+```
+import{UserData}from'../types/UserData.types';import{EventObject}from'xstate';exportinterfaceUpdateMachineContext{
+  userData: UserData;
+  error: boolean;
+  errorMsg: string;}exportenum UpdateStates {
+  fetch ='fetch',
+  edit ='edit',
+  pending ='pending',
+  done ='done',}exportinterfaceUpdateMachineStates{
+  states:{
+    [UpdateStates.fetch]:{};
+    [UpdateStates.edit]:{};
+    [UpdateStates.pending]:{};
+    [UpdateStates.done]:{};
+  };}exportenum UpdateEvents {
+  NEXT='NEXT',
+  ERROR='ERROR',}
+
+type EventTypesSchema = UpdateEvents.NEXT| UpdateEvents.ERROR;exportinterfaceUpdateMachineEventsextendsEventObject{
+  type: EventTypesSchema;}
+```
+
+`userDataMachine.types.ts`:
+
+```
+import{UserData}from'../types/UserData.types';import{EventObject}from'xstate';exportinterfaceUserDataMachineCOntext{
+  userData: UserData;
+  error: boolean;
+  errorMsg: string;}exportenum UserDataStates {
+  init ='init',
+  basic ='basic',
+  address ='address',
+  payment ='payment',
+  complete ='complete',}exportinterfaceUserDataMachineStates{
+  states:{
+    [UserDataStates.init]:{};
+    [UserDataStates.basic]:{};
+    [UserDataStates.address]:{};
+    [UserDataStates.payment]:{};
+    [UserDataStates.complete]:{};
+  };}exportenum UserDataEvents {
+  BASIC='BASIC',
+  ADDRESS='ADDRESS',
+  PAYMENT='PAYMENT',
+  NEXT='NEXT',
+  BACK='BACK',}
+
+type EventTypesSchema =
+  | UserDataEvents.BASIC
+  | UserDataEvents.ADDRESS
+  | UserDataEvents.PAYMENT
+  | UserDataEvents.NEXT
+  | UserDataEvents.BACK;exportinterfaceUserDataMachineEventsextendsEventObject{
+  type: EventTypesSchema;}
+```
+
+After copying our types, we can now declare the machines. Let’s create additional files inside `src/machines`:
+
+`touch src/machines/updateMachie.ts src/machines/userDataMachine.ts`.
+
+#### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#updatemachine)updateMachine
+
+We will start with `updateMachine` - a child one, invoked inside every parent machine’s state representing a given form part.
+
+To start with, we need to import the Machine object from `xstate` library.
+
+`import {Machine} from 'xstate'`.
+
+Then, we can instantiate our machine, just like so:
+
+```
+exportconst updateMachine =Machine()
+```
+
+This new machine takes an object as a parameter with the initial machine configuration. What it means is that we should pass to it all the states, initial context, id, transitions, etc. Apart from that, we can additionally (thanks to TypeScript) add types to this new machine, types that we just have added to our code a moment ago.
+
+Now, along with our Machine configuration, we can also pass all the declared types for context, state and events:
+
+```
+exportconst updateMachine = Machine<
+  UpdateMachineContext,
+  UpdateMachineStates,
+  UpdateMachineEvents
+>({
+  id:'updateMachine',
+  initial: UpdateStates.fetch,
+  context:{
+    error:false,
+    errorMsg:'',
+    userData:null,
+  },
+  states:{
+    [UpdateStates.fetch]:{},
+    [UpdateStates.edit]:{},
+    [UpdateStates.pending]:{},
+    [UpdateStates.done]:{},
+  },});
+```
+
+We assigned an `id` for this machine, added initial `context` to it and defined all the states. If we try, for example, to add one more state that is not declared in our type, we should get a warning informing us that this new, additional state does not exist in the type that we defined earlier 😀
+
+Next, we can also add all the transitions between all the steps. We can do it like so:
+
+```
+states:{
+    [UpdateStates.fetch]:{
+      on:{
+        [UpdateEvents.NEXT]:{
+          target: UpdateStates.edit,
+        },
+      }
+    },
+    ...}
+```
+
+These few lines that we have just added tell us that whenever we send an event of type ‘NEXT’ to the machine that is currently in the `fetch` state, we will be transitioned to another state -> `edit`.
+
+Having added all the remaining possible “moves”, our machine `states` object will look somewhere the same as below:
+
+```
+...
+states:{
+    [UpdateStates.fetch]:{
+      on:{
+        [UpdateEvents.NEXT]:{
+          target: UpdateStates.edit,
+        },
+        [UpdateEvents.ERROR]:{
+          target: UpdateStates.edit,
+        },
+      },
+    },
+    [UpdateStates.edit]:{
+      on:{
+        [UpdateEvents.NEXT]:{
+          target: UpdateStates.pending,
+        },
+      },
+    },
+    [UpdateStates.pending]:{
+      on:{
+        [UpdateEvents.NEXT]:{
+          target: UpdateStates.done,
+        },
+        [UpdateEvents.ERROR]:{
+          target: UpdateStates.edit,
+        },
+      },
+    },
+    [UpdateStates.done]:{
+      type:'final'
+    },
+  },...
+```
+
+<sub>
+  Notice that the `done` state is of
+  type `final`. When our machine reaches
+  this point, we will be able to perform
+  some kind of an action that is
+  available for that type 😀. More on
+  this later on. Keep reading! 💪🏽
+</sub>
+
+At this point, right off the bat, we can also update the machine context while transitioning with a little help of `assign`\* (an action used to update the machine’s context). This `action`\*\*, while updating the context, has access to all the event data that we pass when transitioning + access to the current context thus we can either update the context based on the previous one (think of `useState(prev=>prev+1)` for example 😀), or use the data passed with an event.
+
+> It takes the context “assigner”, which represents how values in the current context should be assigned.
+
+###### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#source-assign-action)_Source: [Assign Action](https://xstate.js.org/docs/guides/context.html#assign-action)_
+
+###### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#-more-in-depth-look-on-assign-in-xstate-docs-assign-action)\* more in-depth look on `assign` in XState docs: [Assign Action](https://xstate.js.org/docs/guides/context.html?#assign-action)
+
+###### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#-simply-put-actions-are-these-side-effects-that-can-be-invokedtriggered-when-eg-entering--exiting-the-state-or-when-transitioning-you-can-read-more-about-them-here-actions)\*\* simply put, `actions` are these side-effects, that can be invoked/triggered when e.g. entering / exiting the state or when transitioning. You can read more about them here: [Actions](https://xstate.js.org/docs/guides/actions.html#declarative-actions)
+
+It is highly possible, that when reading the previous paragraph, you got a little bit confused when I mentioned `event data`. (If not, you rock! You can skip the next paragraph).
+
+##### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#event-data)Event data?
+
+With xstate, we can invoke different actions, for example call the backend. Our call can be successful or not. Based on this information, we transition either the one or the other way. To transition, we have to tell the machine what type of an event we want to send to it (we were declaring this before -> e.g. `NEXT`). Apart from this information, we can also pass whatever we want, for example the response data from our back-end call 😀
+
+##### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#back-to-the-assign)Back to the `assign`
+
+For now, let’s handle only the `error` part of our context. We simply want to update our context with new error value after every transition. The only time, that the error field should be set to `true` is when we transition with `ERROR` event type. So on every transition with `ERROR`, we set `error` to true, while with transitioning with `NEXT`, we reset this value back to `false`. We can then use this to e.g. display some kind of an error pop-up for the user
+
+In code:
+
+```
+...
+ on:{
+        [UpdateEvents.NEXT]:{
+          target: UpdateStates.edit,
+          actions:assign({
+            error:_=>false,
+            errorMsg:_=>'',
+          }),
+        },...
+      },...
+```
+
+This way, we make sure that whenever we transition with `NEXT`, we go back to “no-error” scenario. Let’s do the same in the other direction - whenever we transition with `ERROR`, we set the `error` value to true. For now, we will also set the `errorMsg` to “Error” (will change it later though 😀)
+
+```
+...
+ on:{
+        [UpdateEvents.ERROR]:{
+          target: UpdateStates.edit,
+          actions:assign({
+            error:_=>true,
+            errorMsg:_=>'Error',
+          }),
+        },...
+      },...
+```
+
+What we should have so far:
+
+```
+exportconst updateMachine = Machine<
+  UpdateMachineContext,
+  UpdateMachineStates,
+  UpdateMachineEvents
+>({
+  id:'updateMachine',
+  initial: UpdateStates.fetch,
+  context:{
+    error:false,
+    errorMsg:'',
+    userData:null,
+  },
+  states:{
+    [UpdateStates.fetch]:{
+      on:{
+        [UpdateEvents.NEXT]:{
+          target: UpdateStates.edit,
+          actions:assign({
+            error:_=>false,
+            errorMsg:_=>'',
+          }),
+        },
+        [UpdateEvents.ERROR]:{
+          target: UpdateStates.edit,
+          actions:assign({
+            error:_=>true,
+            errorMsg:_=>'Error',
+          }),
+        },
+      },
+    },
+    [UpdateStates.edit]:{
+      on:{
+        [UpdateEvents.NEXT]:{
+          target: UpdateStates.pending,
+        },
+      },
+    },
+    [UpdateStates.pending]:{
+      on:{
+        [UpdateEvents.NEXT]:{
+          target: UpdateStates.done,
+          actions:assign({
+            error:_=>false,
+            errorMsg:_=>'',
+          }),
+        },
+        [UpdateEvents.ERROR]:{
+          target: UpdateStates.edit,
+          actions:assign({
+            error:_=>true,
+            errorMsg:_=>'Error',
+          }),
+        },
+      },
+    },
+    [UpdateStates.done]:{
+      type:'final',
+    },
+  },});
+```
+
+Now, that we know how to update the context, let’s handle the scenario when we’re in different states and want to “do something”. Every single state has access to this `invoke` property. This value is just an object, with which we can tell what we want to “invoke”, with what data etc. ((in-depth look: [click here](https://xstate.js.org/docs/guides/communication.html#the-invoke-property))). We can invoke a Promise or a different machine (will do this soon 🔥), or a “callback handler”. I especially like the latter 😀.
+
+Let’s try to put this into practise:
+
+```
+[UpdateStates.fetch]:{
+  ...
+  invoke:{
+    src:(context, event)=>asynccb=>{
+      try{
+        awaitnewPromise(res=>setTimeout(res,2000));
+        cb({
+          type: UpdateEvents.NEXT,
+          errorMsg:'Message from callback handler',
+        });
+      }catch(e){
+        cb({type: UpdateEvents.ERROR});
+      }
+    },
+  },
+  ...},
+```
+
+When invoking something, we have access to three things (basically four, when we want to listen to the parent machine, but let’s stick with three for now):
+
+1. Our machine context -> `src: (context, ...`
+2. Our event data (similarily to assign) -> `src: (context, event) => ...`
+3. Our callback handler -> `=> async cb =>`
+
+This “callback handler” (`cb`) is just a function that we can call with the event data. In other words, when our “action” (the one that we invoke in `src` property) is finished with success, we can call this `cb()` with data about:
+
+1. a type of an event (based on this information we will be transitioned to a different state) -> `cb({type: UpdateEvents.NEXT});`
+2. and other data (response from back-end call), that later we can use e.g. with an `assign` :muscle:! -> `cb({type: UpdateEvents.NEXT, hello: 'world'});`.
+
+To summarize, in the previous code snippet, we have invoked a function that after 2 seconds will transition us to a different state with an event of type NEXT and some additional data in the form of a simple message.
+
+Let’s finish adding all the remaining actions stuff to our machine:
+
+```
+exportconst updateMachine = Machine<
+  UpdateMachineContext,
+  UpdateMachineStates,
+  UpdateMachineEvents
+>({
+  id:'updateMachine',
+  initial: UpdateStates.fetch,
+  context:{
+    error:false,
+    errorMsg:'',
+    userData:null,
+  },
+  states:{
+    [UpdateStates.fetch]:{
+      on:{
+        [UpdateEvents.NEXT]:{
+          target: UpdateStates.edit,
+          actions:assign({
+            error:_=>false,
+            errorMsg:_=>'',
+          }),
+        },
+        [UpdateEvents.ERROR]:{
+          target: UpdateStates.edit,
+          actions:assign({
+            error:_=>true,
+            errorMsg:_=>'Error',
+          }),
+        },
+      },
+      invoke:{
+        src:_=>asynccb=>{
+          try{
+            awaitnewPromise(res=>setTimeout(res,2000));
+            cb({
+              type: UpdateEvents.NEXT,
+            });
+          }catch(e){
+            cb({type: UpdateEvents.ERROR});
+          }
+        },
+      },
+    },
+    [UpdateStates.edit]:{
+      on:{
+        [UpdateEvents.NEXT]:{
+          target: UpdateStates.pending,
+        },
+      },
+    },
+    [UpdateStates.pending]:{
+      on:{
+        [UpdateEvents.NEXT]:{
+          target: UpdateStates.done,
+          actions:assign({
+            error:_=>false,
+            errorMsg:_=>'',
+          }),
+        },
+        [UpdateEvents.ERROR]:{
+          target: UpdateStates.edit,
+          actions:assign({
+            error:_=>true,
+            errorMsg:_=>'Error',
+          }),
+        },
+      },
+      invoke:{
+        src:_=>asynccb=>{
+          try{
+            awaitnewPromise(res=>setTimeout(res,2000));
+            cb({
+              type: UpdateEvents.NEXT,
+            });
+          }catch(e){
+            cb({type: UpdateEvents.ERROR});
+          }
+        },
+      },
+    },
+    [UpdateStates.done]:{
+      type:'final',
+    },
+  },});
+```
+
+We add actions with `invoke` in two places: in `fetch` state (when we fetch/update user data) and in `pending` state (when we send the edited data to the back end to update the user). For now, we are using timeouts to mock the back end calls but later on we will replace it with our logic.
+
+Our machine should be working now, so let’s quickly test it in our app (we will use `useMachine` hook to quickly test everything and afterward we will delete it and get back to setting it up properly later on 😀)
+
+#### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#test-drive-our-updatemachine)Test-drive our updateMachine
+
+So let’s quickly test this machine with `useMachine` hook inside e.g. `FormName` component. Remember, it is just for the sake of testing whether this machine is setup correctly. We can get rid of the stuff that we code in this sub-part completely after we make sure it works.
+
+Let’s add the hook (it returns an array of values that we can destructure - the first element, `current`_, tells us about, among others, the machine current state / context and the second value, `send`_, is a function that can trigger transitions):
+
+<sub>
+  *we can name it whatever we want, just
+  to be clear, it does not have to be
+  `current` or `send`, we can name it
+  e.g. `machineData` and `sendEvent` etc
+</sub>
+
+```
+const[current, send]=useMachine(updateMachine)
+```
+
+And let’s use `useEffect` hook to console.log all the changes + trigger our first transition:
+
+```
+useEffect(()=>{
+  console.log("current state")
+  console.log(current.value)
+  console.log("current context")
+  console.log(current.context)},[current])
+```
+
+Let’s also conditionally render\* some text inside components return:
+
+```
+...
+
+  return(
+    <FormWrapper
+      title="Name and contact"
+      nextBtnAction={goNext}
+      backBtnAction={backBtn}>
+      <>
+        {current.matches(UpdateStates.fetch)&&<Text>Fetching initial</Text>}
+        <Input
+
+...
+```
+
+<sub>
+  * [useMachine
+  hook](https://xstate.js.org/docs/recipes/react.html#hooks)
+  - first element from an array returned
+  by the hook has this cool method
+  `.matches`. Thanks to it we can check
+  if the machine is currently in a given
+  state.
+</sub>
+
+<sub>
+  `current.matches("TEST_STATE")` ->
+  this code will check if the machine is
+  in the `TEST_STATE` state. If so, the
+  returned value from this method will
+  be `true`. Else, `false`.
+</sub>
+
+Our console output should look like this:
+
+```
+LOG  current state
+ LOG  fetch
+ LOG  current context
+ LOG{"error":false,"errorMsg":"","userData":null}LOG  current state
+ LOG  edit
+ LOG  current context
+ LOG{"error":false,"errorMsg":"","userData":null}
+```
+
+###### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#how-it-looks-in-the-app)How it looks in the app:
+
+![](/9d480350996d4583d6a2166695d860ff/updateMachineTest.gif)
+
+Our machine was first in the `fetch` state, and then, after transitioning with `NEXT` event type went straight into the `edit` state. While `fetching`, we displayed some text (see the pic above).
+
+Now, let’s delete all of this test code from our `FormName` screen 😂 -> our machine is working so we can now proceed with our work.
+
+#### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#userdatamachine)userDataMachine
+
+It’s time to take care of our main, parent machine ⬆️ which will invoke the previous machine as child services in every state that is representing a given form part.
+
+Let’s do the same as with the previous one -> declare a new `Machine` with a configuration object with initial context, transitions and types.
+
+This is how it should look like, at least for now:
+
+```
+exportconst userDataMachine = Machine<
+  UserDataMachineContext,
+  UserDataMachineStates,
+  UserDataMachineEvents
+>({
+  id:'userDataMachine',
+  initial: UserDataStates.init,
+  context:{
+    error:false,
+    errorMsg:'',
+    userData:null,
+  },
+  states:{
+    [UserDataStates.init]:{
+      on:{
+        [UserDataEvents.BASIC]:{
+          target: UserDataStates.basic,
+        },
+        [UserDataEvents.ADDRESS]:{
+          target: UserDataStates.address,
+        },
+        [UserDataEvents.PAYMENT]:{
+          target: UserDataStates.payment,
+        },
+      },
+    },
+    [UserDataStates.basic]:{
+      on:{
+        [UserDataEvents.NEXT]:{
+          target: UserDataStates.address,
+        },
+      },
+    },
+    [UserDataStates.address]:{
+      on:{
+        [UserDataEvents.NEXT]:{
+          target: UserDataStates.payment,
+        },
+        [UserDataEvents.BACK]:{
+          target: UserDataStates.basic,
+        },
+      },
+    },
+    [UserDataStates.payment]:{
+      on:{
+        [UserDataEvents.NEXT]:{
+          target: UserDataStates.complete,
+        },
+        [UserDataEvents.BACK]:{
+          target: UserDataStates.address,
+        },
+      },
+    },
+    [UserDataStates.complete]:{
+      on:{
+        [UserDataEvents.BACK]:{
+          target: UserDataStates.payment,
+        },
+      },
+    },
+  },});
+```
+
+As mentioned at the very beginning of this article, and also a little bit later on, this parent machine is supposed to represent every form screen, thus our states are named e.g. “address”, “payment” etc.
+
+The very first state, “init”, also is representing the screen -> this can be a loading screen displaying to the user e.g. the message that the app is checking whether we need to update some profile data or not. Based on this information we will be redirected to one of the form screens.
+
+So now that we have all the states and transitions setup, we can actually connect it with our navigation.
+
+As the first step, we need to wrap our existing navigator with another navigator. Why?
+
+1. We have to have access to navigation props inside the component with our “form” navigator
+2. The app that we are building is supposed to be a part of some kind of a bigger app -> for example, after logging in, we would check whether our profile data is completed or not. Depending on this information, we can either navigate to the main dashboard of the app, or to the screen with form, being in fact another navigator (our `FormFlow`).
+
+Let’s do a little make-over in our `App.tsx` and create another `StackNavigator`.
+
+```
+...const Stack =createStackNavigator();// already used navigatorconst Root =createStackNavigator();// new one...
+```
+
+Now, let’s move our existing navigator inside a separate component and render it as a screen of the new navigator:
+
+```
+constFormFlow=()=>{
+  return(
+    <Stack.NavigatorscreenOptions={{ headerShown:false}}>
+      <Stack.Screenname="Home"component={Home}/>
+      <Stack.Screenname="FormName"component={FormName}/>
+      <Stack.Screenname="FormAddress"component={FormAddress}/>
+      <Stack.Screenname="FormPayment"component={FormPayment}/>
+      <Stack.Screenname="Success"component={Success}/>
+    </Stack.Navigator>
+  )}constApp=()=>{
+  return(
+    <NavigationContainer>
+      <ApplicationProvidermapping={mapping}theme={darkTheme}>
+        <Layoutstyle={styles.wrapper}>
+          <SafeAreaViewstyle={styles.wrapper}>
+            <StatusBarbarStyle="light-content"/>
+            <Root.Navigator
+              screenOptions={{ headerShown:false}}
+              initialRouteName="Form"
+            >
+              <Root.Screenname="Form"component={FormFlow}/>
+              {/* ANOTHER PART OF THE IMAGINARY APP */}
+            </Root.Navigator>
+          </SafeAreaView>
+        </Layout>
+      </ApplicationProvider>
+    </NavigationContainer>
+  )}
+```
+
+Now, if we were to add some kind of a “listener” for our machine changes, we could map every state to each screen with `switch` statement and fire up the `navigate` method from our `navigation` prop to jump between screens. Let’s try to implement it.
+
+We can use `useNavigation` hook to get access to the `navigation` property with all the necessary methods:
+
+```
+...constFormFlow=()=>{
+  const nav =useNavigation();
+  const{navigate}= nav;...
+```
+
+Let’s use our machine with `useMachine` hook:
+
+```
+...
+  const{navigate}= nav;
+  const[current, send]=useMachine(userDataMachine);...
+```
+
+<sub>
+  Don’t forget to import everything :)
+</sub>
+
+And now, let’s add this `switch` statement logic inside `useEffect`:
+
+```
+useEffect(()=>{
+  switch(true){
+    case current.matches(UserDataStates.basic):
+      navigate("FormName")
+      break
+    case current.matches(UserDataStates.address):
+      navigate("FormAddress")
+      break
+    case current.matches(UserDataStates.payment):
+      navigate("FormPayment")
+      break
+    case current.matches(UserDataStates.complete):
+      navigate("Success")
+      break
+    default:
+      navigate("Home")
+      break
+  }},[current])
+```
+
+Now, every state of the machine is mapped to a different screen.
+
+When we reload the app now, we should still see our home screen. But let’s send an event to the machine as soon as the component mounts:
+
+```
+useEffect(()=>{
+  setTimeout(()=>send(UserDataEvents.BASIC),1000)},[send])
+```
+
+After one second we should be redirected to the name screen:
+
+![](/270ee87a781aa0f94bdc7fd7bb404b2b/machineRedirect.gif)
+
+When we change the event type:
+
+```
+useEffect(()=>{
+  setTimeout(()=>send(UserDataEvents.ADDRESS),1000)},[send])
+```
+
+The redirect will be set to address form:
+
+![](/bbb82776035449eaf6e25c56bdaa943f/machineRedirect2.gif)
+
+As the purpose of this timeout was to only test the transitions, we can freely delete it now.
+
+#### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#fetching-initial-user-data-and-checking-where-to-redirect-them)Fetching initial user data and checking where to redirect them
+
+We can now start fetching the user data in our parent machine! Let’s use `invoke` property of our `init` state, and call for the user data with our mock function that we need to import (in real-life scenario it should be `fetch`,`axios` or whatever, this mock is only for the sake of this article):
+
+```
+import{getUser}from'../data/Api';...
+
+
+states:{
+  [UserDataStates.init]:{
+    ...
+
+    invoke:{
+      src:_=>asynccb=>{
+        try{
+          const userData =awaitgetUser();
+
+          console.log(userData);
+
+        }catch(e){
+          console.log(e.message);
+        }
+      },
+    },
+  },
+
+  ...}
+```
+
+Now when we reload the app, we should see nothing in particular to be changed, but when we look into our console, we should get a log of the fetched user data.
+
+Now, depending on the user fields and whether they are `null` or not, we can update our context and redirect the user to the appropriate screen with our `callback handler`.
+
+Let’s do so then:
+
+```
+invoke:{
+  src:_=>asynccb=>{
+    try{
+      const userData =awaitgetUser();
+
+      const{
+        name,
+        surname,
+        email,
+        phone,
+        street,
+        city,
+        code,
+        country,
+        account,
+        creaditCardNo,
+        creditCardExp,
+        creditCardCvv,
+      }= userData;
+
+      switch(null){
+        case name && surname && email && phone:
+          cb({type: UserDataEvents.BASIC, userData});
+          break;
+        case street && city && code && country:
+          cb({type: UserDataEvents.ADDRESS, userData});
+          break;
+        case account && creaditCardNo && creditCardExp && creditCardCvv:
+          cb({type: UserDataEvents.PAYMENT, userData});
+          break;
+        default:
+          cb({type: UserDataEvents.BASIC, userData});
+          break;
+      }
+    }catch(e){
+      console.log(e.message);
+    }
+  },},...
+```
+
+Along with `type` of an event, we also pass our `userData` to the callback handler. So let’s `assign` it to our context on transitioning between the appropriate states:
+
+```
+...
+
+  states:{
+    [UserDataStates.init]:{
+      on:{
+        [UserDataEvents.BASIC]:{
+          target: UserDataStates.basic,
+          actions:assign({
+            userData:(_,{userData})=> userData,
+          }),
+        },
+        [UserDataEvents.ADDRESS]:{
+          target: UserDataStates.address,
+          actions:assign({
+            userData:(_,{userData})=> userData,
+          }),
+        },
+        [UserDataEvents.PAYMENT]:{
+          target: UserDataStates.payment,
+          actions:assign({
+            userData:(_,{userData})=> userData,
+          }),
+        },
+      },
+      invoke:{...
+```
+
+###### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#checkpoint-3)[Checkpoint #3](https://github.com/TheWidlarzGroup/multistep-form-xstate-formik/tree/xstate)
+
+#### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#blocking-the-gestures-and-android-hardware-back-button)Blocking the gestures and Android hardware back button
+
+Let’s imagine, that we are redirected to the payment form. When we use the hardware android back button or swipe from left on iOS, we will be redirected to the previous screen in the stack. What was our previous screen? The initial one, where instead it should have been the previous form part screen. It can happen for example, when the user starts updating their profile from scratch, and then, in the middle, decides to kill the app and finish it later. Upon the second try, the user will be redirected to the place where they left off, but when they want to go back (either by swiping on iOS, or by using hardware back button on Android or back button in the form) they will be transfered back to the first screen. To prevent that, we will:
+
+1. Disable swipe gestures for iOS
+2. Assign custom back functionality for Back buttons in the form screens
+3. Add a custom behavior for hardware Android back button.
+
+First one is fairly easy and not that much complicated. We just have to edit the navigator options on `App.tsx`:
+
+```
+...
+    <Stack.Navigator
+      screenOptions={{headerShown:false, gestureEnabled:false}}>
+...
+```
+
+We are done for iOS. In order to edit the android back button behavior, we will use `useFocusEffect` hook provided by `react-navigation` library. It will trigger some actions whenever we focus given screen. Next, we will have to import the `BackHandler` object from `react-native` and
+
+1. block the default action and
+2. add custom one that sends the correct event to the machine
+
+```
+useFocusEffect(
+  React.useCallback(()=>{
+    constonBackPress=()=>{
+      goBack()
+
+      returntrue
+    }
+
+    BackHandler.addEventListener("hardwareBackPress", onBackPress)
+
+    return()=>
+      BackHandler.removeEventListener("hardwareBackPress", onBackPress)
+  },[current, goBack]))
+```
+
+To disable the default back button behavior, we need to pass a function to our BackHandler listener that returns a `boolean`. When we return `true`, the default behavior will be blocked. Every additional custom action can be invoked in the body of this function (e.g. `goBack` in our case).
+
+`goBack` is a function that we will use for navigating/sending events to parent machine. Let’s declare it along with `goNext` (you know for what)
+
+```
+const goBack =useCallback(()=>{
+  send(UserDataEvents.BACK)},[send])const goNext =useCallback(()=>{
+  send(UserDataEvents.NEXT)},[send])
+```
+
+These two functions, as well as customizing `useFocusEffect` with `BackHandler` handling, should be added inside a component that has our navigator inside.
+
+#### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#changing-the-way-we-navigate-between-screens)Changing the way we navigate between screens
+
+Now, we need to pass down some new things to our form screens -> functions for navigating (`goBack` and `goNext`) and also invoked child machines (we did not invoked them yet inside our machines configs. More on that later on in the article)
+
+Let’s change the way that we pass our components to screens.
+
+Instead of:
+
+```
+<Stack.Screenname="FormName"component={FormName}/>
+```
+
+Let’s go with:
+
+```
+<Stack.Screenname="FormName">{()=><FormName/>}</Stack.Screen>
+```
+
+This way we will be able to pass different stuff down to the screens.
+
+Let’s pass down our functions to appropriate screens then:
+
+```
+...
+    <Stack.Navigator
+      screenOptions={{headerShown:false, gestureEnabled:false}}>
+      <Stack.Screenname="Home"component={Home}/>
+      <Stack.Screenname="FormName">
+        {()=><FormNamegoBack={goBack}goNext={goNext}/>}
+      </Stack.Screen>
+      <Stack.Screenname="FormAddress">
+        {()=>(
+          <FormAddressgoBack={goBack}goNext={goNext}/>
+        )}
+      </Stack.Screen>
+      <Stack.Screenname="FormPayment">
+        {()=><FormPaymentgoBack={goBack}goNext={goNext}/>}
+      </Stack.Screen>
+      <Stack.Screenname="Success">
+        {()=><SuccessgoBack={goBack}/>}
+      </Stack.Screen>
+    </Stack.Navigator>...
+```
+
+If you are observant enough, you might have noticed, that we passed the `goBack` function to the FormName screen. We don’t want to be able to go from this screen back to the initial, `Home` one. But don’t worry, thanks to the way of how we have setup our transitions between states, when we send the `BACK` event while being in `FormName` state, the machine will not change its state as this kind of transition is not possible. You can try it yourself 😃
+
+#### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#invoking-child-machines)Invoking child machines
+
+Now, we can finally invoke appropriate stuff inside every form state, that being invoking our `updateMachine` inside different `userDataMachine` states.
+
+Remember how we can invoke some actions when we’re in a given state with `src` property of `invoke` object?
+
+Quick reminder:
+
+```
+...STATE:{
+  invoke:{
+    src:...
+  }}...
+```
+
+Earlier we used `invoke` property to take advantage of `callback handler`. Now, we want to simply pass our child machine as a source (`src`) to the `invoke` property. Along with invoking another machine, we can pass some data to it, as well as give it a custom id (which is important, you’ll see why later).
+
+Let’s do so then. We will setup the `invoke` object for the `FormName` form part (`basic` state in our parent machine) first.
+
+```
+...
+
+    [UserDataStates.basic]:{
+      on:{
+        [UserDataEvents.NEXT]:{
+          target: UserDataStates.address,
+        },
+      },
+      invoke:{
+        id:'FormName',
+        src: updateMachine,
+        data:(ctx: UserDataMachineContext)=> ctx,
+        onDone:{},
+      },
+    },...
+```
+
+We give it an ID for the child, which will be used to get this invoked service working as a child machine using `useService` (similar to `useMachie`) hook later on. Then, we pass our child machine as `src`. Right after, we pass the context in `data` property and then we can handle the child machine being done in the `onDone` property. We will handle it a bit later on. For now, it is good to know that the stuff inside this property will be triggered as soon as the child machine enters the state which is `final` 😃
+
+Let’s do the same for all the other states: `UserDataStates.address` and `UserDataStates.payment`. Don’t forget to give each one of them an unique ID.
+
+Now goes the question:
+
+> How can I get access to this invoked child machine and this updated context? Do I use `useMachine` hook? Or `useService` hook mentioned in the previous paragraph? If so, what should I pass to it, just this `updateMachine`? Will it even work?
+
+**Here’s the answer:**
+
+This invoked child machine is somehow a part of our parent machine (`userDataMachine`), thus in order to get access to all invoked services/child machines, we simply need to extract them from the parent.
+
+When we used this `useMachine` hook earlier, we destructured only two elements from the array that this hook returns:
+
+1. `current` (or whatever you called it) -> 1st element that gives us information about states of the machine, context, current state and more
+2. `send` (or whatever you called it) -> 2nd element in the returned array that is a function used for sending events down to our machine.
+
+There is also a third element that we can destructure from the array returned by the `useMachine` hook -> `services` (again, how you name the destructured element is up to you 😃).
+
+Thanks to this destructured element, we will get access to all the children of the machine for example. We can simply pass this to every screen, then get the appropriate child (by ID, thus it was so important to give each invoked child one 😃) and pass it to our `useService` hook (works similar to `useMachine`. The difference is that we pass a child machine to it as a parameter not a machine object) 😃
+
+Let’s start then by extracting this third element (service) and pass it down to our screens.
+
+In our “app root” being `App.tsx`, let’s update this part of the code:
+
+```
+...const{navigate}= nav;
+  const[current, send, service]=useMachine(userDataMachine);
+  // destructure also the 3rd element from the array returned by the useMachine hook
+  useEffect(()=>{...
+```
+
+And now, pass this service to every screen:
+
+```
+...
+      <Stack.Screenname="Home"component={Home}/>
+      <Stack.Screenname="FormName">
+        {()=>
+          current.matches(UserDataStates.basic)&&(
+            <FormNameservice={service}goBack={goBack}goNext={goNext}/>
+          )
+        }
+      </Stack.Screen>
+      <Stack.Screenname="FormAddress">
+        {()=>
+          current.matches(UserDataStates.address)&&(
+            <FormAddressservice={service}goBack={goBack}goNext={goNext}/>
+          )
+        }
+      </Stack.Screen>
+      <Stack.Screenname="FormPayment">
+        {()=>
+          current.matches(UserDataStates.payment)&&(
+            <FormPaymentservice={service}goBack={goBack}goNext={goNext}/>
+          )
+        }
+      </Stack.Screen>
+      <Stack.Screenname="Success">
+        {()=><SuccessgoBack={goBack}/>}
+      </Stack.Screen>...
+```
+
+Inside each screen, we render the component only when the machine is in the appropriate state, thus the child is correctly invoked and we don’t get the undefined variable error kinda crash of the app. When we try to render the screen without this `current.matches()` checking, we could end up with the app telling us that the child that we want to extract by given id from service object is undefined.
+
+Then, inside each screen that has this `service` passed to it, we can extract the invoked machine, and pass it to the new `useMachine` hook, like so:
+
+```
+// updating our Props interface:interfaceProps{
+  goBack:()=>void;
+  goNext:()=>void;
+  service: Interpreter<UserDataMachineContext, any, UserDataMachineEvents, any>;}constFormName=({goBack, goNext, service}: Props)=>{
+  const{navigate}=useNavigation();
+  const nav =useNavigation();
+
+  const machine = service.children.get('FormName');...
+```
+
+`Interpreter` is imported from `@xstate/react` and we pass to it the context and events types for our parent machine.
+
+With `service.children.get(ID)` we are able to get the invoked child.
+
+Remember when I told you that this machine that we extract from the service will be used with `useService` similarily to the `useMachine` hook? This is the exact time we do that. Import it from `@xstate/react`.
+
+For our usecase, apart from the name, this hook works, let’s say, exactly the same as the `useMachine` one.
+
+```
+...const[current, send]=useService(
+    machine as Interpreter<UpdateMachineContext, any, UpdateMachineEvents>,
+  );...
+```
+
+In order not to get any types complaints, we have to add this `as Interpreter<>`
+
+Repeat it for every screen.
+
+For testing sake, let’s just console.log some `hello world` strings from inside our child machine in `fetch` state (being the inital state):
+
+###### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#our-updatemachinets-file)Our `updateMachine.ts` file:
+
+```
+...
+  states:{
+    [UpdateStates.fetch]:{
+      on:{
+        [UpdateEvents.NEXT]:{
+          target: UpdateStates.edit,
+          actions:assign({
+            error:_=>false,
+            errorMsg:_=>'',
+          }),
+        },
+        [UpdateEvents.ERROR]:{
+          target: UpdateStates.edit,
+          actions:assign({
+            error:_=>true,
+            errorMsg:_=>'Error',
+          }),
+        },
+      },
+      invoke:{
+        src:ctx=>asynccb=>{
+          try{
+            console.log("hello from child machine, here's the passed context");
+
+            console.log(ctx);
+
+            // await new Promise(res => setTimeout(res, 2000));
+            cb({
+              type: UpdateEvents.NEXT,
+            });
+          }catch(e){
+            cb({type: UpdateEvents.ERROR});
+          }...
+```
+
+Given that we succesfully passed the service to every screen and invoked a new machine with `useService` in every screen, we should get this `hello from child machine, here's the passed context` string printed out in the console when we cycle through each form screen + the machine context:
+
+```
+LOG  hello from child machine, here's the passed context
+ LOG{"error":false,"errorMsg":"","userData":{"account":null,"city":null,"code":null,"country":null,"creaditCardNo":null,"creditCardCvv":null,"creditCardExp":null,"email":"john.doe@mail.com","name":"John","phone":"857 254 712","street":null,"surname":"Doe"}}
+```
+
+Before we proceed with our app, let’s quickly:
+
+1. Get rid of the navigation button in our `Home` screen (`Home.tsx`) that uses the navigation props to go to the next screen. Instead of the button, let’s put the loader there 😃
+2. Change the transitions between screens and add `cardStyles` (for there’s no white background behind the screens)
+3. Reset navigation stack so every animation transition is done the same way
+
+Our updated Home screen:
+
+```
+...constHome=()=>{
+  return(
+    <Layoutstyle={styles.container}>
+      <Textstyle={styles.text}category="h1">
+        Form App
+      </Text>
+      <Textstyle={styles.text}>Fetching user data</Text>
+      <Spinnerstatus="success"/>
+    </Layout>
+  );};const styles = StyleSheet.create({
+  container:{
+    flex:1,
+    justifyContent:'center',
+    alignItems:'center',
+  },
+  text:{marginBottom: theme.spacing.value *4},});...
+```
+
+<sub>
+  * Spinner is imported from UI Kitten
+  library
+</sub>
+
+Setting custom animating transition in navigator options:
+
+```
+...return(
+    <Stack.Navigator
+      screenOptions={{
+        headerShown:false,
+        gestureEnabled:false,
+        cardStyle: styles.cardStyle,
+        cardStyleInterpolator: CardStyleInterpolators.forScaleFromCenterAndroid,
+      }}>
+      <Stack.Screenname="Home"component={Home}/>
+...
+```
+
+`CardStyleInterpolators` are imported from `@react-navigation/stack` and cardStyles are (update the styles inside our `App.tsx`):
+
+```
+const styles = StyleSheet.create({
+  wrapper:{ flex:1},
+  cardStyle:{
+    backgroundColor: darkTheme["color-basic-800"],
+  },})
+```
+
+Let’s apply the same styles also for our Root Navigator (also `App.tsx`):
+
+```
+...
+          <SafeAreaViewstyle={styles.wrapper}>
+            <StatusBarbarStyle="light-content"/>
+            <Root.Navigator
+              screenOptions={{
+                headerShown:false,
+                cardStyle: styles.cardStyle,
+              }}
+              initialRouteName="Form">
+              <Root.Screenname="Form"component={FormFlow}/>
+...
+```
+
+As for the resetting stack of the navigator, let’s (instead of `navigate("screen name")`) use something different:
+
+```
+...
+    switch(true){
+      case current.matches(UserDataStates.basic):
+        nav.dispatch(
+          CommonActions.reset({
+            index:1,
+            routes:[
+              {
+                name:'FormName',
+              },
+            ],
+          }),
+        );
+        break;...
+```
+
+Update our switch statement responsible for redirecting using above code as a schema. With the previous version of react-navigation we could use SwitchNavigator. Now we can either do it this way, or render the screens inside navigator like so [React Navigation Docs - Switch Navigator - upgrading from 4.x](https://reactnavigation.org/docs/upgrading-from-4.x/#switch-navigator)
+
+How it looks so far:
+
+![](/a2e7e6f8442f71cf1d0eead57bfcdf01/navAnimations.gif)
+
+### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#handling-forms-with-formik-and-yup)Handling forms (with Formik and Yup)
+
+If you want to start working from this part, here are the files [Checkpoint #4](https://github.com/TheWidlarzGroup/multistep-form-xstate-formik/tree/xstate-invoking)
+
+In this part, we will finally handle our forms and inputs and add some simple validation. Validation wise, you would want to go for something more thorough than just checking whether the input value is present or contains e.g. only numbers.
+
+In each screen, the moment we initialize a new machine/service, we get access to the latest user data. Let’s pass this data as initial values to our inputs. As we want to use Formik and Yup\* in order to handle the forms, we have to configure both of these libraries first.
+
+###### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#-we-have-installed-these-two-packages-at-the-very-beginning-of-an-article-if-by-any-chance-you-dont-have-it-installed-do-it-now-)\* we have installed these two packages at the very beginning of an article. If by any chance you don’t have it installed, do it now 😀
+
+Let’s start with importing `useFormik` hook from `formik` package and initializing it inside our screen components (each screen should have its own formik configuration). Screen with “name form” is the first one in the order, so let’s start with it 😃
+
+###### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#formnametsx)`FormName.tsx`:
+
+```
+...constFormName=({goBack, service}: Props)=>{
+  const machine = service.children.get('FormName');
+  const[current, send]=useService(
+    machine as Interpreter<UpdateMachineContext, any, UpdateMachineEvents>,
+  );
+
+  const formik =useFormik({
+    initialValues:{
+      name: current.context.userData?.name ??'',
+      surname: current.context.userData?.surname ??'',
+      email: current.context.userData?.email ??'',
+      phone: current.context.userData?.phone ??'',
+    },
+    validateOnBlur:true,
+    validateOnChange:true,
+  });...
+```
+
+Apart from passing the initial values, we also tell formik to validate the values on every input change and on blur (meaning loosing focus on the currently focused input).
+
+But how come formik knows when the input value is valid and when it is not? It’s thanks to the `validationSchema` that we also need to provide to the configuration object. In effect, formik will know how to check and validate the values.
+
+To define the `validationSchema`, we can use `Yup` library that we also should have installed now (if not, add it with `yarn add yup`).
+
+We will need to define one schema for each one of the screen forms.
+
+To do so, we simply create a new variable with `Yup.object().shape(config)` and then pass it to our formik config object.
+
+Our schema:
+
+```
+const FormSchema = Yup.object().shape({
+  name: Yup.string().required("Required"),
+  surname: Yup.string().required("Required"),
+  email: Yup.string().required("Required").email("Should be an e-mail"),
+  phone: Yup.string()
+    .required("Required")
+    .matches(newRegExp(/^[0-9\s]*$/),"Only numbers and spaces allowed"),})
+```
+
+As for the validation options, we have plenty to choose from. For detailed descriptions you can visit the [Yup docs here](https://github.com/jquense/yup).
+
+As said before, we just want some simple validation, only to check whether the inputs are not empty, are e-mail or if they are numbers-only.
+
+Now that we have our schema ready, let’s pass it to `formik`:
+
+```
+...
+  const formik =useFormik({
+    initialValues:{
+      name: current.context.userData?.name ??'',
+      surname: current.context.userData?.surname ??'',
+      email: current.context.userData?.email ??'',
+      phone: current.context.userData?.phone ??'',
+    },
+    validationSchema: FormSchema,
+    validateOnBlur:true,
+    validateOnChange:true,
+  }...
+```
+
+We can also tell `formik` what it should do on submit. When we try to invoke the submit with formik while the values are invalid, formik simply won’t do anything. Our submit function will not take action.
+
+To add submit behavior, it is just a matter of passing a function to another config property of `formik` config object:
+
+```
+...
+  const formik =useFormik({
+    initialValues:{
+      name: current.context.userData?.name ??'',
+      surname: current.context.userData?.surname ??'',
+      email: current.context.userData?.email ??'',
+      phone: current.context.userData?.phone ??'',
+    },
+    validationSchema: FormSchema,
+    validateOnBlur:true,
+    validateOnChange:true,
+    onSubmit:values=>{
+      send(UpdateEvents.NEXT, values);
+    },
+  });...
+```
+
+On submit, we will send the event type to our machine, along with newly updated values.
+
+Let’s quickly go back to our child machine to address this “new thing” that we want to do with this line of code: `send(UpdateEvents.NEXT, values);` inside onSubmit in formik configuration.
+
+After navigating to `updateMachine.ts` and to the part where we have the configuration of `UpdateStates.edit` state, we should see something like this:
+
+```
+    [UpdateStates.edit]:{
+      on:{
+        [UpdateEvents.NEXT]:{
+          target: UpdateStates.pending,
+        },
+      },
+    },
+```
+
+We tell the machine that it should navigate to `UpdateStates.pending` upon the `NEXT` event. Let’s update this behavior by assigning new data to the machine context.
+
+When we call this on submit (with Formik):
+
+```
+send(UpdateEvents.NEXT, values)
+```
+
+We pass new values as event data along with the type of an event (the type being `NEXT`).
+
+To update the context on transition, we can do something like this:
+
+```
+...
+
+
+  [UpdateEvents.NEXT]:{
+    target: UpdateStates.pending,
+    actions:assign({
+      userData:({userData}, eventData:{[key: string]: any})=>{
+        const updatedUser: UserData ={
+          ...userData,
+          ...(eventData as UserData),
+        };
+
+        return updatedUser;
+      },
+    }),
+  },...
+```
+
+We assign a new object to the `userData` in our machine context with a little help of spread operators, made of the previous context data (this destructured `userData` form the first argument) and the newly updated values from event data (second argument).
+
+Now, whenever we invoke the submit action with formik, an event `UpdatedEvents.NEXT` will be sent to our machine (along with new user data). It will transition us to the next state (`pending`) along with updated context. While `pending`, we will call the back-end to update the user (in our case - just a mock function) and the updated user from the response will be passed one more time to the next transition.
+
+When our machine finds itself in the `pending` state, it will have access to the latest `userData` from the context. We will use it to update the user in the backend.
+
+Let’s also edit the behavior in `pending` state then:
+
+Our pending state so far:
+
+```
+...
+    [UpdateStates.pending]:{
+      on:{
+        [UpdateEvents.NEXT]:{
+          target: UpdateStates.done,
+          actions:assign({
+            error:_=>false,
+            errorMsg:_=>'',
+          }),
+        },
+        [UpdateEvents.ERROR]:{
+          target: UpdateStates.edit,
+          actions:assign({
+            error:_=>true,
+            errorMsg:_=>'Error',
+          }),
+        },
+      },
+      invoke:{
+        src:_=>asynccb=>{
+          try{
+            awaitnewPromise(res=>setTimeout(res,2000));
+            cb({
+              type: UpdateEvents.NEXT,
+            });
+          }catch(e){
+            cb({type: UpdateEvents.ERROR});
+          }
+        },
+      },
+    },...
+```
+
+And now let’s replace this timer thingy with our mock back-end call function:
+
+```
+...
+  invoke:{
+    src:({userData})=>asynccb=>{
+      try{
+        // CALLING BACK END TO UPDATE USER
+        if(userData){
+          const response =awaitupdateUser(userData);
+
+          cb({
+            type: UpdateEvents.NEXT,
+            userData: response,
+          });
+        }else{
+          throwError('User Data is null');
+        }
+      }catch(e){
+        cb({type: UpdateEvents.ERROR});
+      }
+    },
+  },...
+```
+
+When the back-end call is successful, we will be redirected to the `final` state. When a machine, which is invoked inside another machine, reaches its `final` state, we will be able to invoke an action in our parent in this very moment and also get access to some data from our child.
+
+That being said, when we reach the final state in our child machine, `updateMachine`, its context has the latest userData. This data can be passed to the parent.
+
+In order to pass it, we simply use `data` property of the state object, just like so:
+
+```
+...
+  [UpdateStates.done]:{
+    type:'final',
+    data:{
+      userData:({userData}: UpdateMachineContext)=> userData,
+    },
+  },...
+```
+
+Let’s also handle this stuff back in our parent machine.
+
+Navigate to `userDataMachine.ts` and for every state which invokes the child machine do something like this:
+
+```
+...
+  invoke:{
+    id:'FormName',
+    src: updateMachine,
+    data:(ctx: UserDataMachineContext)=> ctx,
+    onDone:{
+      target: UserDataStates.address,
+      actions:assign({
+        userData:(_,{data})=> data?.userData ??null,
+      }),
+    },
+  },...
+```
+
+When the child machine **“is done”**, we will transition (hint: on parent level :)) to the next state + update parent’s context:
+
+```
+  actions:assign({
+    userData:(_,{data})=> data?.userData ??null,
+  }),
+```
+
+We should add this setup to every state that invokes our child machine.
+
+Now let’s go back one more time to our child machine config.
+
+Whenever we invoke the machine, we are in this first state called `fetch`. In there, we can make another BE call just to check if we are up to date in terms of user data. For now, we have a timer there, so let’s just replace it will an actual call to the back-end (mock function in our case):
+
+```
+...
+    [UpdateStates.fetch]:{
+      on:{
+        [UpdateEvents.NEXT]:{
+          target: UpdateStates.edit,
+          actions:assign({
+            error:_=>false,
+            errorMsg:_=>'',
+            userData:(_,{userData})=> userData,
+          }),
+        },
+        [UpdateEvents.ERROR]:{
+          target: UpdateStates.edit,
+          actions:assign({
+            error:_=>true,
+            errorMsg:_=>'Error',
+          }),
+        },
+      },
+      invoke:{
+        src:({userData})=>asynccb=>{
+          try{
+            if(userData){
+              const response =awaitgetUser(userData);
+
+              cb({
+                type: UpdateEvents.NEXT,
+                userData: response,
+              });
+            }else{
+              throwError('User Data is null');
+            }
+          }catch(e){
+            cb({type: UpdateEvents.ERROR});
+          }
+        },
+      },
+    },...
+```
+
+We did the same action as before with `pending` state, but instead of using `updateUser` function, we use `getUser` that returns the `userData`.
+
+The app should still work correctly, you can give it a spin 😃
+
+Now, when done with this additional machines setup, we can come back to our screen forms and finish the work there.
+
+Let’s pass all the formik values down to the inputs now, just like so:
+
+```
+<Input
+    ...
+    value={formik.values.surname}
+    ...
+  />
+```
+
+Let’s also handle the input change event:
+
+```
+<Input
+    ...
+    onChangeText={text=> formik.setFieldValue('surname', text)}
+    ...
+  />
+```
+
+For handling errors, we can use the `errors` object that is a property of `formik` variable that we initialized with `useFormik` hook earlier.
+
+Whenever the given input value is invalid, we want to style the input in a different way and provide the user with error message. In case of the UI Kitten library that we use in this project, we can do it by using `caption` and `status` props.
+
+```
+<Input
+    ...
+    caption={formik.errors['surname']||'Your last name'}
+    status={formik.errors['surname']&&'danger'}
+    ...
+  />
+```
+
+When a given input field has an error, we change the input status to `danger` and provide an error msg as the `caption` to be displayed below the input box.
+
+Our finished Input component should look somewhere the same as (code wise):
+
+```
+<Input
+  style={styles.input}
+  caption={formik.errors["surname"]||"Your last name"}
+  label="Last name"
+  placeholder="Surname"
+  status={formik.errors["surname"]&&"danger"}
+  value={formik.values.surname}
+  onChangeText={text=> formik.setFieldValue("surname", text)}/>
+```
+
+Here’s the pic presenting the input when it is in error mode:
+
+![errorInput](https://thewidlarzgroup.com/static/387fb2c2107073d25f5146e29ead5714/6d370/errorInput.png)
+
+The error message comes from our Yup configuration:
+
+```
+...const FormSchema = Yup.object().shape({
+  ...
+
+  surname: Yup.string().required('Required'),...
+```
+
+Do the same with the rest of the inputs.
+
+We are almost finished with this part. One more thing that we want to add, is to block the next and back buttons whenever we are either in the `fetch` or `pending` state. It will prevent the user from dispatching events during backend calls etc.
+
+Apart from this, it would also be reasonable to additionaly block the next button when the form is in error mode. When we allow the user to invoke the submit despite the input values being invalid, the formik will handle it, but it would be nice from the UI/UX point of view to just format the styling of the button in a different way.
+
+In order to do so, we need to pass some new props down to our `FormWrapper` component.
+
+So let’s update the Props:
+
+```
+interfaceProps{
+  backBtnAction:()=>void;
+  nextBtnAction:()=>void;
+  children: React.ReactChild;
+  title: string;
+  backDisabled?: boolean;
+  nextDisabled?: boolean;}
+```
+
+And let’s use them inside the component to block the buttons:
+
+```
+...constFormWrapper=({
+  backBtnAction,
+  nextBtnAction,
+  children,
+  title,
+  backDisabled,
+  nextDisabled,}: Props)=>{
+  return(
+
+        ...
+
+        <Viewstyle={styles.bottom}>
+          <Button
+            style={styles.next}
+            size="medium"
+            appearance="ghost"
+            status="basic"
+            disabled={backDisabled}
+            onPress={backBtnAction}>
+            Back
+          </Button>
+          <Button
+            style={styles.next}
+            size="medium"
+            appearance="outline"
+            status="success"
+            disabled={nextDisabled}
+            onPress={nextBtnAction}>
+            Next
+          </Button>
+
+        ...
+
+    </Layout>
+  );
+};
+...
+```
+
+And let’s actually pass this data to our wrapper in `FormName` component.
+
+We should declare two new variables:
+
+1. `isLoading` -> it will tell us when the loading occurs (when in `fetch` and `pending` states of the machine)
+2. `canProceed` -> it will tell us when the form inputs are actually valid and whether the submit action can be invoked succesfully.
+
+We can use `useMemo` hooks for it:
+
+```
+...
+
+
+  const isLoading =useMemo(()=>{
+    if(
+      current.matches(UpdateStates.fetch)||
+      current.matches(UpdateStates.pending)
+    ){
+      returntrue;
+    }
+    returnfalse;
+  },[current]);
+
+  const canProceed =useMemo(()=>{
+    const errorsArray = Object.keys(formik.errors);
+
+    if(isLoading || errorsArray.length >0){
+      returnfalse;
+    }
+    returntrue;
+  },[isLoading, formik.errors]);
+
+  ...
+```
+
+Let’s pass this data to the wrapper now:
+
+```
+...
+  return(
+    <FormWrapper
+      title="Name and contact"
+      nextBtnAction={submitForm}
+      nextDisabled={!canProceed}
+      backBtnAction={goBack}
+      backDisabled={isLoading}>
+      <>
+        <Input
+...
+```
+
+Let’s also get rid of this `goNext` function from Props for this screen as we no longer need it:
+
+```
+interfaceProps{
+  goBack:()=>void;
+  goNext:()=>void;// GET RID OF THIS LINE
+  service: Interpreter<UserDataMachineContext, any, UserDataMachineEvents, any>;}
+```
+
+And in our navigator (`App.tsx`):
+
+```
+<Stack.Screenname="FormName">
+  {()=>
+    current.matches(UserDataStates.basic)&&(
+      <FormNameservice={service}goBack={goBack}goNext={goNext}/>
+      // GET RID OF goNext
+    )
+  }</Stack.Screen>
+```
+
+Let’s also render some kind of a spinner indicating the loading state. For this purpose, we can use the previously declared `isLoading` variable:
+
+```
+...
+      disabled={isLoading}
+    />
+    {isLoading &&(
+      <Viewstyle={styles.loading}>
+        <Spinnerstatus="success"/>
+      </View>
+    )}
+  </></FormWrapper>...
+```
+
+Styles:
+
+```
+const styles = StyleSheet.create({
+  input:{
+    marginBottom: theme.spacing.value *2,
+  },
+  loading:{
+    alignItems:"center",
+  },})
+```
+
+When finished with the first screen, our code for it should look like this:
+
+```
+const FormSchema = Yup.object().shape({
+  name: Yup.string().required('Required'),
+  surname: Yup.string().required('Required'),
+  email: Yup.string()
+    .required('Required')
+    .email('Should be an e-mail'),
+  phone: Yup.string()
+    .required('Required')
+    .matches(newRegExp(/^[0-9\s]*$/),'Only numbers and spaces allowed'),});interfaceProps{
+  goBack:()=>void;
+  service: Interpreter<UserDataMachineContext, any, UserDataMachineEvents, any>;}constFormName=({goBack, service}: Props)=>{
+  const machine = service.children.get('FormName');
+  const[current, send]=useService(
+    machine as Interpreter<UpdateMachineContext, any, UpdateMachineEvents>,
+  );
+
+  const formik =useFormik({
+    initialValues:{
+      name: current.context.userData?.name ??'',
+      surname: current.context.userData?.surname ??'',
+      email: current.context.userData?.email ??'',
+      phone: current.context.userData?.phone ??'',
+    },
+    validationSchema: FormSchema,
+    validateOnBlur:true,
+    validateOnChange:true,
+    onSubmit:values=>{
+      send(UpdateEvents.NEXT, values);
+    },
+  });
+
+  constsubmitForm=()=> formik.submitForm();
+
+  const isLoading =useMemo(()=>{
+    if(
+      current.matches(UpdateStates.fetch)||
+      current.matches(UpdateStates.pending)
+    ){
+      returntrue;
+    }
+    returnfalse;
+  },[current]);
+
+  const canProceed =useMemo(()=>{
+    const errorsArray = Object.keys(formik.errors);
+
+    if(isLoading || errorsArray.length >0){
+      returnfalse;
+    }
+    returntrue;
+  },[isLoading, formik.errors]);
+
+  return(
+    <FormWrapper
+      title="Name and contact"
+      nextBtnAction={submitForm}
+      nextDisabled={!canProceed}
+      backBtnAction={goBack}
+      backDisabled={isLoading}>
+      <>
+        <Input
+          style={styles.input}
+          caption={formik.errors['name']||'Your first name'}
+          label="First name"
+          placeholder="Name"
+          status={formik.errors['name']&&'danger'}
+          value={formik.values.name}
+          onChangeText={text=> formik.setFieldValue('name', text)}
+          disabled={isLoading}
+        />
+        <Input
+          style={styles.input}
+          caption={formik.errors['surname']||'Your last name'}
+          label="Last name"
+          placeholder="Surname"
+          status={formik.errors['surname']&&'danger'}
+          value={formik.values.surname}
+          onChangeText={text=> formik.setFieldValue('surname', text)}
+          disabled={isLoading}
+        />
+        <Input
+          style={styles.input}
+          caption={formik.errors['email']||'You e-mail address'}
+          label="E-mail"
+          placeholder="E-mail address"
+          status={formik.errors['email']&&'danger'}
+          value={formik.values.email}
+          onChangeText={text=> formik.setFieldValue('email', text)}
+          disabled={isLoading}
+          autoCapitalize="none"
+        />
+        <Input
+          style={styles.input}
+          caption={formik.errors['phone']||'Your phone number'}
+          label="Phone"
+          keyboardType="number-pad"
+          placeholder="Phone"
+          status={formik.errors['phone']&&'danger'}
+          value={formik.values.phone}
+          onChangeText={text=> formik.setFieldValue('phone', text)}
+          disabled={isLoading}
+        />
+        {isLoading &&(
+          <Viewstyle={styles.loading}>
+            <Spinnerstatus="success"/>
+          </View>
+        )}
+      </>
+    </FormWrapper>
+  );};const styles = StyleSheet.create({
+  input:{
+    marginBottom: theme.spacing.value *2,
+  },
+  loading:{
+    alignItems:'center',
+  },});exportdefault FormName;
+```
+
+Your task is to repeat this step for every screen. It’s just a matter of copying and pasting some code and changing a few things here and there. Machines are already taken care of so don’t worry about them.
+
+At this point, our app should correctly handle the user update process and look somewhat like this:
+
+![](https://thewidlarzgroup.com/d34d6db656a642b133f38560c80e7830/success.gif)
+
+There’s one more feature we could add to polish our app.
+
+Upon completing the whole form (meaning that the user is in the `UserDataStates.complete` state), we could either exit this flow and redirect the user to the completely different part of the app, or just simply give him the chance to e.g. go back and get through each one of the steps one more time. Let’s implement the latter and add a button allowing the user to go back to the previous screens. Our machines are currently setup in such a way, we just need to add a button on our success screen. Let’s do so then:
+
+```
+interfaceProps{
+  goBack:()=>void;}constSuccess=({ goBack }: Props)=>{
+  return(
+    <Layoutstyle={{ flex:1, justifyContent:"center", alignItems:"center"}}>
+      <Textstyle={styles.text}category="h2">
+        Success screen
+      </Text>
+      <Buttonappearance="ghost"status="success"onPress={goBack}>
+        Let me go back and edit some stuff...
+      </Button>
+    </Layout>
+  )}const styles = StyleSheet.create({
+  text:{ marginBottom: theme.spacing.value *2},})exportdefault Success
+```
+
+![successBtn](https://thewidlarzgroup.com/static/19e896f30201fdedd4f0fe3350b9627f/a8a0d/successBtn.png)
+
+🔥 And bang, the app is finished: 🔥💪🏽
+
+![fullFlow2](https://thewidlarzgroup.com/static/bb018b2e298720939b05f53254e15072/12f38/fullFlow2.png)
+
+Now, the user can also go back whenever in `success` screen.
+
+### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#summary)Summary
+
+That’s it, we have made it and created the mobile app together using XState, Formik, Yup and TypeScript! 🤓
+
+It was quite a long article, I hope that you eventually got through it and it helped you in any way at least a bit.
+
+The final code for the app is available in the repo either on the master branch or `xstate-formik` branch. Check it out [here](https://github.com/TheWidlarzGroup/multistep-form-xstate-formik). Feel free to leave a star
