@@ -2,21 +2,25 @@ const path = require("path");
 const fs = require("fs");
 const chalk = require("chalk");
 
-function escapeHtml(raw) {
-  return raw
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
+function getAuthors(author) {
+  if (Array.isArray(author)) {
+    const rendered = author.reduce(
+      (authors, currentAuthor) =>
+        authors.concat(`<author><name>${currentAuthor}</name></author>\n`),
+      ""
+    );
+    return rendered;
+  }
+  return `<author><name>${author}</name></author>\n`;
 }
 
-const DATA_DIR = path.join(process.cwd(), "pages/example");
+const DATA_DIR = path.join(process.cwd(), "data");
 const HOME_URL = "https://xstate.tips/";
-const RSS_FILE = path.join(process.cwd(), "static/feed.xml");
-const metadata = require(`${DATA_DIR}/metadata.json`);
+const RSS_FILE = path.join(process.cwd(), "public/feed.xml");
 
-module.exports.generateFeed = function (tips) {
+function generateFeed() {
+  const tips = require(path.join(DATA_DIR, "posts.json"));
+  console.log({ tips });
   let feedXML = `<?xml version="1.0" encoding="UTF-8"?>
           <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
           <channel>
@@ -28,17 +32,23 @@ module.exports.generateFeed = function (tips) {
   const pubDateFallback = new Date();
 
   for (const tip of tips) {
-    feedXML += `\n<item><title>${tip.title}</title><description>${escapeHtml(
-      tip.html
-    )}</description><pubDate>${
-      tip.pubDate || pubDateFallback.toUTCString()
-    }</pubDate><link>${HOME_URL}${
+    feedXML += `\n<item><title>${tip.title}</title><description>${
+      tip.description
+    }</description>
+      ${getAuthors(tip.author)}
+      <pubDate>${
+        tip.pubDate || pubDateFallback.toUTCString()
+      }</pubDate><link>${HOME_URL}examples/${
       tip.slug
-    }</link><guid isPermaLink="true">${HOME_URL}${tip.slug}</guid></item>`;
+    }</link><guid isPermaLink="true">${HOME_URL}examples/${
+      tip.slug
+    }</guid></item>`;
   }
 
   feedXML += "\n</channel>\n</rss>";
 
   fs.writeFileSync(RSS_FILE, feedXML);
   console.log(chalk.green(`📰 Successfully compiled RSS feed!`));
-};
+}
+
+generateFeed();
