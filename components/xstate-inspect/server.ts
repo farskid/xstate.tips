@@ -9,7 +9,7 @@ import {
 } from "xstate";
 import { toSCXMLEvent } from "xstate/lib/utils";
 
-import { inspectMachine } from "./";
+import { inspectMachine } from ".";
 
 const wss = new WebSocket.Server({
   port: 8888,
