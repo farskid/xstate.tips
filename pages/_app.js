@@ -36,6 +36,7 @@ function MyApp({ Component, pageProps }) {
   const response = useSWR("/api/example", {
     fetcher: (...args) => fetch(...args).then((r) => r.json()),
   });
+
   const pagesList = React.useMemo(
     () =>
       [
@@ -50,7 +51,7 @@ function MyApp({ Component, pageProps }) {
   return (
     <MDXProvider components={mdxComponents}>
       <Layout examples={pagesList}>
-        <Component {...pageProps} />
+        <Component />
       </Layout>
     </MDXProvider>
   );

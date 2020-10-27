@@ -1,54 +1,50 @@
 const path = require("path");
 const fs = require("fs");
 const chalk = require("chalk");
+const RSS = require("rss");
+const uuid = require("uuid");
 
-function getAuthors(author) {
-  if (Array.isArray(author)) {
-    const rendered = author.reduce(
-      (authors, currentAuthor) =>
-        authors.concat(`<author><name>${currentAuthor}</name></author>\n`),
-      ""
-    );
-    return rendered;
-  }
-  return `<author><name>${author}</name></author>\n`;
-}
+const feed = new RSS({
+  title: "XState Tips",
+  description:
+    "Examples from real life that help you master state machines and statecharts",
+  language: "en",
+});
 
-const DATA_DIR = path.join(process.cwd(), "data");
+const DATA_DIR = path.join(process.cwd(), "pages/example");
 const HOME_URL = "https://xstate.tips/";
 const RSS_FILE = path.join(process.cwd(), "public/feed.xml");
 
-function generateFeed() {
-  const tips = require(path.join(DATA_DIR, "posts.json"));
-  console.log({ tips });
-  let feedXML = `<?xml version="1.0" encoding="UTF-8"?>
-          <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
-          <channel>
-          <title>XState Tips</title>
-          <description>Examples from real life that help you master state machines</description>
-          <link>${HOME_URL}</link>
-          <atom:link href="${HOME_URL}feed.xml" rel="self" type="application/rss+xml" />`;
+function prepareFullContent(exampleDir) {
+  const metadata = require(path.join(exampleDir, "meta.js"));
 
-  const pubDateFallback = new Date();
+  return JSON.parse(JSON.stringify(metadata));
+}
 
-  for (const tip of tips) {
-    feedXML += `\n<item><title>${tip.title}</title><description>${
-      tip.description
-    }</description>
-      ${getAuthors(tip.author)}
-      <pubDate>${
-        tip.pubDate || pubDateFallback.toUTCString()
-      }</pubDate><link>${HOME_URL}examples/${
-      tip.slug
-    }</link><guid isPermaLink="true">${HOME_URL}examples/${
-      tip.slug
-    }</guid></item>`;
-  }
+function collectMetadata() {
+  return fs
+    .readdirSync(DATA_DIR)
+    .map((fileName) => prepareFullContent(path.join(DATA_DIR, fileName)));
+}
 
-  feedXML += "\n</channel>\n</rss>";
+function generateAutomaticFeed() {
+  const tips = collectMetadata();
 
-  fs.writeFileSync(RSS_FILE, feedXML);
+  tips.forEach((tip) => {
+    const { title, description, author, pubDate: date, url } = tip.meta;
+    feed.item({
+      title,
+      description,
+      author,
+      date,
+      guid: uuid.v4(),
+      url: path.join(HOME_URL, url),
+    });
+  });
+
+  fs.writeFileSync(RSS_FILE, feed.xml({ indent: true }));
+
   console.log(chalk.green(`📰 Successfully compiled RSS feed!`));
 }
 
-generateFeed();
+generateAutomaticFeed();
