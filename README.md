@@ -1,5 +1,5 @@
 # xstate.tips
 
-Tips and tricks of using XState for modeling with state machines and statecharts
+Examples from real life that help you master state machines and statecharts
 
-Coming soon.
+>Coming soon.
