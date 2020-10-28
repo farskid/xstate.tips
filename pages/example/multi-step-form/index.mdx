@@ -1,34 +1,11 @@
-# Multistep form handling with Finite State Machines, Formik and TypeScript | The Widlarz Group Website
+import { Tip } from "../../../components/Tip";
+import { meta } from "./meta";
+
+export default ({ children }) => <Tip meta={meta}>{children}</Tip>;
 
 [](https://thewidlarzgroup.com/multistep-form-xstate-formik/)
 
-June 17, 2020
-
-- **[Introduction](/multistep-form-xstate-formik/#introduction)**
-- **[#0 Our case](/multistep-form-xstate-formik/#part-0---our-case)**
-- **[#1 XState machines and Typescript](/multistep-form-xstate-formik/#part-1---xstate-machines-and-typescript)**
-
-  - **[Let’s start!](/multistep-form-xstate-formik/#lets-get-our-hands-dirty-already-)**
-  - **[Adding TypeScript](/multistep-form-xstate-formik/#what-about-typescript-)**
-
-- **[#2 Mobile App](/multistep-form-xstate-formik/#part-2---mobile-app)**
-
-  - **[Mocking the back-end](/multistep-form-xstate-formik/#mocking-the-back-end)**
-  - **[Installing all the necessary dependencies](/multistep-form-xstate-formik/#installing-all-the-necessary-dependencies)**
-  - **[Adding navigation to our app](/multistep-form-xstate-formik/#adding-navigation-to-our-app)**
-  - **[Adding machines](/multistep-form-xstate-formik/#adding-machines)**
-  - **[Update machine](/multistep-form-xstate-formik/#updatemachine)**
-  - **[Test-drive our update machine](/multistep-form-xstate-formik/#test-drive-our-updatemachine)**
-  - **[User data machine](/multistep-form-xstate-formik/#userdatamachine)**
-  - **[Initial data fetch and redirecting](/multistep-form-xstate-formik/#fetching-initial-user-data-and-checking-where-to-redirect-them)**
-  - **[Blocking gestures and handling Android back button](/multistep-form-xstate-formik/#blocking-the-gestures-and-android-hardware-back-button)**
-  - **[Changing the way of navigating between the screens](/multistep-form-xstate-formik/#changing-the-way-we-navigate-between-screens)**
-  - **[Invoking child machines](/multistep-form-xstate-formik/#invoking-child-machines)**
-  - **[Handling forms with Formik and Yup](/multistep-form-xstate-formik/#handling-forms-with-formik-and-yup)**
-
-- **[#3 Summary](/multistep-form-xstate-formik/#summary)**
-
-## [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#introduction)Introduction
+## Introduction
 
 Lately, I had a chance to work on a mobile app that utilizes this concept of finite state machines. Having no prior knowledge on such thing as a state machine, I quickly got to liking it!
 
@@ -41,17 +18,17 @@ If you want to read more about it, and about finite states machines concept in g
 
 In this article, I will try to share some knowledge about it with you. We will develop a simple React Native app, which handles multi-step forms. Apart from XState, we will use Formik and TypeScript.
 
-## [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#part-0---our-case)Part 0 - Our case
+## Part 0 - Our case
 
-### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#what-we-want-to-achieve-and-how)What we want to achieve and how?
+### What we want to achieve and how?
 
-#### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#we-want-to)We want to:
+#### We want to:
 
 - have the user update their address, billing and contact information
 - check what information is not yet updated and based on this redirect the user to the appropriate form step (screen)
 - save progress as the user goes between each form step (when a user decides to complete the form later, the app will redirect them to the place when they left off)
 
-#### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#how)How?
+#### How?
 
 Back-end wise, let’s imagine that we have these two endpoints - one for getting the user data and the second one for updating (e.g. `https://myapi.com/api/user` with GET and PUT methods).
 
@@ -63,15 +40,15 @@ So in order to DRY, we can declare the state machine that takes in the previous 
 
 Apart from declaring this machine, we will also create another one: a parent, which states will represent every screen. We will also use it to handle redirecting.
 
-#### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#final-app)Final app
+#### Final app
 
 ![](https://thewidlarzgroup.com/8104a0b294fd2628816fe7f3f4796682/wholeFlowFinal_fast.gif)
 
 ---
 
-## [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#part-1---xstate-machines-and-typescript)Part 1 - XState machines and Typescript
+## Part 1 - XState machines and Typescript
 
-### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#lets-get-our-hands-dirty-already-)Let’s get our hands dirty already 😎!
+### Let’s get our hands dirty already 😎!
 
 Before we dive into the VS Code (or whatever IDE you will be using), let’s use this cool [Xstate Visualizer](https://xstate.js.org/viz/) and try to initially declare our machines.
 
@@ -125,7 +102,7 @@ That’s the beauty of state machines 💪🏽🔥!
 
 Ok! So now, that we know all the basics, let’s try to declare our first machine -> the one that will be responsible for updating the user.
 
-#### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#re-usable-child-machine-%E2%99%80)Re-usable child machine 👷🏼‍♀
+#### Re-usable child machine 👷🏼‍♀
 
 Possible states that can represent all the necessary actions that need to be done while editing the user data on one particular screen:
 
@@ -210,7 +187,7 @@ const updateMachine =Machine({
 
 Now that we have our `updateMachine` ready, let’s do the same with the parent one (this parent will invoke the previous child machine in every state that represents given form part. More on that later)!
 
-#### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#parent-machine-%EF%B8%8F)Parent machine ⬆️
+#### Parent machine ⬆️
 
 Let’s start with all possible states. I decided to divide my form into these steps:
 
@@ -303,7 +280,7 @@ const userDataMachine =Machine({
 
 As we can see, initially, we will check what information about the user is lacking. Based on this information, we will redirect the user to a given form part. While being in one of the form states, we can go between each one of them, and after updating all the information, we will be redirected to the complete state.
 
-### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#what-about-typescript-)What about TypeScript? 💎
+### What about TypeScript? 💎
 
 As stated in the introduction to this article, we will use TypeScript to write our app, thus we also need to add some types, yay!
 
@@ -317,7 +294,7 @@ As you would guess, we have 3 things to cover with types:
 
 For the context, we simply do it with an `interface`, just like so:
 
-#### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#updatemachine-context)updateMachine Context:
+#### updateMachine Context:
 
 ```
 interfaceUpdateMachineContext{
@@ -328,7 +305,7 @@ interfaceUpdateMachineContext{
 
 Let’s don’t forget to also export it! `export interface UpdateMachineContext...`
 
-#### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#updatemachine-states)updateMachine States:
+#### updateMachine States:
 
 As for the states, we will first declare an enum with possible states, and then the state object, just like so:
 
@@ -352,7 +329,7 @@ exportinterfaceUpdateMachineStates{
   };}
 ```
 
-#### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#updatemachine-events)updateMachine Events:
+#### updateMachine Events:
 
 With events, we can use an enum again, representing every possible event, and then we will extend an EventObject that we import from `xstate` library (more about that later on)
 
@@ -373,12 +350,9 @@ exportinterfaceUpdateMachineEventsextendsEventObject{
   type: EventTypesSchema;}
 ```
 
-<sub>
-  EventObject is imported from `xstate`
-  library
-</sub>
+<sub>EventObject is imported from `xstate` library</sub>
 
-#### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#userdatamachine-context)userDataMachine Context
+#### userDataMachine Context
 
 Now let’s do the same with our parent machine.
 
@@ -389,7 +363,7 @@ interfaceUserDataMachineCOntext{
   errorMsg: string;}
 ```
 
-#### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#userdatamachine-states)userDataMachine States:
+#### userDataMachine States:
 
 ```
 exportenum UserDataStates {
@@ -407,7 +381,7 @@ exportenum UserDataStates {
   }}
 ```
 
-#### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#userdatamachine-events)userDataMachine Events:
+#### userDataMachine Events:
 
 ```
 exportenum UserDataEvents {
@@ -431,9 +405,9 @@ WE ARE DONE with these types at last! Quite a lot of work and we did not even st
 
 ---
 
-## [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#part-2---mobile-app)Part 2 - Mobile App
+## Part 2 - Mobile App
 
-##### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#starting-point-of-this-step-checkpoint-1)Starting point of this step: [Checkpoint #1](https://github.com/TheWidlarzGroup/multistep-form-xstate-formik/tree/project-init)
+#####
 
 If you don’t want to create your own project from scratch, I have setup a simple hello world app in React Native with UI Kitten library (for our UI), declared UserData interface for our users’ data and two functions to mock our back-end calls (see: [Checkpoint #1](https://github.com/TheWidlarzGroup/multistep-form-xstate-formik/tree/project-init)).
 
@@ -445,7 +419,7 @@ and then
 
 `cd ios && pod install && cd ..`
 
-### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#mocking-the-back-end)Mocking the back-end
+### Mocking the back-end
 
 To start with, here are our two functions that will mock back-end calls:
 
@@ -507,7 +481,7 @@ exportconstupdateUser=async(updated: UserData)=>{
 }
 ```
 
-### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#installing-all-the-necessary-dependencies)Installing all the necessary dependencies
+### Installing all the necessary dependencies
 
 Now it is time to install all the necessary dependencies.
 
@@ -523,9 +497,9 @@ Run:
 
 `yarn add @react-navigation/native @react-navigation/stack react-native-screens react-native-safe-area-context @react-native-community/masked-view react-native-gesture-handler react-native-reanimated xstate @xstate/react formik yup`
 
-### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#adding-navigation-to-our-app)Adding navigation to our app
+### Adding navigation to our app
 
-###### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#if-you-want-to-skip-adding-the-navigation-yourself-you-can-go-to-the-next-step-and-use-files-from-another-checkpoint-)If you want to skip adding the navigation yourself, you can go to the next step and use files from another checkpoint 😀
+###### If you want to skip adding the navigation yourself, you can go to the next step and use files from another checkpoint 😀
 
 Now, that we have our project ready, we can add navigation to it. In our `App.tsx` we will setup the navigator + add all the necessary screens.
 
@@ -765,9 +739,9 @@ constSuccess=()=>{
 
 After being done with the navigation, at least for now, our code should look like so: [Checkpoint #2](https://github.com/TheWidlarzGroup/multistep-form-xstate-formik/tree/navigation)
 
-### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#adding-machines)Adding machines
+### Adding machines
 
-###### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#starting-point-files-for-this-step-checkpoint-2)Starting point files for this step: [Checkpoint #2](https://github.com/TheWidlarzGroup/multistep-form-xstate-formik/tree/navigation)
+######
 
 After taking care of the navigation, we can finally dive into the xstate 😀
 
@@ -847,7 +821,7 @@ After copying our types, we can now declare the machines. Let’s create additio
 
 `touch src/machines/updateMachie.ts src/machines/userDataMachine.ts`.
 
-#### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#updatemachine)updateMachine
+#### updateMachine
 
 We will start with `updateMachine` - a child one, invoked inside every parent machine’s state representing a given form part.
 
@@ -943,31 +917,28 @@ states:{
 ```
 
 <sub>
-  Notice that the `done` state is of
-  type `final`. When our machine reaches
-  this point, we will be able to perform
-  some kind of an action that is
-  available for that type 😀. More on
-  this later on. Keep reading! 💪🏽
+  Notice that the `done` state is of type `final`. When our machine reaches this
+  point, we will be able to perform some kind of an action that is available for
+  that type 😀. More on this later on. Keep reading! 💪🏽
 </sub>
 
 At this point, right off the bat, we can also update the machine context while transitioning with a little help of `assign`\* (an action used to update the machine’s context). This `action`\*\*, while updating the context, has access to all the event data that we pass when transitioning + access to the current context thus we can either update the context based on the previous one (think of `useState(prev=>prev+1)` for example 😀), or use the data passed with an event.
 
 > It takes the context “assigner”, which represents how values in the current context should be assigned.
 
-###### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#source-assign-action)_Source: [Assign Action](https://xstate.js.org/docs/guides/context.html#assign-action)_
+###### \_
 
-###### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#-more-in-depth-look-on-assign-in-xstate-docs-assign-action)\* more in-depth look on `assign` in XState docs: [Assign Action](https://xstate.js.org/docs/guides/context.html?#assign-action)
+######
 
-###### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#-simply-put-actions-are-these-side-effects-that-can-be-invokedtriggered-when-eg-entering--exiting-the-state-or-when-transitioning-you-can-read-more-about-them-here-actions)\*\* simply put, `actions` are these side-effects, that can be invoked/triggered when e.g. entering / exiting the state or when transitioning. You can read more about them here: [Actions](https://xstate.js.org/docs/guides/actions.html#declarative-actions)
+######
 
 It is highly possible, that when reading the previous paragraph, you got a little bit confused when I mentioned `event data`. (If not, you rock! You can skip the next paragraph).
 
-##### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#event-data)Event data?
+##### Event data?
 
 With xstate, we can invoke different actions, for example call the backend. Our call can be successful or not. Based on this information, we transition either the one or the other way. To transition, we have to tell the machine what type of an event we want to send to it (we were declaring this before -> e.g. `NEXT`). Apart from this information, we can also pass whatever we want, for example the response data from our back-end call 😀
 
-##### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#back-to-the-assign)Back to the `assign`
+##### Back to the `assign`
 
 For now, let’s handle only the `error` part of our context. We simply want to update our context with new error value after every transition. The only time, that the error field should be set to `true` is when we transition with `ERROR` event type. So on every transition with `ERROR`, we set `error` to true, while with transitioning with `NEXT`, we reset this value back to `false`. We can then use this to e.g. display some kind of an error pop-up for the user
 
@@ -1195,17 +1166,15 @@ We add actions with `invoke` in two places: in `fetch` state (when we fetch/upda
 
 Our machine should be working now, so let’s quickly test it in our app (we will use `useMachine` hook to quickly test everything and afterward we will delete it and get back to setting it up properly later on 😀)
 
-#### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#test-drive-our-updatemachine)Test-drive our updateMachine
+#### Test-drive our updateMachine
 
 So let’s quickly test this machine with `useMachine` hook inside e.g. `FormName` component. Remember, it is just for the sake of testing whether this machine is setup correctly. We can get rid of the stuff that we code in this sub-part completely after we make sure it works.
 
 Let’s add the hook (it returns an array of values that we can destructure - the first element, `current`_, tells us about, among others, the machine current state / context and the second value, `send`_, is a function that can trigger transitions):
 
 <sub>
-  *we can name it whatever we want, just
-  to be clear, it does not have to be
-  `current` or `send`, we can name it
-  e.g. `machineData` and `sendEvent` etc
+  *we can name it whatever we want, just to be clear, it does not have to be
+  `current` or `send`, we can name it e.g. `machineData` and `sendEvent` etc
 </sub>
 
 ```
@@ -1240,21 +1209,16 @@ Let’s also conditionally render\* some text inside components return:
 ```
 
 <sub>
-  * [useMachine
-  hook](https://xstate.js.org/docs/recipes/react.html#hooks)
-  - first element from an array returned
-  by the hook has this cool method
-  `.matches`. Thanks to it we can check
-  if the machine is currently in a given
+  * [useMachine hook](https://xstate.js.org/docs/recipes/react.html#hooks) -
+  first element from an array returned by the hook has this cool method
+  `.matches`. Thanks to it we can check if the machine is currently in a given
   state.
 </sub>
 
 <sub>
-  `current.matches("TEST_STATE")` ->
-  this code will check if the machine is
-  in the `TEST_STATE` state. If so, the
-  returned value from this method will
-  be `true`. Else, `false`.
+  `current.matches("TEST_STATE")` -> this code will check if the machine is in
+  the `TEST_STATE` state. If so, the returned value from this method will be
+  `true`. Else, `false`.
 </sub>
 
 Our console output should look like this:
@@ -1269,7 +1233,7 @@ LOG  current state
  LOG{"error":false,"errorMsg":"","userData":null}
 ```
 
-###### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#how-it-looks-in-the-app)How it looks in the app:
+###### How it looks in the app:
 
 ![](/9d480350996d4583d6a2166695d860ff/updateMachineTest.gif)
 
@@ -1277,7 +1241,7 @@ Our machine was first in the `fetch` state, and then, after transitioning with `
 
 Now, let’s delete all of this test code from our `FormName` screen 😂 -> our machine is working so we can now proceed with our work.
 
-#### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#userdatamachine)userDataMachine
+#### userDataMachine
 
 It’s time to take care of our main, parent machine ⬆️ which will invoke the previous machine as child services in every state that is representing a given form part.
 
@@ -1417,9 +1381,7 @@ Let’s use our machine with `useMachine` hook:
   const[current, send]=useMachine(userDataMachine);...
 ```
 
-<sub>
-  Don’t forget to import everything :)
-</sub>
+<sub>Don’t forget to import everything :)</sub>
 
 And now, let’s add this `switch` statement logic inside `useEffect`:
 
@@ -1470,7 +1432,7 @@ The redirect will be set to address form:
 
 As the purpose of this timeout was to only test the transitions, we can freely delete it now.
 
-#### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#fetching-initial-user-data-and-checking-where-to-redirect-them)Fetching initial user data and checking where to redirect them
+#### Fetching initial user data and checking where to redirect them
 
 We can now start fetching the user data in our parent machine! Let’s use `invoke` property of our `init` state, and call for the user data with our mock function that we need to import (in real-life scenario it should be `fetch`,`axios` or whatever, this mock is only for the sake of this article):
 
@@ -1576,9 +1538,9 @@ Along with `type` of an event, we also pass our `userData` to the callback handl
       invoke:{...
 ```
 
-###### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#checkpoint-3)[Checkpoint #3](https://github.com/TheWidlarzGroup/multistep-form-xstate-formik/tree/xstate)
+######
 
-#### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#blocking-the-gestures-and-android-hardware-back-button)Blocking the gestures and Android hardware back button
+#### Blocking the gestures and Android hardware back button
 
 Let’s imagine, that we are redirected to the payment form. When we use the hardware android back button or swipe from left on iOS, we will be redirected to the previous screen in the stack. What was our previous screen? The initial one, where instead it should have been the previous form part screen. It can happen for example, when the user starts updating their profile from scratch, and then, in the middle, decides to kill the app and finish it later. Upon the second try, the user will be redirected to the place where they left off, but when they want to go back (either by swiping on iOS, or by using hardware back button on Android or back button in the form) they will be transfered back to the first screen. To prevent that, we will:
 
@@ -1628,7 +1590,7 @@ const goBack =useCallback(()=>{
 
 These two functions, as well as customizing `useFocusEffect` with `BackHandler` handling, should be added inside a component that has our navigator inside.
 
-#### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#changing-the-way-we-navigate-between-screens)Changing the way we navigate between screens
+#### Changing the way we navigate between screens
 
 Now, we need to pass down some new things to our form screens -> functions for navigating (`goBack` and `goNext`) and also invoked child machines (we did not invoked them yet inside our machines configs. More on that later on in the article)
 
@@ -1674,7 +1636,7 @@ Let’s pass down our functions to appropriate screens then:
 
 If you are observant enough, you might have noticed, that we passed the `goBack` function to the FormName screen. We don’t want to be able to go from this screen back to the initial, `Home` one. But don’t worry, thanks to the way of how we have setup our transitions between states, when we send the `BACK` event while being in `FormName` state, the machine will not change its state as this kind of transition is not possible. You can try it yourself 😃
 
-#### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#invoking-child-machines)Invoking child machines
+#### Invoking child machines
 
 Now, we can finally invoke appropriate stuff inside every form state, that being invoking our `updateMachine` inside different `userDataMachine` states.
 
@@ -1809,7 +1771,7 @@ Repeat it for every screen.
 
 For testing sake, let’s just console.log some `hello world` strings from inside our child machine in `fetch` state (being the inital state):
 
-###### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#our-updatemachinets-file)Our `updateMachine.ts` file:
+###### Our `updateMachine.ts` file:
 
 ```
 ...
@@ -1881,10 +1843,7 @@ Our updated Home screen:
   text:{marginBottom: theme.spacing.value *4},});...
 ```
 
-<sub>
-  * Spinner is imported from UI Kitten
-  library
-</sub>
+<sub>* Spinner is imported from UI Kitten library</sub>
 
 Setting custom animating transition in navigator options:
 
@@ -1952,7 +1911,7 @@ How it looks so far:
 
 ![](/a2e7e6f8442f71cf1d0eead57bfcdf01/navAnimations.gif)
 
-### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#handling-forms-with-formik-and-yup)Handling forms (with Formik and Yup)
+###
 
 If you want to start working from this part, here are the files [Checkpoint #4](https://github.com/TheWidlarzGroup/multistep-form-xstate-formik/tree/xstate-invoking)
 
@@ -1960,11 +1919,11 @@ In this part, we will finally handle our forms and inputs and add some simple va
 
 In each screen, the moment we initialize a new machine/service, we get access to the latest user data. Let’s pass this data as initial values to our inputs. As we want to use Formik and Yup\* in order to handle the forms, we have to configure both of these libraries first.
 
-###### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#-we-have-installed-these-two-packages-at-the-very-beginning-of-an-article-if-by-any-chance-you-dont-have-it-installed-do-it-now-)\* we have installed these two packages at the very beginning of an article. If by any chance you don’t have it installed, do it now 😀
+###### \* we have installed these two packages at the very beginning of an article. If by any chance you don’t have it installed, do it now 😀
 
 Let’s start with importing `useFormik` hook from `formik` package and initializing it inside our screen components (each screen should have its own formik configuration). Screen with “name form” is the first one in the order, so let’s start with it 😃
 
-###### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#formnametsx)`FormName.tsx`:
+###### `FormName.tsx`:
 
 ```
 ...constFormName=({goBack, service}: Props)=>{
@@ -2638,7 +2597,7 @@ interfaceProps{
 
 Now, the user can also go back whenever in `success` screen.
 
-### [<svg aria-hidden="true" focusable="false" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>](#summary)Summary
+### Summary
 
 That’s it, we have made it and created the mobile app together using XState, Formik, Yup and TypeScript! 🤓
 

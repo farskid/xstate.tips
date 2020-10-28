@@ -1,11 +1,13 @@
 {
   "name": "xstate.tips",
+  "description": "Examples from real life that help you master state machines and statecharts",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "feed": "node scripts/rss.js"
   },
   "dependencies": {
     "@mdx-js/loader": "^1.6.16",
@@ -17,19 +19,22 @@
     "@xstate/react": "^0.8.1",
     "classnames": "^2.2.6",
     "codemirror": "^5.58.1",
-    "immer": "^7.0.8",
-    "mdx-observable": "^0.2.0",
+    "immer": "^7.0.14",
     "next": "9.5.4",
-    "next-mdx-enhanced": "^4.0.0",
     "prism-react-renderer": "^1.1.1",
     "react": "16.13.1",
     "react-codemirror2": "^7.2.1",
     "react-dom": "16.13.1",
     "react-markdown": "^4.3.1",
     "react-syntax-highlighter": "^15.2.1",
+    "remark-frontmatter": "^3.0.0",
+    "remark-mdx": "^1.6.19",
+    "rss": "^1.2.2",
     "sass": "^1.26.11",
+    "serve": "^11.3.2",
     "styled-components": "^5.2.0",
     "swr": "^0.3.2",
+    "uuid": "^8.3.1",
     "xstate": "^4.13.0"
   },
   "devDependencies": {

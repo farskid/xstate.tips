@@ -1,15 +1,11 @@
-import { CodeSandbox } from "../../components/mdx-embed/Codesandbox";
-import { StandaloneViz } from "../../components/StandaloneViz";
+import { CodeSandbox } from "../../../components/mdx-embed/Codesandbox";
+import { StandaloneViz } from "../../../components/StandaloneViz";
+import { Tip } from "../../../components/Tip";
+import { meta } from "./meta";
 
-# Using React and XState to Build a Sign In Form
+export default ({ children }) => <Tip meta={meta}>{children}</Tip>;
 
 [](https://css-tricks.com/using-react-and-xstate-to-build-a-sign-in-form/)
-
-## Update 15th June 2019
-
-A number of changes to XState have occurred since writing this article. An updated version of a sign-in form using React & XState can be found [here](https://css-tricks.com/using-react-and-xstate-to-build-a-sign-in-form/)
-
----
 
 To make a sign in form with good UX requires UI state management, meaning we’d like to minimize the cognitive load to complete it and reduce the number of required user actions while making an intuitive experience. Think about it: even a relatively simple email and password sign in form needs to handle a number of different states, like empty fields, errors, password requirements, loading and success.
 

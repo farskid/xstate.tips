@@ -142,6 +142,15 @@ const LayoutContent = styled.div`
       margin: 0 auto;
     }
   }
+
+  .break::before {
+    content: "***";
+    display: block;
+    width: 100%;
+    height: 1em;
+    text-align: center;
+    letter-spacing: 1em;
+  }
 `;
 
 const LayoutHeader = styled.div`
