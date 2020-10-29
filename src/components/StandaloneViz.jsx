@@ -4,7 +4,6 @@ import { MachineViz } from "../components/xstate-viz/src/MachineViz";
 import styled from "styled-components";
 
 const Container = styled.div`
-  min-height: 200px;
   margin: 1em auto;
 `;
 
