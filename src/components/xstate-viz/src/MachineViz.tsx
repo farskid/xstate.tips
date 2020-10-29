@@ -121,6 +121,11 @@ const MachineVizContainer: React.FC<MachineVizProps> = ({
   const { service, tracker } = React.useContext(StateContext);
   const ref = useTracking(`machine:${machine.id}`);
   const groupRef = React.useRef<SVGGElement | null>(null);
+  const foElem = React.useRef<SVGForeignObjectElement | null>(null);
+  const svgElem = React.useRef<SVGElement | null>(null);
+  const [rootStateDimensions, setRootStateDimensions] = React.useState<
+    DOMRect
+  >();
   const [
     measurements,
     setMeasurements,
@@ -150,6 +155,16 @@ const MachineVizContainer: React.FC<MachineVizProps> = ({
   React.useEffect(() => {
     tracker.updateAll();
   }, [machine]);
+
+  React.useLayoutEffect(() => {
+    if (foElem.current && rootStateDimensions) {
+      console.log(rootStateDimensions);
+      foElem.current.style.width = `${rootStateDimensions.width}px`;
+      foElem.current.style.height = `${rootStateDimensions.height}px`;
+      svgElem.current.style.width = `${rootStateDimensions.width}px`;
+      svgElem.current.style.height = `${rootStateDimensions.height}px`;
+    }
+  }, [rootStateDimensions, foElem.current, svgElem.current]);
 
   return (
     <div
@@ -190,6 +205,7 @@ const MachineVizContainer: React.FC<MachineVizProps> = ({
             overflow: "visible",
             display: "block",
           }}
+          ref={svgElem}
           onClick={(e) => {
             e.stopPropagation();
             e.persist();
@@ -214,9 +230,17 @@ const MachineVizContainer: React.FC<MachineVizProps> = ({
               y={0}
               width={1000}
               height={1000}
+              ref={foElem}
             >
               <div data-xviz="machine" title={`machine: #${machine.id}`}>
-                <StateNodeViz stateNode={machine} />
+                <StateNodeViz
+                  rootStateValue={machine.initialState.value}
+                  getRootStateDimensions={(dimensions) => {
+                    // console.log(dimensions);
+                    setRootStateDimensions(dimensions);
+                  }}
+                  stateNode={machine}
+                />
               </div>
               <div data-xviz="popovers">
                 {popoverData && (

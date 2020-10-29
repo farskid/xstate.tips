@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useContext, useMemo } from "react";
 import { StateContext } from "./StateContext";
-import { StateNode } from "xstate";
+import { State, StateNode, StateValue } from "xstate";
 import { EventViz } from "./EventViz";
 import { getEdges, serializeTransition, isActive, getLevel } from "./utils";
 import { ActionViz } from "./ActionViz";
@@ -12,12 +12,19 @@ import ReactMarkdown from "react-markdown";
 import { MachineRectMeasurements } from "./MachineMeasure";
 import { ActorRefViz, SessionIdViz } from "./ActorRefViz";
 import { StateNodeKeyViz } from "./StateNodeKeyViz";
+import { readFile } from "fs";
 
 interface StateNodeVizProps {
   stateNode: StateNode<any, any, any>;
+  getRootStateDimensions(dimensions: DOMRect): any;
+  rootStateValue: StateValue;
 }
 
-export function StateNodeViz({ stateNode }: StateNodeVizProps) {
+export function StateNodeViz({
+  stateNode,
+  getRootStateDimensions,
+  rootStateValue,
+}: StateNodeVizProps) {
   const { state, service, selection } = useContext(StateContext);
   const ref = useTracking(stateNode.id);
   const eventsRef = useTracking(stateNode.id + ":events");
@@ -34,6 +41,12 @@ export function StateNodeViz({ stateNode }: StateNodeVizProps) {
         ? "deep history"
         : "history"
       : undefined;
+
+  React.useLayoutEffect(() => {
+    if (state && state.value === rootStateValue) {
+      getRootStateDimensions(ref.current.getBoundingClientRect());
+    }
+  }, [state, rootStateValue]);
 
   return (
     <div

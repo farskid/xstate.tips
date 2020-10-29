@@ -1,5 +1,5 @@
 [data-xviz] {
-  --xviz-background-color: #0b0b0b;
+  --xviz-background-color: transparent;
   --xviz-background-transparent-color: #{rgb(#111, 0.8)};
   --xviz-foreground-color: white;
   --xviz-active-color: #398ef1;
@@ -16,15 +16,15 @@
   --xviz-border-radius: calc(var(--xviz-sp) / 4);
 }
 
-[data-xviz='machine-container'],
-[data-xviz='service'],
-[data-xviz='inspector'],
-[data-xviz='sequenceDiagram'] {
+[data-xviz="machine-container"],
+[data-xviz="service"],
+[data-xviz="inspector"],
+[data-xviz="sequenceDiagram"] {
   --gap: calc(var(--xviz-sp) * 2);
   background: var(--xviz-background-color);
   color: white;
   font-size: var(--xviz-font-size-base);
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 
   &,
   * {

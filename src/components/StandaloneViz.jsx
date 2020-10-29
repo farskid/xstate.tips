@@ -5,6 +5,8 @@ import styled from "styled-components";
 
 const Container = styled.div`
   margin: 1em auto;
+  overflow: auto;
+  padding: var(--xviz-sp);
 `;
 
 export const StandaloneViz = ({ machine, onUpdate = () => {} }) => {
@@ -16,7 +18,7 @@ export const StandaloneViz = ({ machine, onUpdate = () => {} }) => {
     });
   }, [service]);
   return (
-    <Container>
+    <Container className="standalone-viz">
       <MachineViz
         machine={machine}
         state={service.state}
