@@ -1,1 +1,1 @@
-export { default } from "../../src/tips/multi-step-form/index.mdx";
+export { default } from "tips/multi-step-form/index.mdx";

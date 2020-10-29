@@ -20,7 +20,7 @@ module.exports.meta = meta;
 `index.mdx` will contain the content of your tip. Since it's an MDX file, you can import any React components in it or define variables and such, but for the tip to be rendered properly in the website, please include this bit of code at the beginning of this file:
 
 ```jsx
-import { Tip } from "../../components/Tip";
+import { Tip } from "components/Tip";
 import { meta } from "./meta";
 
 export default ({ children }) => <Tip meta={meta}>{children}</Tip>;
@@ -33,7 +33,7 @@ Full markdown support.
 You can use embed components like `CodeSandbox` which renders a lazy loaded CodeSandbox embed.
 
 ```jsx
-import { CodeSandbox } from "../src/components/mdx-embed/Codesandbox";
+import { CodeSandbox } from "components/mdx-embed/Codesandbox";
 
 <CodeSandbox id="fervent-morse-wxueq" />;
 ```
@@ -43,7 +43,7 @@ You can use the visualizer component that creates and initializes an interpreter
 You can interact with the visualizer indirectly through a custom interface! use the `getService` prop on the `StandaloneViz` component to access the running interpreter for state updates and sending events.
 
 ```jsx
-import { StandaloneViz } from "../src/components/StandaloneViz";
+import { StandaloneViz } from "components/StandaloneViz";
 import { Machine, assign } from "xstate";
 
 <div>
@@ -115,7 +115,7 @@ export let sendEvent = () => {};
 You could even take it to the next level by dynamically rendering event triggers that are available in the current interpreter state and showing the current state.
 
 ```jsx
-import { StandaloneViz } from "../src/components/StandaloneViz";
+import { StandaloneViz } from "components/StandaloneViz";
 import { Machine, assign } from "xstate";
 
 export const Demo = () => {
@@ -183,5 +183,3 @@ export const Demo = () => {
 
 <Demo />;
 ```
-
-<!-- You can inline your React components right in the MDX file but be aware that the parsing is super tricky. Make sure you don't live any empty lines in between the code. -->

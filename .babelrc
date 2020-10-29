@@ -9,6 +9,14 @@
         "preprocess": false
       }
     ],
-    "./babel-next-mdx.js"
+    [
+      "module-resolver",
+      {
+        "alias": {
+          "components": "./src/components",
+          "tips": "./src/tips"
+        }
+      }
+    ]
   ]
 }

@@ -1,8 +1,8 @@
-import { CodeSandbox } from "../src/components/mdx-embed/Codesandbox";
-import { StandaloneViz } from "../src/components/StandaloneViz";
+import { CodeSandbox } from "components/mdx-embed/Codesandbox";
+import { StandaloneViz } from "components/StandaloneViz";
 import { Machine, assign } from "xstate";
 import { useMachine } from "@xstate/react";
-import { Tip } from "../src/components/Tip";
+import { Tip } from "components/Tip";
 
 export const meta = {
   title: "Contributing",
@@ -45,7 +45,7 @@ Full markdown support.
 You can use embed components like `CodeSandbox` which renders a lazy loaded CodeSandbox embed. <CodeSandbox id="fervent-morse-wxueq" />
 
 ```jsx
-import { CodeSandbox } from "../src/components/mdx-embed/Codesandbox";
+import { CodeSandbox } from "components/mdx-embed/Codesandbox";
 
 <CodeSandbox id="fervent-morse-wxueq" />;
 ```
@@ -55,7 +55,7 @@ You can use the visualizer component that creates and initializes an interpreter
 You can interact with the visualizer indirectly through a custom interface! use the `getService` prop on the `StandaloneViz` component to access the running interpreter for state updates and sending events.
 
 ```jsx
-import { StandaloneViz } from "../src/components/StandaloneViz";
+import { StandaloneViz } from "components/StandaloneViz";
 import { Machine, assign } from "xstate";
 
 <div>
@@ -192,7 +192,7 @@ export let sendEvent = () => {};
 You could even take it to the next level by dynamically rendering event triggers that are available in the current interpreter state and showing the current state.
 
 ```jsx
-import { StandaloneViz } from "../src/components/StandaloneViz";
+import { StandaloneViz } from "components/StandaloneViz";
 import { Machine, assign } from "xstate";
 
 export const Demo = () => {

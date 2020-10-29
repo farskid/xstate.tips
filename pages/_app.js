@@ -2,12 +2,12 @@ import "../styles/normalize.css";
 import "../styles/globals.css";
 import * as React from "react";
 import { useRouter } from "next/router";
-import { ExamplesLayout } from "../src/components/ExamplesLayout";
+import { ExamplesLayout } from "components/ExamplesLayout";
 import useSWR from "swr";
 import { MDXProvider } from "@mdx-js/react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import style from "react-syntax-highlighter/dist/cjs/styles/prism/pojoaque";
-import "../src/components/xstate-viz/themes/dark.scss";
+import "components/xstate-viz/themes/dark.scss";
 
 const mdxComponents = {
   pre: (props) => props.children,
