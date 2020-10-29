@@ -4,21 +4,21 @@
         <description><![CDATA[Examples from real life that help you master state machines and statecharts]]></description>
         <link>http://github.com/dylang/node-rss</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Thu, 29 Oct 2020 09:58:59 GMT</lastBuildDate>
+        <lastBuildDate>Thu, 29 Oct 2020 10:27:11 GMT</lastBuildDate>
         <language><![CDATA[en]]></language>
         <item>
             <title><![CDATA[Multistep form handling with Finite State Machines, Formik and TypeScript]]></title>
             <description><![CDATA[Lately, I had a chance to work on a mobile app that utilizes this concept of finite state machines. Having no prior knowledge on such thing as a state machine, I quickly got to liking it! Basically, the concept of such state machines is that we have a finite number of states and we can transition between these states while also exchanging some data. We can declare multiple machines which can handle different tasks and behave in a different way, as well as declare some universal ones that can be re-used. That being said, we can think of our app as a combination of state machines that, based on their states, render different parts of UI. For example, fetching data from the back-end - we are either in a `fetching` state (we can render some kind of a loader at this time) or in a `done` state where we can display all the fetched data along with some kind of information about our request status, e.g. whether it was successful or not. If you want to start developing an app based on state machines, there’s this cool library called XState - the one that I used in the aforementioned project and got familiar with (but not entirely, at least yet! 🙂).]]></description>
             <link>https:/xstate.tips/multi-step-form</link>
-            <guid isPermaLink="false">f21eed78-34dd-4330-9175-674962c34fa9</guid>
-            <dc:creator><![CDATA[Farzad YZ]]></dc:creator>
+            <guid isPermaLink="false">ccf72ea2-1532-46c0-b557-01ac49c2b377</guid>
+            <dc:creator><![CDATA[John Doe]]></dc:creator>
             <pubDate>Tue, 16 Jun 2020 21:00:00 GMT</pubDate>
         </item>
         <item>
             <title><![CDATA[Using React and XState to Build a Sign In Form]]></title>
             <description><![CDATA[A number of changes to XState have occurred since writing this article. An updated version of a sign-in form using React & XState can be found]]></description>
             <link>https:/xstate.tips/sign-in-form</link>
-            <guid isPermaLink="false">50357cfa-b15e-41ca-ae3e-d7cd0e63ed2f</guid>
+            <guid isPermaLink="false">b6d56d6c-206b-467f-bedb-36fa359fc444</guid>
             <dc:creator><![CDATA[John Doe]]></dc:creator>
             <pubDate>Fri, 14 Jun 2019 21:00:00 GMT</pubDate>
         </item>

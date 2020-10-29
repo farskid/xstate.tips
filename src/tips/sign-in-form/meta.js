@@ -4,7 +4,6 @@ const meta = {
     "A number of changes to XState have occurred since writing this article. An updated version of a sign-in form using React & XState can be found",
   pubDate: "15 June 2019",
   author: "John Doe",
-  url: "/sign-in-form",
 };
 
 module.exports.meta = meta;

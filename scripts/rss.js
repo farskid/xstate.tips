@@ -53,16 +53,15 @@ function shouldTriggerRSS() {
   );
 }
 
-function prepareFullContent(exampleDir) {
-  const metadata = require(path.join(exampleDir, "meta.js"));
+function prepareFullContent(tipDirName) {
+  const dir = path.join(TIPS_DIR, tipDirName);
+  const metadata = require(path.join(dir, "meta.js"));
 
-  return JSON.parse(JSON.stringify(metadata));
+  return { ...metadata, dir: tipDirName };
 }
 
 function collectMetadata() {
-  return fs
-    .readdirSync(TIPS_DIR)
-    .map((fileName) => prepareFullContent(path.join(TIPS_DIR, fileName)));
+  return fs.readdirSync(TIPS_DIR).map(prepareFullContent);
 }
 
 function generateAutomaticFeed() {
@@ -76,14 +75,17 @@ function generateAutomaticFeed() {
   const tips = collectMetadata();
 
   tips.forEach((tip) => {
-    const { title, description, author, pubDate: date, url } = tip.meta;
+    const {
+      meta: { title, description, author, pubDate: date },
+      dir,
+    } = tip;
     feed.item({
       title,
       description,
       author,
       date,
       guid: uuid.v4(),
-      url: path.join(HOME_URL, url),
+      url: path.join(HOME_URL, dir),
     });
   });
 
