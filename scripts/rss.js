@@ -4,6 +4,10 @@ const chalk = require("chalk");
 const RSS = require("rss");
 const uuid = require("uuid");
 
+const TIPS_DIR = path.join(process.cwd(), "src/tips");
+const HOME_URL = "https://xstate.tips/";
+const RSS_FILE = path.join(process.cwd(), "public/feed.xml");
+
 const feed = new RSS({
   title: "XState Tips",
   description:
@@ -11,9 +15,43 @@ const feed = new RSS({
   language: "en",
 });
 
-const DATA_DIR = path.join(process.cwd(), "pages/example");
-const HOME_URL = "https://xstate.tips/";
-const RSS_FILE = path.join(process.cwd(), "public/feed.xml");
+function getPathLastModified(path) {
+  const stats = fs.statSync(path);
+  return stats.mtime;
+}
+
+function shouldTriggerRSS() {
+  // In case this is the 1st time we generate the feed
+  if (!fs.existsSync(RSS_FILE)) {
+    return true;
+  }
+
+  const feedLastModifiedDate = getPathLastModified(RSS_FILE);
+
+  const allExamplesLastModifiedDate = fs
+    .readdirSync(TIPS_DIR)
+    .map((dir) => ({ dir }))
+    .map((obj) => ({
+      ...obj,
+      files: fs.readdirSync(path.join(TIPS_DIR, obj.dir)),
+    }))
+    .reduce((total, current) => {
+      return total.concat(
+        ...current.files.map(
+          (f) =>
+            new Date(getPathLastModified(path.join(TIPS_DIR, current.dir, f)))
+        )
+      );
+    }, []);
+  const mostRecentExampleLastModifiedDate = allExamplesLastModifiedDate.reduce(
+    (recent, current) => (recent.getTime() < current ? current : recent)
+  );
+
+  return (
+    feedLastModifiedDate.getTime() <=
+    mostRecentExampleLastModifiedDate.getTime()
+  );
+}
 
 function prepareFullContent(exampleDir) {
   const metadata = require(path.join(exampleDir, "meta.js"));
@@ -23,11 +61,18 @@ function prepareFullContent(exampleDir) {
 
 function collectMetadata() {
   return fs
-    .readdirSync(DATA_DIR)
-    .map((fileName) => prepareFullContent(path.join(DATA_DIR, fileName)));
+    .readdirSync(TIPS_DIR)
+    .map((fileName) => prepareFullContent(path.join(TIPS_DIR, fileName)));
 }
 
 function generateAutomaticFeed() {
+  if (!shouldTriggerRSS()) {
+    console.log(
+      chalk.magentaBright(`📰 Nothing new. Skipping the RSS generation`)
+    );
+    return;
+  }
+
   const tips = collectMetadata();
 
   tips.forEach((tip) => {
