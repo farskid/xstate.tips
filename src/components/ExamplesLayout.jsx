@@ -95,22 +95,37 @@ const LayoutContent = styled.div`
     border-radius: 0.25rem !important;
   }
 
+  .mdx-embed {
+    @media screen and (max-width: 64em) {
+      margin-left: -2em !important;
+      margin-right: -2em !important;
+    }
+  }
+
   img {
     max-width: 100%;
     background: rgb(36, 36, 36);
     border: 1px solid rgb(36, 36, 36);
-    border-radius: 0.25rem !important;
+    border-radius: 0.25em !important;
   }
 
   pre {
     background: rgb(21, 21, 21);
     border: 1px solid #fff !important;
     padding: 1em;
-    border-radius: 0.25rem !important;
-    margin: 2rem 0px 4rem;
+    border-radius: 0.25em !important;
+    margin: 2em 0 4em;
     line-height: 1.5;
     font-feature-settings: normal;
     font-size: 1em;
+
+    @media screen and (max-width: 64em) {
+      margin-right: -2em;
+      margin-left: -2em;
+      border-radius: 0 !important;
+      border-right: none !important;
+      border-left: none !important;
+    }
   }
 
   code {
@@ -141,6 +156,10 @@ const LayoutContent = styled.div`
       color: #222;
       margin: 0 auto;
     }
+
+    @media screen and (max-width: 64em) {
+      margin: 0 -2em;
+    }
   }
 
   .break::before {
@@ -150,6 +169,13 @@ const LayoutContent = styled.div`
     height: 1em;
     text-align: center;
     letter-spacing: 1em;
+  }
+
+  .standalone-viz {
+    @media screen and (max-width: 64em) {
+      margin-right: -2em;
+      margin-left: -2em;
+    }
   }
 `;
 
@@ -186,13 +212,6 @@ const List = styled.ul`
   list-style: none;
   padding: 1em 0;
   margin: 0;
-  position: sticky;
-  top: 1em;
-
-  @media screen and (max-width: 64em) {
-    position: relative;
-    top: 0;
-  }
 `;
 const ListItem = styled.li`
   &:hover {
@@ -266,6 +285,8 @@ const MobileList = styled.nav`
 `;
 
 const DesktopList = styled.nav`
+  position: sticky;
+  top: 1em;
   @media screen and (max-width: 64em) {
     display: none;
   }
