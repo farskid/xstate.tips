@@ -32,7 +32,7 @@ module.exports.meta = meta;
 `index.mdx` will contain the content of your tip. Since it's an MDX file, you can import any React components in it or define variables and such, but for the tip to be rendered properly in the website, please include this bit of code at the beginning of this file:
 
 ```jsx
-import { Tip } from "../../components/Tip";
+import { Tip } from "components/Tip";
 import { meta } from "./meta";
 
 export default ({ children }) => <Tip meta={meta}>{children}</Tip>;
@@ -53,6 +53,49 @@ import { CodeSandbox } from "components/mdx-embed/Codesandbox";
 You can use the visualizer component that creates and initializes an interpreter for your statechart and render an interactive visualizer for the machine.
 
 You can interact with the visualizer indirectly through a custom interface! use the `getService` prop on the `StandaloneViz` component to access the running interpreter for state updates and sending events.
+
+export const nestedmachine = Machine({
+  key: "light",
+  initial: "green",
+  states: {
+    green: {
+      on: {
+        TIMER: "yellow",
+      },
+    },
+    yellow: {
+      on: {
+        TIMER: "red",
+      },
+    },
+    red: {
+      on: {
+        TIMER: "green",
+      },
+      initial: "walk",
+      states: {
+        walk: {
+          on: {
+            PED_COUNTDOWN: "wait",
+          },
+        },
+        wait: {
+          on: {
+            PED_COUNTDOWN: "stop",
+          },
+        },
+        stop: {},
+        blinking: {},
+      },
+    },
+  },
+  on: {
+    POWER_OUTAGE: ".red.blinking",
+    POWER_RESTORED: ".red",
+  },
+});
+
+<StandaloneViz machine={nestedmachine} />
 
 ```jsx
 import { StandaloneViz } from "components/StandaloneViz";
@@ -188,8 +231,8 @@ export let sendEvent = () => {};
     },
   })}
 />
-
-You could even take it to the next level by dynamically rendering event triggers that are available in the current interpreter state and showing the current state.
+You could even take it to the next level by dynamically rendering event triggers
+that are available in the current interpreter state and showing the current state.
 
 ```jsx
 import { StandaloneViz } from "components/StandaloneViz";
