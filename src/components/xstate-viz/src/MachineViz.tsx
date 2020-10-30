@@ -1,4 +1,5 @@
 import * as React from "react";
+import { toStatePaths } from "xstate/lib/utils";
 
 import { StateNodeViz } from "./StateNodeViz";
 import { StateContext } from "./StateContext";
@@ -28,6 +29,7 @@ import { Popover } from "./Popover";
 import { ResultBox } from "./types";
 import Editor from "./Editor";
 import { useState } from "react";
+import { useDynamicDimensions } from "./useDynamicDimensions";
 
 interface CanvasCtx {
   zoom: number;
@@ -77,6 +79,7 @@ interface MachineVizProps {
   style?: React.CSSProperties;
   mode?: "read" | "play";
   selection?: Array<string | StateNode>;
+  containerRef?: React.MutableRefObject<HTMLDivElement>;
 }
 
 export function useConstant<T>(fn: () => T): T {
@@ -114,18 +117,17 @@ const EventPopover: React.FC<{
 
 const MachineVizContainer: React.FC<MachineVizProps> = ({
   style,
+  state,
   machine,
   mode = "play",
+  containerRef,
 }) => {
   const canvasService = useConstant(() => interpret(canvasMachine).start());
   const { service, tracker } = React.useContext(StateContext);
   const ref = useTracking(`machine:${machine.id}`);
   const groupRef = React.useRef<SVGGElement | null>(null);
   const foElem = React.useRef<SVGForeignObjectElement | null>(null);
-  const svgElem = React.useRef<SVGElement | null>(null);
-  const [rootStateDimensions, setRootStateDimensions] = React.useState<
-    DOMRect
-  >();
+  const svgElem = React.useRef<SVGSVGElement | null>(null);
   const [
     measurements,
     setMeasurements,
@@ -156,15 +158,33 @@ const MachineVizContainer: React.FC<MachineVizProps> = ({
     tracker.updateAll();
   }, [machine]);
 
+  // responsive and visible viz
+  useDynamicDimensions(foElem, ref, svgElem);
+
+  // Automatically horizontally scroll into view the current state node in the viz
   React.useLayoutEffect(() => {
-    if (foElem.current && rootStateDimensions) {
-      console.log(rootStateDimensions);
-      foElem.current.style.width = `${rootStateDimensions.width}px`;
-      foElem.current.style.height = `${rootStateDimensions.height}px`;
-      svgElem.current.style.width = `${rootStateDimensions.width}px`;
-      svgElem.current.style.height = `${rootStateDimensions.height}px`;
+    if (state && containerRef) {
+      // TODO: support parallel states
+      const pathToState = toStatePaths(state.value)[0].join(".");
+
+      const targetStateNode = document.querySelector(
+        `[data-xviz-id="${machine.id}.${state.value}"]`
+      ) as HTMLDivElement;
+
+      if (targetStateNode) {
+        const targetLeftMargin = parseFloat(
+          getComputedStyle(targetStateNode).marginLeft
+        );
+
+        containerRef.current.scrollLeft =
+          targetStateNode.offsetLeft -
+          containerRef.current.offsetWidth / 2 +
+          /* 1.5 is to reset targer left margin and add half of the left side neighbour's margin.
+          all state nodes in the viz have the same side margings */
+          targetLeftMargin * 1.5;
+      }
     }
-  }, [rootStateDimensions, foElem.current, svgElem.current]);
+  }, [state?.value, containerRef.current]);
 
   return (
     <div
@@ -200,8 +220,6 @@ const MachineVizContainer: React.FC<MachineVizProps> = ({
             // position: "absolute",
             // top: 0,
             // left: 0,
-            height: "100%",
-            width: "100%",
             overflow: "visible",
             display: "block",
           }}
@@ -214,7 +232,7 @@ const MachineVizContainer: React.FC<MachineVizProps> = ({
               type: "canvas.tap",
             });
           }}
-          // viewBox={'0 0 100 100'}
+          // viewBox={`0 0 100 100`}
           // viewBox={`0 0 ${100 / zoom} ${100 / zoom}`}
         >
           <g data-xviz="machine-group" ref={groupRef}>
@@ -235,10 +253,6 @@ const MachineVizContainer: React.FC<MachineVizProps> = ({
               <div data-xviz="machine" title={`machine: #${machine.id}`}>
                 <StateNodeViz
                   rootStateValue={machine.initialState.value}
-                  getRootStateDimensions={(dimensions) => {
-                    // console.log(dimensions);
-                    setRootStateDimensions(dimensions);
-                  }}
                   stateNode={machine}
                 />
               </div>
@@ -290,6 +304,7 @@ export function MachineViz({
   onCanvasTap,
   selection = [],
   mode = "play",
+  containerRef,
 }: MachineVizProps) {
   const [, , service] = useMachine(machineVizMachine, {
     actions: {
@@ -308,7 +323,12 @@ export function MachineViz({
     <StateContext.Provider
       value={{ state, tracker, service, selection: selectionNodes }}
     >
-      <MachineVizContainer machine={machine} state={state} mode={mode} />
+      <MachineVizContainer
+        containerRef={containerRef}
+        machine={machine}
+        state={state}
+        mode={mode}
+      />
     </StateContext.Provider>
   );
 }

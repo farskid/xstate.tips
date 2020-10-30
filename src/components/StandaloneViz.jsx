@@ -6,11 +6,12 @@ import styled from "styled-components";
 const Container = styled.div`
   margin: 1em auto;
   overflow: auto;
-  padding: var(--xviz-sp);
+  padding: 2em 0;
 `;
 
 export const StandaloneViz = ({ machine, onUpdate = () => {} }) => {
   const [, send, service] = useMachine(machine, { devtools: true });
+  const ref = React.useRef();
   React.useEffect(() => {
     onUpdate({ service, state: service.state });
     service.onTransition((state) => {
@@ -18,11 +19,12 @@ export const StandaloneViz = ({ machine, onUpdate = () => {} }) => {
     });
   }, [service]);
   return (
-    <Container className="standalone-viz">
+    <Container className="standalone-viz" ref={ref}>
       <MachineViz
         machine={machine}
         state={service.state}
         onEventTap={(e) => send(e.eventType)}
+        containerRef={ref}
       />
     </Container>
   );

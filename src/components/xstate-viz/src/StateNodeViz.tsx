@@ -12,19 +12,12 @@ import ReactMarkdown from "react-markdown";
 import { MachineRectMeasurements } from "./MachineMeasure";
 import { ActorRefViz, SessionIdViz } from "./ActorRefViz";
 import { StateNodeKeyViz } from "./StateNodeKeyViz";
-import { readFile } from "fs";
 
 interface StateNodeVizProps {
   stateNode: StateNode<any, any, any>;
-  getRootStateDimensions(dimensions: DOMRect): any;
-  rootStateValue: StateValue;
 }
 
-export function StateNodeViz({
-  stateNode,
-  getRootStateDimensions,
-  rootStateValue,
-}: StateNodeVizProps) {
+export function StateNodeViz({ stateNode }: StateNodeVizProps) {
   const { state, service, selection } = useContext(StateContext);
   const ref = useTracking(stateNode.id);
   const eventsRef = useTracking(stateNode.id + ":events");
@@ -41,12 +34,6 @@ export function StateNodeViz({
         ? "deep history"
         : "history"
       : undefined;
-
-  React.useLayoutEffect(() => {
-    if (state && state.value === rootStateValue) {
-      getRootStateDimensions(ref.current.getBoundingClientRect());
-    }
-  }, [state, rootStateValue]);
 
   return (
     <div
