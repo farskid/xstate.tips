@@ -8,9 +8,36 @@ import { MDXProvider } from "@mdx-js/react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import style from "react-syntax-highlighter/dist/cjs/styles/prism/pojoaque";
 import "components/xstate-viz/themes/dark.scss";
+import * as prettier from "prettier";
+import babelParser from "prettier/parser-babel";
+
+function formatCodeSnippet(code) {
+  return prettier
+    .format(code, {
+      parser: "babel",
+      plugins: [babelParser],
+      semi: true,
+    })
+    .trim();
+}
 
 const mdxComponents = {
-  pre: (props) => props.children,
+  pre: (props) => {
+    return {
+      ...props.children,
+      props: {
+        ...props.children.props,
+        children: (() => {
+          const code = props.children.props.children;
+          try {
+            return formatCodeSnippet(code);
+          } catch(_) {
+            return code;
+          }
+        })()
+      },
+    };
+  },
   code: (props) => {
     const { className = "" } = props;
     const language = className.replace("language-", "");
