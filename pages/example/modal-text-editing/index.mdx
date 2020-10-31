@@ -17,6 +17,7 @@ Message passing to communicate state updates is of the advantages to using a sta
 document.body.addEventListener("keyup", changeModes);
 function changeModes(e) {
   e.preventDefault();
+  // Refers to our xstate service, this will be defined later.
   modalService.send(e.key);
 }
 ```
@@ -24,6 +25,35 @@ function changeModes(e) {
 By passing messages to the state machine, we avoid logic branching altogether: no `if` or `switch` statements, no ternary operators, and perhaps most importantly, our actions are _deterministic_. Determinism gives us confidence that we will never see our editor in a state that is not explicitly defined by our state machine, no matter how many actions we trigger, or in what order they are triggered.
 
 Being able to co-locate all of the state changing actions inside of the state machine also helps when determining which actions are modifying which pieces of state, rather than trying to find this information scattered across different files or different event handlers.
+
+## Creating the Machine
+
+For this example, we won't implement all the modes of Neovim, but instead focus on a subset which captures why it beneficial to use a state machine to model its behavior.
+
+```js
+// MACHINE SETUP -- Note: XState bound to a global object (the library is being served by unpkg)
+// *****************************
+//
+const { Machine, interpret, assign } = XState;
+const modeMachine = Machine(
+  {
+    id: "modal-editor",
+    initial: "normal",
+    context: {},
+    states: {
+      normal: {},
+      visual: {},
+      insert: {},
+      replace: {},
+    },
+  },
+  {
+    actions: {},
+  }
+);
+```
+
+Next, we want to create functionality for working with the DOM. This will differ depending on your own rendering approach, but the concepts underpinning this behavior will stay the same: update the view as a result of state changes. For this simple example, we will just work with the DOM directly.
 
 ```js
 // WORKING WITH THE DOM
@@ -34,9 +64,14 @@ const terminalText = terminal.getElementsByTagName("span")[0];
 const showmode = document.getElementById("showmode");
 const text = document.getElementById("text");
 const col = document.getElementById("col");
-const TEXT_CURSOR = (textContent) => `<span id="cursor">${textContent}</span>`;
+const cursorTextContent = (textContent) =>
+  `<span id="cursor">${textContent}</span>`;
 let cursor;
+```
 
+Now that we have some building blocks in place, it's time to implement our events on the state machine! Let's start with the most basic, going from insert mode to normal mode.
+
+```js
 // MACHINE SETUP
 // *****************************
 //
@@ -44,7 +79,7 @@ const { Machine, interpret, assign } = XState;
 
 const modeMachine = Machine(
   {
-    id: "input-mode",
+    id: "modal-editor",
     initial: "normal",
     context: {
       cursorPointer: undefined,
@@ -172,7 +207,9 @@ const modeMachine = Machine(
         text.innerHTML = textContent
           .slice(0, cursorPointer)
           .concat(
-            TEXT_CURSOR(textContent.slice(cursorPointer, cursorPointer + 1))
+            cursorTextContent(
+              textContent.slice(cursorPointer, cursorPointer + 1)
+            )
           )
           .concat(textContent.slice(cursorPointer + 1));
       },
@@ -189,7 +226,7 @@ const modeMachine = Machine(
         text.innerHTML = textContent
           .slice(0, cursorPointer || textLength)
           .concat(
-            TEXT_CURSOR(
+            cursorTextContent(
               innerText(textContent.slice(cursorPointer, cursorPointer + 1))
             )
           )

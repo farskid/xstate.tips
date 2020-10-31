@@ -9,6 +9,10 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import style from "react-syntax-highlighter/dist/cjs/styles/prism/pojoaque";
 import "../components/xstate-viz/themes/dark.scss";
 
+style.comment = {
+  ...style.comment,
+  color: "hsl(194.5, 14.1%, 100%)",
+};
 const mdxComponents = {
   pre: (props) => props.children,
   code: (props) => {
@@ -19,6 +23,11 @@ const mdxComponents = {
         className={className}
         language={language}
         style={style}
+        customStyle={{
+          background: "#151515",
+          border: "none",
+          boxShadow: "rgba(17, 17, 17, 0.65) 4px 0px 8px 1px",
+        }}
         {...props}
       />
     );

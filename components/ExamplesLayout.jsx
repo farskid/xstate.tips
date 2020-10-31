@@ -104,7 +104,6 @@ const LayoutContent = styled.div`
 
   pre {
     background: rgb(21, 21, 21);
-    border: 1px solid #fff !important;
     padding: 1em;
     border-radius: 0.25rem !important;
     margin: 2rem 0px 4rem;
