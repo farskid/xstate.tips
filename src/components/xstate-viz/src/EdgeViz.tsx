@@ -152,6 +152,7 @@ export function EdgeViz({
   const triggered =
     !!state &&
     state.event.type === edge.event &&
+    getPartialStateValue(edge.source) &&
     state.history?.matches(getPartialStateValue(edge.source));
 
   const path =

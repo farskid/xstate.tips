@@ -1,15 +1,3 @@
-import { CodeSandbox } from "components/mdx-embed/Codesandbox";
-import { StandaloneViz } from "components/StandaloneViz";
-import { Machine, assign } from "xstate";
-import { useMachine } from "@xstate/react";
-import { Tip } from "components/Tip";
-
-export const meta = {
-  title: "Contributing",
-};
-
-export default ({ children }) => <Tip meta={meta}>{children}</Tip>;
-
 ## Add new Tip
 
 To add a new tip, create a new folder with a short name, all lowercase and separated by hyphens in `src/tips`. Inside that folder, create a `meta.js` and an `index.mdx` file.
@@ -42,7 +30,7 @@ export default ({ children }) => <Tip meta={meta}>{children}</Tip>;
 
 Full markdown support.
 
-You can use embed components like `CodeSandbox` which renders a lazy loaded CodeSandbox embed. <CodeSandbox id="fervent-morse-wxueq" />
+You can use embed components like `CodeSandbox` which renders a lazy loaded CodeSandbox embed.
 
 ```jsx
 import { CodeSandbox } from "components/mdx-embed/Codesandbox";
@@ -53,49 +41,6 @@ import { CodeSandbox } from "components/mdx-embed/Codesandbox";
 You can use the visualizer component that creates and initializes an interpreter for your statechart and render an interactive visualizer for the machine.
 
 You can interact with the visualizer indirectly through a custom interface! use the `getService` prop on the `StandaloneViz` component to access the running interpreter for state updates and sending events.
-
-export const nestedmachine = Machine({
-  key: "light",
-  initial: "green",
-  states: {
-    green: {
-      on: {
-        TIMER: "yellow",
-      },
-    },
-    yellow: {
-      on: {
-        TIMER: "red",
-      },
-    },
-    red: {
-      on: {
-        TIMER: "green",
-      },
-      initial: "walk",
-      states: {
-        walk: {
-          on: {
-            PED_COUNTDOWN: "wait",
-          },
-        },
-        wait: {
-          on: {
-            PED_COUNTDOWN: "stop",
-          },
-        },
-        stop: {},
-        blinking: {},
-      },
-    },
-  },
-  on: {
-    POWER_OUTAGE: ".red.blinking",
-    POWER_RESTORED: ".red",
-  },
-});
-
-<StandaloneViz machine={nestedmachine} />
 
 ```jsx
 import { StandaloneViz } from "components/StandaloneViz";
@@ -167,72 +112,7 @@ export let sendEvent = () => {};
 />;
 ```
 
-<div>
-  <button
-    onClick={() => {
-      sendEvent({ type: "FETCH" });
-    }}
-  >
-    FETCH
-  </button>
-  <button
-    onClick={() => {
-      sendEvent({ type: "RESOLVE" });
-    }}
-  >
-    RESOLVE
-  </button>
-  <button
-    onClick={() => {
-      sendEvent({ type: "REJECT" });
-    }}
-  >
-    REJECT
-  </button>
-</div>
-
-export let sendEvent = () => {};
-
-<StandaloneViz
-  onUpdate={({ service }) => {
-    sendEvent = service.send;
-  }}
-  machine={Machine({
-    id: "fetch",
-    initial: "idle",
-    context: {
-      retries: 0,
-    },
-    states: {
-      idle: {
-        on: {
-          FETCH: "loading",
-        },
-      },
-      loading: {
-        on: {
-          RESOLVE: "success",
-          REJECT: "failure",
-        },
-      },
-      success: {
-        type: "final",
-      },
-      failure: {
-        on: {
-          RETRY: {
-            target: "loading",
-            actions: assign({
-              retries: (context, event) => context.retries + 1,
-            }),
-          },
-        },
-      },
-    },
-  })}
-/>
-You could even take it to the next level by dynamically rendering event triggers
-that are available in the current interpreter state and showing the current state.
+You could even take it to the next level by dynamically rendering event triggers that are available in the current interpreter state and showing the current state.
 
 ```jsx
 import { StandaloneViz } from "components/StandaloneViz";
@@ -303,70 +183,3 @@ export const Demo = () => {
 
 <Demo />;
 ```
-
-<!-- You can inline your React components right in the MDX file but be aware that the parsing is super tricky. Make sure you don't live any empty lines in between the code. -->
-
-export const Demo = () => {
-  const [service, setService] = React.useState({ state: {} });
-  const [nextEvents, setNextEvents] = React.useState([]);
-  const [state, setState] = React.useState({ value: "" });
-  return (
-    <>
-      <div>
-        {nextEvents.map((evt, idx) => (
-          <button
-            key={idx}
-            onClick={() => {
-              service.send(evt);
-            }}
-          >
-            {evt}
-          </button>
-        ))}
-      </div>
-      <p>Current state: {state.value}</p>
-      <StandaloneViz
-        onUpdate={({ service, state }) => {
-          setService(service);
-          setState(state);
-          setNextEvents(state.nextEvents);
-        }}
-        machine={Machine({
-          id: "fetch",
-          initial: "idle",
-          context: {
-            retries: 0,
-          },
-          states: {
-            idle: {
-              on: {
-                FETCH: "loading",
-              },
-            },
-            loading: {
-              on: {
-                RESOLVE: "success",
-                REJECT: "failure",
-              },
-            },
-            success: {
-              type: "final",
-            },
-            failure: {
-              on: {
-                RETRY: {
-                  target: "loading",
-                  actions: assign({
-                    retries: (context, event) => context.retries + 1,
-                  }),
-                },
-              },
-            },
-          },
-        })}
-      />
-    </>
-  );
-};
-
-<Demo />

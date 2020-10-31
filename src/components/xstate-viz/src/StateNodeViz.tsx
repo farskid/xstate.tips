@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useContext, useMemo } from "react";
 import { StateContext } from "./StateContext";
-import { StateNode } from "xstate";
+import { State, StateNode, StateValue } from "xstate";
 import { EventViz } from "./EventViz";
 import { getEdges, serializeTransition, isActive, getLevel } from "./utils";
 import { ActionViz } from "./ActionViz";

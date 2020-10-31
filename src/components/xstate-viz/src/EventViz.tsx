@@ -107,6 +107,7 @@ export function EventViz({ transition, index }: EventVizProps) {
   const triggered =
     !!state &&
     state.event.type === transition.eventType &&
+    getPartialStateValue(transition.source) &&
     state.history?.matches(getPartialStateValue(transition.source));
 
   const active = state ? isActive(state, transition.source) : false;

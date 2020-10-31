@@ -22,12 +22,16 @@ const LayoutContainer = styled.div``;
 
 const LayoutSidebar = styled.aside`
   border-right: 1px solid rgb(36, 36, 36);
-  width: 25em;
+  width: 25%;
   display: flex;
   flex-direction: column;
   padding-top: 2em;
 
-  @media screen and (max-width: 64em) {
+  @media screen and (min-width: 86rem) {
+    width: 20rem;
+  }
+
+  @media screen and (max-width: 64rem) {
     width: 100%;
     border-right: none;
     padding-top: 0;
@@ -45,27 +49,31 @@ const LayoutMain = styled.main`
   display: flex;
   flex-direction: row;
 
-  @media screen and (max-width: 64em) {
+  @media screen and (max-width: 64rem) {
     flex-direction: column;
   }
 `;
 const LayoutContent = styled.div`
   position: relative;
-  max-width: 48em;
   margin-left: auto;
   margin-right: auto;
-  margin-top: 5em;
+  margin-top: 2em;
   font-size: 1.25em;
+  padding: 0 2em;
+  width: 75%;
 
-  @media screen and (max-width: 86em) {
+  @media screen and (min-width: 86rem) {
+    width: 80rem;
+  }
+
+  @media screen and (max-width: 86rem) {
     padding: 0 2em;
-    width: auto;
     font-size: 1em;
   }
 
-  @media screen and (max-width: 64em) {
-    max-width: 100%;
+  @media screen and (max-width: 64rem) {
     margin-top: 0;
+    width: 100%;
   }
 
   h1 {
@@ -95,21 +103,39 @@ const LayoutContent = styled.div`
     border-radius: 0.25rem !important;
   }
 
+  .mdx-embed {
+    @media screen and (max-width: 64rem) {
+      margin-left: -2em !important;
+      margin-right: -2em !important;
+    }
+  }
+
   img {
     max-width: 100%;
     background: rgb(36, 36, 36);
     border: 1px solid rgb(36, 36, 36);
-    border-radius: 0.25rem !important;
+    border-radius: 0.25em !important;
   }
 
   pre {
     background: rgb(21, 21, 21);
     padding: 1em;
-    border-radius: 0.25rem !important;
-    margin: 2rem 0px 4rem;
+    border-radius: 0.25em !important;
+    margin: 2em 0 4em;
     line-height: 1.5;
     font-feature-settings: normal;
     font-size: 1em;
+    width: auto;
+    display: inline-block;
+
+    @media screen and (max-width: 64rem) {
+      margin-right: -2em;
+      margin-left: -2em;
+      border-radius: 0 !important;
+      border-right: none !important;
+      border-left: none !important;
+      display: block;
+    }
   }
 
   code {
@@ -135,10 +161,17 @@ const LayoutContent = styled.div`
     margin: 0 auto;
     font-weight: 700;
     border-left: 0.5em solid rgb(136 126 81);
+    display: inline-block;
+    width: auto;
 
     * {
       color: #222;
       margin: 0 auto;
+    }
+
+    @media screen and (max-width: 64rem) {
+      margin: 0 -2em;
+      display: block;
     }
   }
 
@@ -149,6 +182,13 @@ const LayoutContent = styled.div`
     height: 1em;
     text-align: center;
     letter-spacing: 1em;
+  }
+
+  .standalone-viz {
+    @media screen and (max-width: 64rem) {
+      margin-right: -2em;
+      margin-left: -2em;
+    }
   }
 `;
 
@@ -169,7 +209,7 @@ const SearchInput = styled.input`
   border: 1px solid rgb(52, 52, 52);
   border-radius: 2px;
 
-  @media screen and (max-width: 64em) {
+  @media screen and (max-width: 64rem) {
     width: auto;
   }
 `;
@@ -185,13 +225,6 @@ const List = styled.ul`
   list-style: none;
   padding: 1em 0;
   margin: 0;
-  position: sticky;
-  top: 1em;
-
-  @media screen and (max-width: 64em) {
-    position: relative;
-    top: 0;
-  }
 `;
 const ListItem = styled.li`
   &:hover {
@@ -231,7 +264,7 @@ const HeaderNavContent = styled.div`
 `;
 
 const MobileList = styled.nav`
-  @media screen and (min-width: 64em) {
+  @media screen and (min-width: 64rem) {
     display: none;
   }
 
@@ -265,7 +298,9 @@ const MobileList = styled.nav`
 `;
 
 const DesktopList = styled.nav`
-  @media screen and (max-width: 64em) {
+  position: sticky;
+  top: 1em;
+  @media screen and (max-width: 64rem) {
     display: none;
   }
 `;
@@ -336,7 +371,7 @@ export function ExamplesLayout({ children, examples }) {
                             : ""
                         }
                       >
-                        {ex.title}
+                        {ex.title.repeat(5)}
                       </a>
                     </NextLink>
                   </ListItem>
