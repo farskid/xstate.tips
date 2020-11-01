@@ -162,7 +162,7 @@ const MachineVizContainer: React.FC<MachineVizProps> = ({
   useDynamicDimensions(foElem, ref, svgElem);
 
   // Automatically horizontally scroll into view the current state node in the viz
-  React.useLayoutEffect(() => {
+  React.useEffect(() => {
     if (state && containerRef) {
       // TODO: support parallel states
       const pathToState = toStatePaths(state.value)[0].join(".");
@@ -251,10 +251,7 @@ const MachineVizContainer: React.FC<MachineVizProps> = ({
               ref={foElem}
             >
               <div data-xviz="machine" title={`machine: #${machine.id}`}>
-                <StateNodeViz
-                  rootStateValue={machine.initialState.value}
-                  stateNode={machine}
-                />
+                <StateNodeViz stateNode={machine} />
               </div>
               <div data-xviz="popovers">
                 {popoverData && (

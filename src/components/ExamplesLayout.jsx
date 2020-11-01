@@ -2,6 +2,7 @@ import * as React from "react";
 import { useRouter } from "next/router";
 import styled, { createGlobalStyle } from "styled-components";
 import NextLink from "next/link";
+import { Icon } from "./Icon";
 
 const GlobalStyle = createGlobalStyle`
   body {
@@ -121,12 +122,12 @@ const LayoutContent = styled.div`
     background: rgb(21, 21, 21);
     padding: 1em;
     border-radius: 0.25em !important;
-    margin: 2em 0 4em;
+    /* margin: 2em 0 4em; */
     line-height: 1.5;
     font-feature-settings: normal;
     font-size: 1em;
     width: auto;
-    display: inline-block;
+    display: table;
 
     @media screen and (max-width: 64rem) {
       margin-right: -2em;
@@ -248,12 +249,16 @@ const ListItem = styled.li`
 `;
 
 const HeaderNav = styled.nav`
-  padding: 0px 1em;
+  padding: 0px 3em 0 1em;
   margin: auto;
   display: flex;
   height: 100%;
   align-items: center;
   justify-content: space-between;
+
+  @media screen and (max-width: 64rem) {
+    padding-right: 1em;
+  }
 `;
 
 const HeaderNavContent = styled.div`
@@ -347,8 +352,20 @@ export function ExamplesLayout({ children, examples }) {
                   <a
                     href="https://github.com/farskid/xstate.tips"
                     target="_blank"
+                    rel="noreferer noopener"
                   >
-                    Contribute
+                    <Icon name="twitter" style={{ marginRight: ".5em" }} />
+                    <span>Follow us!</span>
+                  </a>
+                </MenuLink>
+                <MenuLink>
+                  <a
+                    href="https://github.com/farskid/xstate.tips"
+                    target="_blank"
+                    rel="noreferer noopener"
+                  >
+                    <Icon name="github" style={{ marginRight: ".5em" }} />
+                    <span>Github</span>
                   </a>
                 </MenuLink>
               </LinksList>
@@ -371,7 +388,7 @@ export function ExamplesLayout({ children, examples }) {
                             : ""
                         }
                       >
-                        {ex.title.repeat(5)}
+                        {ex.title}
                       </a>
                     </NextLink>
                   </ListItem>

@@ -1,5 +1,7 @@
 import * as React from "react";
 
+const MIN_WIDTH_LIMIT_PX = 460;
+
 export function useDynamicDimensions(
   foElem: React.MutableRefObject<SVGForeignObjectElement>,
   ref: React.MutableRefObject<HTMLDivElement>,
@@ -22,7 +24,7 @@ export function useDynamicDimensions(
   React.useEffect(() => {
     if (ref.current && foElem.current) {
       foElem.current.style.width = `${Math.max(
-        Math.max(parentWidth - 40, 460)
+        Math.max(parentWidth - 40, MIN_WIDTH_LIMIT_PX)
       )}px`;
     }
   }, [foElem.current, ref.current, parentWidth]);
@@ -36,9 +38,11 @@ export function useDynamicDimensions(
         svgElem.current.style.height = `${
           machine.getBoundingClientRect().height
         }px`;
-        svgElem.current.style.width = `${
+        svgElem.current.style.width = `${Math.max(
+          parentWidth,
+          MIN_WIDTH_LIMIT_PX,
           edges.getBoundingClientRect().width + 15 // 15px guessed threshold for overflowed event arrows
-        }px`;
+        )}px`;
       }
     }
   }, [foElem.current, svgElem.current, ref.current, parentWidth]);
