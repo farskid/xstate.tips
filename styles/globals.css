@@ -33,6 +33,11 @@ a {
   box-sizing: border-box;
 }
 
+*::selection, *::-moz-selection {
+  background: #0c0c03;
+  color: #dccf8f;
+}
+
 .spacing-vertical > * {
   margin-top: 0;
   margin-bottom: 0;

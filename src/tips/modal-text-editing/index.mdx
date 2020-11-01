@@ -28,12 +28,12 @@ Being able to co-locate all of the state changing actions inside of the state ma
 
 ## Creating the Machine
 
-For this example, we won't implement all the modes of Neovim, but instead focus on a subset which captures why it beneficial to use a state machine to model its behavior.
+For this example, we won't implement all the modes of Neovim, but instead focus on a subset which captures why it is beneficial to use a state machine to model its behavior.
 
 ```js
 // MACHINE SETUP -- Note: XState bound to a global object (the library is being served by unpkg)
 // *****************************
-//
+
 const { Machine, interpret, assign } = XState;
 const modeMachine = Machine(
   {
@@ -53,7 +53,7 @@ const modeMachine = Machine(
 );
 ```
 
-Next, we want to create functionality for working with the DOM. This will differ depending on your own rendering approach, but the concepts underpinning this behavior will stay the same: update the view as a result of state changes. For this simple example, we will just work with the DOM directly.
+Next, since the majority of the logic for this state machine is concerned with manipulating the current view, we want to create functionality for working with the DOM. This will differ depending on your own rendering approach, but the concepts underpinning this behavior will stay the same: update the view as a result of state changes. For this simple example, we will just work with the DOM directly.
 
 ```js
 // WORKING WITH THE DOM
@@ -72,9 +72,151 @@ let cursor;
 Now that we have some building blocks in place, it's time to implement our events on the state machine! Let's start with the most basic, going from insert mode to normal mode.
 
 ```js
+const modeMachine = Machine(
+  {
+    id: "modal-editor",
+    initial: "normal",
+    context: {
+      cursorPointer: undefined,
+      textContent: "",
+      textLength: undefined,
+    },
+    states: {
+      normal: {
+        entry: ["applyNormalModeStyles"],
+        on: {
+          i: "insert",
+        }
+      },
+      visual: {},
+      insert: {
+        entry: ["getCursorElement", "applyInsertModeStyles"],
+        on: {
+          Escape: "normal",
+        }
+      },
+      replace: {},
+  },
+  {
+    actions: {
+      getCursorElement: () => {
+        cursor = document.getElementById("cursor");
+      },
+      applyInsertModeStyles: () => {
+        // Show which mode we're in
+        showmode.textContent = "-- INSERT --";
+        // Change the cursor from a block to a line
+        cursor.style.width = "1.5px";
+      },
+      applyNormalModeStyles: ({ textContent, cursorPointer, textLength }) => {
+        // Set the text showing which row and column our cursor is on.
+        // In this basic examle, we won't be implementing rows, so that stays as 1
+        col.innerText = `1,${cursorPointer || textLength || 0}`;
+        const innerText = (content) => (cursorPointer > 0 ? content : "");
+        // Place the cursor block character: █ , over the current text character
+        text.innerHTML = textContent
+          .slice(0, cursorPointer || textLength)
+          .concat(
+            cursorTextContent(
+              innerText(textContent.slice(cursorPointer, cursorPointer + 1))
+            )
+          )
+          .concat(innerText(textContent.slice(cursorPointer + 1)));
+        // nvim does not show the mode text in normal mode
+        showmode.textContent = "";
+      },
+    },
+  }
+);
+```
+
+By sending every keystroke to the machine, we can use the key name as events for our state machine to process. In doing this, we avoid long `switch` or `if` statements and our code becomes easier to read. In the snippet above, the user's keystrokes are directly controlling the machine instead of being processed through logic such as:
+
+```js
+if (e.key === "i") modalService.send({ type: "insert" });
+if (e.key === "Escape") modalService.send({ type: "normal" });
+```
+
+Upon receiving these events, both the `insert` and `normal` states execute two actions: getting a reference to the cursor element, and updating the cursor styles. If we were using a VDOM library for rendering such as React, we wouldn't be manipulating the DOM in these actions, but rather using the `assign` utility to set the values in the machine context for our components to consume. The important thing here is that regardless of how our rendering is being implemented, we are using the actions to initiate a _side effect_ which updates the view.
+
+Continuing this same pattern, let's implement the transitions between the rest of the modes:
+
+```js
+const modeMachine = Machine(
+  {
+    id: "modal-editor",
+    initial: "normal",
+    context: {
+      cursorPointer: undefined,
+      textContent: "",
+      textLength: undefined,
+    },
+    states: {
+      normal: {
+        entry: ["applyNormalModeStyles"],
+        on: {
+          i: "insert",
+          v: "visual",
+          R: "replace",
+      },
+      visual: {
+        entry: "applyVisualModeStyles",
+        on: { Escape: "normal" },
+      },
+      insert: {
+        entry: ["getCursorElement", "applyInsertModeStyles"],
+        on: { Escape: "normal" },
+      replace: {
+        entry: "applyReplaceModeStyles",
+        on: { Escape: "normal" },
+      },
+    },
+  },
+  {
+    actions: {
+     getCursorElement: () => {
+        cursor = document.getElementById("cursor");
+      },
+      applyInsertModeStyles: () => {
+        // Show which mode we're in
+        showmode.textContent = "-- INSERT --";
+        // Change the cursor from a block to a line
+        cursor.style.width = "1.5px";
+      },
+      applyReplaceModeStyles: () => {
+        // Show which mode we're in
+        showmode.textContent = "-- REPLACE --";
+      },
+      applyNormalModeStyles: ({ textContent, cursorPointer, textLength }) => {
+        // Set the text showing which row and column our cursor is on.
+        // In this basic examle, we won't be implementing rows, so that stays as 1
+        col.innerText = `1,${cursorPointer || textLength || 0}`;
+        const innerText = (content) => (cursorPointer > 0 ? content : "");
+        // Place the cursor block character: █ , over the current text character
+        text.innerHTML = textContent
+          .slice(0, cursorPointer || textLength)
+          .concat(
+            cursorTextContent(
+              innerText(textContent.slice(cursorPointer, cursorPointer + 1))
+            )
+          )
+          .concat(innerText(textContent.slice(cursorPointer + 1)));
+        // nvim does not show the mode text in normal mode
+        showmode.textContent = "";
+      },
+      applyVisualModeStyles: () => {
+        // Show which mode we're in
+        showmode.textContent = "-- VISUAL --";
+      },
+    },
+  }
+);
+```
+
+```js
 // MACHINE SETUP
 // *****************************
-//
+
 const { Machine, interpret, assign } = XState;
 
 const modeMachine = Machine(
