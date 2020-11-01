@@ -1,15 +1,23 @@
-import "../styles/normalize.css";
-import "../styles/globals.css";
 import * as React from "react";
 import { useRouter } from "next/router";
 import { ExamplesLayout } from "components/ExamplesLayout";
 import useSWR from "swr";
 import { MDXProvider } from "@mdx-js/react";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { PrismAsync as SyntaxHighlighter } from "react-syntax-highlighter";
 import style from "react-syntax-highlighter/dist/cjs/styles/prism/pojoaque";
 import "components/xstate-viz/themes/dark.scss";
 import * as prettier from "prettier";
 import babelParser from "prettier/parser-babel";
+import Router from "next/router";
+import Head from "next/head";
+import NProgress from "nprogress";
+
+Router.events.on("routeChangeStart", (url) => {
+  console.log(`Loading: ${url}`);
+  NProgress.start();
+});
+Router.events.on("routeChangeComplete", () => NProgress.done());
+Router.events.on("routeChangeError", () => NProgress.done());
 
 function formatCodeSnippet(code) {
   return prettier
@@ -31,10 +39,10 @@ const mdxComponents = {
           const code = props.children.props.children;
           try {
             return formatCodeSnippet(code);
-          } catch(_) {
+          } catch (_) {
             return code;
           }
-        })()
+        })(),
       },
     };
   },
@@ -45,6 +53,7 @@ const mdxComponents = {
       <SyntaxHighlighter
         className={className}
         language={language}
+        useInlineStyles={true}
         style={style}
         {...props}
       />
@@ -77,6 +86,15 @@ function MyApp({ Component, pageProps }) {
   );
   return (
     <MDXProvider components={mdxComponents}>
+      <Head>
+        <link
+          rel="stylesheet"
+          type="text/css"
+          href="https://unpkg.com/nprogress@0.2.0/nprogress.css"
+        />
+        <link rel="stylesheet" type="text/css" href="/styles/normalize.css" />
+        <link rel="stylesheet" type="text/css" href="/styles/globals.css" />
+      </Head>
       <Layout examples={pagesList}>
         <Component />
       </Layout>
