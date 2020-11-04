@@ -1,6 +1,8 @@
 import * as React from "react";
 import { useRouter } from "next/router";
-import styled, { createGlobalStyle } from "styled-components";
+import styled, {
+  createGlobalStyle,
+} from "styled-components";
 import NextLink from "next/link";
 import { Icon } from "./Icon";
 
@@ -19,7 +21,9 @@ const Flex = styled.div`
   justify-content: center;
 `;
 
-const LayoutContainer = styled.div``;
+const LayoutContainer = styled.div`
+  height: 100vh;
+`;
 
 const LayoutSidebar = styled.aside`
   border-right: 1px solid rgb(36, 36, 36);
@@ -49,6 +53,7 @@ const LayoutSidebar = styled.aside`
 const LayoutMain = styled.main`
   display: flex;
   flex-direction: row;
+  height: calc(100% - 3em);
 
   @media screen and (max-width: 64rem) {
     flex-direction: column;
@@ -147,8 +152,8 @@ const LayoutContent = styled.div`
     margin: 0;
     border-radius: 0.25em;
     line-height: 1.45em;
-    font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
-      monospace;
+    font-family: source-code-pro, Menlo, Monaco, Consolas,
+      "Courier New", monospace;
   }
 
   pre code {
@@ -321,7 +326,10 @@ export function ExamplesLayout({ children, examples }) {
   return (
     <LayoutContainer>
       <GlobalStyle />
-      <LayoutHeader as="header" className="spacing-horizontal">
+      <LayoutHeader
+        as="header"
+        className="spacing-horizontal"
+      >
         <HeaderNav>
           <HeaderNavContent>
             <Flex className="spacing-horizontal">
@@ -355,7 +363,10 @@ export function ExamplesLayout({ children, examples }) {
                     target="_blank"
                     rel="noreferer noopener"
                   >
-                    <Icon name="twitter" style={{ marginRight: ".5em" }} />
+                    <Icon
+                      name="twitter"
+                      style={{ marginRight: ".5em" }}
+                    />
                     <span>Follow us!</span>
                   </a>
                 </MenuLink>
@@ -365,7 +376,10 @@ export function ExamplesLayout({ children, examples }) {
                     target="_blank"
                     rel="noreferer noopener"
                   >
-                    <Icon name="github" style={{ marginRight: ".5em" }} />
+                    <Icon
+                      name="github"
+                      style={{ marginRight: ".5em" }}
+                    />
                     <span>Github</span>
                   </a>
                 </MenuLink>
@@ -384,7 +398,9 @@ export function ExamplesLayout({ children, examples }) {
                     <NextLink href={ex.href}>
                       <a
                         className={
-                          router.pathname.split("/").pop() === ex.slug
+                          router.pathname
+                            .split("/")
+                            .pop() === ex.slug
                             ? "current"
                             : ""
                         }
@@ -406,7 +422,9 @@ export function ExamplesLayout({ children, examples }) {
                       <NextLink href={ex.href}>
                         <a
                           className={
-                            router.pathname.split("/").pop() === ex.slug
+                            router.pathname
+                              .split("/")
+                              .pop() === ex.slug
                               ? "current"
                               : ""
                           }
