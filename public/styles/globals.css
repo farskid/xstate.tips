@@ -62,3 +62,10 @@ a {
     display: none;
   }
 }
+
+@media screen and (max-width: 64rem) {
+  #nprogress .spinner {
+    top: 80px;
+    position: absolute;
+  }
+}

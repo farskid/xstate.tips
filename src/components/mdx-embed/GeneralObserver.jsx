@@ -1,4 +1,4 @@
-import React, {  useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState } from "react";
 
 export const GeneralObserver = ({ children, onEnter, height = 0 }) => {
   const ref = useRef(null);
@@ -13,9 +13,9 @@ export const GeneralObserver = ({ children, onEnter, height = 0 }) => {
       },
       {
         root: null,
-        rootMargin: '400px',
+        rootMargin: "400px",
         threshold: 0,
-      },
+      }
     );
     if (ref && ref.current) {
       observer.observe(ref.current);
@@ -24,7 +24,7 @@ export const GeneralObserver = ({ children, onEnter, height = 0 }) => {
 
   return (
     <div ref={ref} data-testid="general-observer" className="mdx-embed">
-      {isChildVisible ? children : <div style={{ height, width: '100%' }} />}
+      {isChildVisible ? children : <div style={{ height, width: "100%" }} />}
     </div>
   );
 };
