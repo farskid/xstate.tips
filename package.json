@@ -9,7 +9,8 @@
     "build": "run-s feed next:build",
     "start": "next start",
     "static": "next export",
-    "feed": "node scripts/rss.js"
+    "feed": "node scripts/rss.js",
+    "new-tip": "node scripts/newTip.js"
   },
   "dependencies": {
     "@mdx-js/loader": "^1.6.16",
