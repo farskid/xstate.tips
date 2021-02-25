@@ -10,7 +10,7 @@ const Container = styled.div`
 `;
 
 export const StandaloneViz = ({ machine, onUpdate = () => {} }) => {
-  const [, send, service] = useMachine(machine, { devtools: true });
+  const [currentState, send, service] = useMachine(machine, { devtools: true });
   const ref = React.useRef();
   React.useEffect(() => {
     onUpdate({ service, state: service.state });
@@ -20,6 +20,8 @@ export const StandaloneViz = ({ machine, onUpdate = () => {} }) => {
   }, [service]);
   return (
     <Container className="standalone-viz" ref={ref}>
+      {/* <pre>state: {JSON.stringify(currentState.value, null, 2)}</pre> */}
+      <pre>context: {JSON.stringify(currentState.context, null, 2)}</pre>
       <MachineViz
         machine={machine}
         state={service.state}

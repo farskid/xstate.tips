@@ -14,7 +14,8 @@
       {
         "alias": {
           "components": "./src/components",
-          "tips": "./src/tips"
+          "tips": "./src/tips",
+          "utils": "./src/utils.js"
         }
       }
     ]

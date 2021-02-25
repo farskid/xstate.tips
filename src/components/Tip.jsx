@@ -2,7 +2,7 @@ import * as React from "react";
 
 export const Tip = ({ children, meta }) => {
   return (
-    <>
+    <section style={{ paddingBottom: "2rem" }}>
       {meta.title && <h1>{meta.title}</h1>}
       {meta.pubDate && <date>{meta.pubDate}</date>}
       {meta.author && (
@@ -13,6 +13,6 @@ export const Tip = ({ children, meta }) => {
       {meta.description && <p>{meta.description}</p>}
       <div className="break" />
       <article>{children}</article>
-    </>
+    </section>
   );
 };

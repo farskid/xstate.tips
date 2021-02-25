@@ -1,0 +1,120 @@
+import { Tip } from "components/Tip";
+import { meta } from "./meta";
+import { StandaloneViz } from "components/StandaloneViz";
+import { Machine, assign, spawn, send } from "xstate";
+import { Viz } from "components/Viz";
+import { withPayload } from "utils";
+import jsonschema from "jsonschema";
+
+export default ({ children }) => <Tip meta={meta}>{children}</Tip>;
+
+## What is a File manager
+
+File managers are a full featured interface that usually provide a list of files and folders with possible subfolders and a set of operations either in bulk or on a singlular.
+
+export const mockFiles = [
+  {
+    title: "Todo 1",
+    id: "e02c7f2d-131b-4b6b-94d7-9b8234ac8710",
+    createdAt: 1604520456674,
+  },
+  {
+    title: "Todo 2",
+    id: "d7f679de-ebd5-487e-9a0b-7b7a20b985b1",
+    createdAt: 1604520456674,
+  },
+  {
+    title: "Todo 3",
+    id: "dadf579b-477f-42e9-b8f7-44bde6ffffe9",
+    createdAt: 1604520456674,
+  },
+  {
+    title: "Todo 4",
+    id: "d69cc72d-448a-43a1-b8aa-fd6484501cf3",
+    createdAt: 1604520456674,
+  },
+];
+
+export const todoMachine = Machine(
+  {
+    id: "todo-machine",
+    context: {
+      files: mockFiles,
+      selectedFiles: [],
+    },
+    initial: "noFilesSelected",
+    on: {
+      SELECT_FILES: "filesSelected",
+      SELECT_ALL_FILES: {
+        target: "filesSelected",
+        actions: ["selectAllFiles"],
+      },
+    },
+    events: {
+      DELETE_BULK: {
+        ids: {
+          type: "array",
+          items: { type: "string" },
+        },
+        properties: {
+          required: ["ids"],
+        },
+      },
+    },
+    states: {
+      noFilesSelected: {
+        initial: "ready",
+        on: {
+          DELETE_FILE: {
+            actions: "deleteSingleFile",
+          },
+        },
+        states: {
+          ready: {},
+        },
+      },
+      filesSelected: {
+        entry: "selectFiles",
+        on: {
+          UNSELECT_FILES: [
+            {
+              target: "noFilesSelected",
+              cond: "allFilesToBeUnselected",
+            },
+            "filesSelected",
+          ],
+          UNSELECT_ALL_FILES: "noFilesSelected",
+          DELETE_BULK: {
+            actions: "deleteBulk",
+            target: "noFilesSelected", // check if all were deleted
+          },
+        },
+      },
+    },
+  },
+  {
+    guards: {
+      allFilesToBeUnselected: (ctx, e) =>
+        e.data?.files.length === ctx.files.length,
+    },
+    actions: {
+      selectAllFiles: assign({
+        selectedFiles: (ctx) => ctx.files.map((f) => f.id),
+      }),
+      unselectAllFiles: assign({
+        selectedFiles: [],
+      }),
+      deleteSingleFile: withPayload(
+        assign({
+          files: (ctx, e) => ctx.files.filter((f) => f.id !== e.data?.id),
+        }),
+        ["id"]
+      ),
+      deleteBulk: assign({
+        files: (ctx, e) => ctx.files.filter((f) => !e.data?.ids.includes(f.id)),
+      }),
+    },
+  }
+);
+
+<Viz machine={todoMachine} />

@@ -53,7 +53,7 @@ const mdxComponents = {
       <SyntaxHighlighter
         className={className}
         language={language}
-        useInlineStyles={true}
+        useInlineStyles={false}
         style={style}
         {...props}
       />
